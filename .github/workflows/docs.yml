@@ -37,7 +37,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install "pain001>=0.0.52,<0.0.53"
           pip install .
-          pip install sphinx furo myst-parser sphinx-autodoc-typehints sphinx-copybutton
+          pip install sphinx furo "myst-parser[linkify]" sphinx-autodoc-typehints sphinx-copybutton
 
       - name: Build Sphinx documentation
         run: |
