@@ -30,10 +30,10 @@ jobs:
       # pain001-mcp depends on the core pain001 library, which is not yet
       # published to PyPI. Install it from its GitHub repository first,
       # then install this package and its dev dependencies on top.
-      - name: Install pain001 (from GitHub) + this package
+      - name: Install pain001 (from PyPI) + this package
         run: |
           python -m pip install --upgrade pip
-          pip install "git+https://github.com/sebastienrousseau/pain001.git@feat/v0.0.52"
+          pip install "pain001>=0.0.52,<0.0.53"
           pip install -e .
           pip install pytest pytest-cov interrogate
 
@@ -68,10 +68,10 @@ jobs:
           python-version: "3.12"
           cache: "pip"
 
-      - name: Install pain001 (from GitHub) + this package
+      - name: Install pain001 (from PyPI) + this package
         run: |
           python -m pip install --upgrade pip
-          pip install "git+https://github.com/sebastienrousseau/pain001.git@feat/v0.0.52"
+          pip install "pain001>=0.0.52,<0.0.53"
           pip install -e .
           pip install ruff black mypy types-jsonschema
 
@@ -97,10 +97,10 @@ jobs:
           python-version: "3.12"
           cache: "pip"
 
-      - name: Install pain001 (from GitHub) + this package
+      - name: Install pain001 (from PyPI) + this package
         run: |
           python -m pip install --upgrade pip
-          pip install "git+https://github.com/sebastienrousseau/pain001.git@feat/v0.0.52"
+          pip install "pain001>=0.0.52,<0.0.53"
           pip install -e .
 
       - name: Run examples

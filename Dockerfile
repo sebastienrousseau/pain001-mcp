@@ -16,12 +16,11 @@ RUN pip install --upgrade pip poetry
 COPY pyproject.toml ./
 COPY pain001_mcp ./pain001_mcp
 
-# Install pain001 from source (it is not yet published to PyPI), then
-# layer this package on top inside a self-contained virtualenv.
+# Install pain001 from PyPI, then layer this package on top inside a
+# self-contained virtualenv.
 RUN python -m venv /opt/venv \
     && /opt/venv/bin/pip install --upgrade pip \
-    && /opt/venv/bin/pip install \
-        "git+https://github.com/sebastienrousseau/pain001.git@feat/v0.0.52" \
+    && /opt/venv/bin/pip install "pain001>=0.0.52,<0.0.53" \
     && /opt/venv/bin/pip install .
 
 
