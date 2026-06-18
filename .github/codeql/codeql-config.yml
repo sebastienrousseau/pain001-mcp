@@ -1,0 +1,16 @@
+name: "pain001-mcp CodeQL config"
+
+# Examples deliberately demonstrate the MCP tools with sample payment
+# data (IBANs, BICs). CodeQL's ``py/clear-text-logging-sensitive-data``
+# heuristic flags ``print(...)`` of any expression downstream of those
+# fields even when the values are obviously fake fixtures. Excluding the
+# demo directory keeps the scan focused on production code in
+# ``pain001_mcp/``.
+paths-ignore:
+  - examples
+  - tests
+
+# Use the default + security-extended query suite so we get the same
+# coverage GitHub's default setup would have offered.
+queries:
+  - uses: security-and-quality
