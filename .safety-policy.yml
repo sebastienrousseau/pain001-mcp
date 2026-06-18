@@ -1,0 +1,5 @@
+# Safety CLI policy. pain001-mcp has a small dependency tree
+# (jsonschema, mcp, pain001 + its transitive deps); pin known false
+# positives here with an expiry so they don't go stale.
+security:
+  ignore-vulnerabilities: {}
