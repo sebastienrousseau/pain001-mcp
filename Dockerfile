@@ -21,7 +21,7 @@ COPY pain001_mcp ./pain001_mcp
 # self-contained virtualenv.
 RUN python -m venv /opt/venv \
     && /opt/venv/bin/pip install --upgrade pip \
-    && /opt/venv/bin/pip install "pain001>=0.0.52,<0.0.53" \
+    && /opt/venv/bin/pip install "pain001>=0.0.53,<0.0.54" \
     && /opt/venv/bin/pip install .
 
 
