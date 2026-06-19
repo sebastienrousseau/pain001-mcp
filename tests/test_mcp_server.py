@@ -41,6 +41,10 @@ EXPECTED_TOOLS = {
     "parse_pain002",
     "inspect_template",
     "validate_payment_scheme",
+    # New in v0.0.53:
+    "migrate_records",
+    "validate_xml_against_schema",
+    "sanitize_to_iso20022_charset",
 }
 
 
@@ -527,3 +531,77 @@ def test_example_scripts_run_without_error(module_path, capsys):
     finally:
         sys.modules.pop(spec.name, None)
     assert capsys.readouterr().out
+
+
+# ---------------------------------------------------------------------------
+# New in v0.0.53: migrate / validate_xml / sanitize tools
+# ---------------------------------------------------------------------------
+def test_migrate_records_round_trip(sample_record):
+    """Migrating a record across versions returns the migrated rows + summary."""
+    result = server.migrate_records(
+        records=[sample_record],
+        from_version="pain.001.001.03",
+        to_version="pain.001.001.09",
+    )
+    assert "error" not in result, result
+    assert result["from"] == "pain.001.001.03"
+    assert result["to"] == "pain.001.001.09"
+    assert result["migrated"] == 1
+    assert isinstance(result["records"], list)
+    assert result["records"]
+
+
+def test_migrate_records_unsupported_version_returns_error(sample_record):
+    """An unknown version yields a structured error payload, not a raise."""
+    result = server.migrate_records(
+        records=[sample_record],
+        from_version="pain.001.001.03",
+        to_version="pain.999.999.99",
+    )
+    assert "error" in result
+
+
+def test_validate_xml_against_schema_accepts_valid_doc(sample_record):
+    """A freshly-generated XML validates against its bundled XSD."""
+    xml = server.generate_message("pain.001.001.09", [sample_record])
+    assert xml.lstrip().startswith("<?xml")
+    out = server.validate_xml_against_schema(xml, "pain.001.001.09")
+    assert out == {"valid": True, "message_type": "pain.001.001.09"}
+
+
+def test_validate_xml_against_schema_rejects_garbage():
+    """An invalid XML payload is rejected; ``error`` appears only when raised."""
+    out = server.validate_xml_against_schema(
+        "<not-pain001/>", "pain.001.001.09"
+    )
+    assert out["valid"] is False
+    assert out["message_type"] == "pain.001.001.09"
+
+
+def test_validate_xml_against_schema_unknown_type():
+    """An unsupported message type returns an error dict, not an exception."""
+    out = server.validate_xml_against_schema(
+        "<?xml version='1.0'?><x/>", "pain.999.999.99"
+    )
+    assert "error" in out
+
+
+def test_sanitize_to_iso20022_charset_passthrough_for_clean_input():
+    """Already-valid input round-trips with ``changed=False``."""
+    out = server.sanitize_to_iso20022_charset("Acme GmbH")
+    assert out == {
+        "value": "Acme GmbH",
+        "sanitised": "Acme GmbH",
+        "was_valid": True,
+        "changed": False,
+    }
+
+
+def test_sanitize_to_iso20022_charset_transliterates_accents():
+    """Accented input is transliterated and marked as ``changed``."""
+    out = server.sanitize_to_iso20022_charset("Café Müller")
+    assert out["changed"] is True
+    assert out["was_valid"] is False
+    # The exact transliteration is pain001's concern; the contract here
+    # is that the sanitised form differs and is no longer the original.
+    assert out["sanitised"] != "Café Müller"
