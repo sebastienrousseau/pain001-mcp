@@ -517,9 +517,7 @@ def migrate_records(
     """
     try:
         mapper = VersionMapper()
-        migrated = mapper.migrate_rows(
-            records, from_version, to_version
-        )
+        migrated = mapper.migrate_rows(records, from_version, to_version)
         return {
             "records": migrated,
             "migrated": len(migrated),
@@ -531,9 +529,7 @@ def migrate_records(
 
 
 @server.tool()
-def validate_xml_against_schema(
-    xml_content: str, message_type: str
-) -> dict:
+def validate_xml_against_schema(xml_content: str, message_type: str) -> dict:
     """Validate a raw pain.001 / pain.008 XML string against its XSD.
 
     Wraps :func:`pain001.xml.validate_via_xsd.validate_xml_string_via_xsd`
@@ -555,7 +551,9 @@ def validate_xml_against_schema(
             return {"error": f"No XSD bundled for {message_type}"}
         try:
             ok = validate_xml_string_via_xsd(xml_content, str(xsd))
-        except Exception as exc:  # pragma: no cover - underlying API returns False, not raises
+        except (
+            Exception
+        ) as exc:  # pragma: no cover - underlying API returns False, not raises
             return {
                 "valid": False,
                 "message_type": message_type,
