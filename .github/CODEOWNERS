@@ -1,0 +1,17 @@
+# Code ownership for review routing.
+# See https://docs.github.com/articles/about-code-owners
+#
+# pain001-mcp currently has a single maintainer. Co-maintainers are
+# welcome - ARCHITECTURE.md is the onboarding map; open a discussion
+# or PR if you'd like to help maintain an area below.
+
+# Default owner for everything.
+*                       @sebastienrousseau
+
+# The MCP server is the headline surface.
+/pain001_mcp/           @sebastienrousseau
+
+# Tests + examples + CI keep the rest honest.
+/tests/                 @sebastienrousseau
+/examples/              @sebastienrousseau
+/.github/workflows/     @sebastienrousseau

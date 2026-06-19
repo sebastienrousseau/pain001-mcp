@@ -1,0 +1,81 @@
+name: Bug Report
+description: Report a reproducible problem in pain001-mcp
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: pain001-mcp Version
+      placeholder: "0.0.52"
+    validations:
+      required: true
+  - type: input
+    id: pain001_version
+    attributes:
+      label: pain001 Version
+      placeholder: "0.0.52"
+    validations:
+      required: true
+  - type: dropdown
+    id: python_version
+    attributes:
+      label: Python Version
+      options:
+        - "3.10"
+        - "3.11"
+        - "3.12"
+        - "3.13"
+    validations:
+      required: true
+  - type: dropdown
+    id: mcp_client
+    attributes:
+      label: MCP Client
+      options:
+        - Claude Desktop
+        - Claude Code
+        - Cursor / VS Code MCP
+        - Custom (ClientSession)
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - Linux
+        - macOS
+        - Windows
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: tool_call
+    attributes:
+      label: Tool Call
+      description: |
+        The tool name and arguments you sent (redact any sensitive
+        IBAN/BIC values - placeholder data is fine).
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: error_output
+    attributes:
+      label: Error Output
+      description: The {"error": ...} payload or stack trace returned.
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything Else
+      description: Logs, server stderr, MCP client config, etc.
