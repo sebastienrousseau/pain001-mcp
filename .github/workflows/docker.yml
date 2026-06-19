@@ -68,6 +68,16 @@ jobs:
             org.opencontainers.image.source=https://github.com/sebastienrousseau/pain001-mcp
             org.opencontainers.image.licenses=Apache-2.0
 
+      - name: Resolve pain001 install spec for build
+        id: pin
+        run: |
+          REF="${{ github.head_ref || github.ref_name }}"
+          if [[ "$REF" == feat/* ]]; then
+            echo "spec=pain001 @ git+https://github.com/sebastienrousseau/pain001@${REF}" >> "$GITHUB_OUTPUT"
+          else
+            echo "spec=pain001>=0.0.52,<0.0.54" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build (and push on non-PR events)
         id: build
         uses: docker/build-push-action@v6
@@ -78,6 +88,8 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            PAIN001_PIP_SPEC=${{ steps.pin.outputs.spec }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: true

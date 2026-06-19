@@ -11,17 +11,22 @@ WORKDIR /build
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
+# Pin can be overridden at build-time so the GHCR pipeline can install
+# pain001 from a matching feat/* branch before the parent release hits
+# PyPI; the default resolves the published version once available.
+ARG PAIN001_PIP_SPEC="pain001>=0.0.52,<0.0.54"
+
 # pyproject.toml carries ``readme = "README.md"``, so README.md must be
 # present at build-time for ``pip install .`` to resolve the package
 # metadata.
 COPY pyproject.toml README.md ./
 COPY pain001_mcp ./pain001_mcp
 
-# Install pain001 from PyPI, then layer this package on top inside a
-# self-contained virtualenv.
+# Install pain001 from PyPI (or the override spec), then layer this
+# package on top inside a self-contained virtualenv.
 RUN python -m venv /opt/venv \
     && /opt/venv/bin/pip install --upgrade pip \
-    && /opt/venv/bin/pip install "pain001>=0.0.53,<0.0.54" \
+    && /opt/venv/bin/pip install "$PAIN001_PIP_SPEC" \
     && /opt/venv/bin/pip install .
 
 
