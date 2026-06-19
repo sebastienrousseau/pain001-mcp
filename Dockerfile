@@ -11,9 +11,10 @@ WORKDIR /build
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-RUN pip install --upgrade pip poetry
-
-COPY pyproject.toml ./
+# pyproject.toml carries ``readme = "README.md"``, so README.md must be
+# present at build-time for ``pip install .`` to resolve the package
+# metadata.
+COPY pyproject.toml README.md ./
 COPY pain001_mcp ./pain001_mcp
 
 # Install pain001 from PyPI, then layer this package on top inside a

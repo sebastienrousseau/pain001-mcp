@@ -60,3 +60,28 @@ A release is ready only when **all** of the following hold on `main`:
   [PyPI](https://pypi.org/project/pain001-mcp/) and the GitHub release is
   published (not draft).
 - Verify a clean install: `pip install pain001-mcp==X.Y.Z`.
+- The `docker.yml` workflow publishes a matching multi-arch image to
+  `ghcr.io/sebastienrousseau/pain001-mcp:X.Y.Z` (and refreshes
+  `:latest` when the release lands on `main`). The workflow smoke-tests
+  the pulled image by running the `pain001_mcp` import check, so a
+  green run means the image actually launches.
+
+## Optional CI integrations
+
+These are deliberately gated so an empty / un-set secret skips the
+step rather than failing the build:
+
+- **Codecov upload** (`pr.yml`): set the `CODECOV_TOKEN` repository
+  secret and the PR Gate will start publishing branch coverage to
+  [codecov.io](https://about.codecov.io). Without the secret the
+  step skips silently; the 100% coverage gate is still enforced
+  in-CI by pytest's `--cov-fail-under=100`.
+- **PyPI trusted publisher** (`release.yml`): configured at
+  <https://pypi.org/manage/account/publishing/>. The publisher claim
+  set is `repo:sebastienrousseau/pain001-mcp:environment:pypi` with
+  `workflow_ref` pointing at `.github/workflows/release.yml`. A
+  Pending Publisher is auto-converted to a permanent Trusted
+  Publisher on the first successful publish.
+- **GHCR multi-arch image** (`docker.yml`): published with the
+  default `GITHUB_TOKEN`; no extra setup needed. To consume the
+  image: `docker run -i --rm ghcr.io/sebastienrousseau/pain001-mcp:X.Y.Z`.
