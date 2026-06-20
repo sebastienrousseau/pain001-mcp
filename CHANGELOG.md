@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.53] - 2026-06-19
+
+### Added
+
+Three new MCP tools that surface previously-CLI-only capabilities of
+the `pain001` v0.0.53 public API:
+
+- `migrate_records` - migrate flat records between pain.001 schema
+  versions (e.g. `pain.001.001.03` to `.09`). Wraps
+  `pain001.migration.VersionMapper`; returns the migrated rows plus a
+  `{from, to, migrated}` summary, or an `{error: ...}` payload for
+  unsupported versions.
+- `validate_xml_against_schema` - validate a raw pain.001 / pain.008
+  XML string against its bundled XSD without writing it to disk.
+  Wraps `pain001.xml.validate_via_xsd.validate_xml_string_via_xsd`.
+- `sanitize_to_iso20022_charset` - transliterate accents and remove
+  symbols outside the ISO 20022 Latin set. Wraps
+  `pain001.sanitize_to_charset`; returns the cleaned string plus a
+  `changed` flag so an agent can surface the diff to the user before
+  writing it back.
+
+Total MCP surface: **16 tools** (was 13 in v0.0.52), 1 resource, 1
+prompt.
+
+### Changed
+
+- Pinned to `pain001 >= 0.0.53` so the new public-API symbols
+  (`sanitize_to_charset`, `VersionMapper`, the SEPA B2B profile,
+  Redis-backed stores) are available.
+
+### Quality gates
+
+- pytest: **54 tests**, 100% line + branch coverage (was 47, +7 new).
+- interrogate: 100% docstring coverage.
+- ruff + black + mypy all clean.
+
 ## [0.0.52] - 2026-06-18
 
 ### Added

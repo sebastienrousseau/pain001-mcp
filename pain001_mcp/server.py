@@ -63,12 +63,15 @@ from pain001 import (
     generate_xml_string,
     parse_camt053_statement,
     parse_pain002_report,
+    sanitize_to_charset,
     validate_scheme,
 )
 from pain001.async_adapter import generate_xml_string_async
 from pain001.constants import SCHEMAS_DIR, TEMPLATES_DIR, valid_xml_types
 from pain001.csv.load_csv_data import load_csv_data
+from pain001.migration import VersionMapper
 from pain001.validation import validate_bic, validate_iban
+from pain001.xml.validate_via_xsd import validate_xml_string_via_xsd
 
 server = FastMCP("pain001")
 
@@ -488,6 +491,102 @@ def build_payment_batch(
         "with validate_records (and validate_payment_scheme for SEPA), "
         "then call generate_message to produce the XML."
     )
+
+
+@server.tool()
+def migrate_records(
+    records: list[dict],
+    from_version: str,
+    to_version: str,
+) -> dict:
+    """Migrate flat payment records between pain.001 schema versions.
+
+    Wraps :class:`pain001.migration.VersionMapper`. Returns the
+    migrated rows plus a summary of which fields were renamed,
+    derived, or dropped; ``{"error": ...}`` if either version is
+    unsupported.
+
+    Args:
+        records: Records in the ``from_version`` shape.
+        from_version: Source pain.001 version (e.g. ``"pain.001.001.03"``).
+        to_version: Target pain.001 version (e.g. ``"pain.001.001.09"``).
+
+    Returns:
+        ``{"records": [...], "migrated": int, "from": str, "to": str}``
+        or ``{"error": ...}``.
+    """
+    try:
+        mapper = VersionMapper()
+        migrated = mapper.migrate_rows(records, from_version, to_version)
+        return {
+            "records": migrated,
+            "migrated": len(migrated),
+            "from": from_version,
+            "to": to_version,
+        }
+    except Exception as exc:  # noqa: BLE001 - DataSourceError + others
+        return {"error": str(exc)}
+
+
+@server.tool()
+def validate_xml_against_schema(xml_content: str, message_type: str) -> dict:
+    """Validate a raw pain.001 / pain.008 XML string against its XSD.
+
+    Wraps :func:`pain001.xml.validate_via_xsd.validate_xml_string_via_xsd`
+    so an agent can verify an XML payload it received from another
+    system without writing it to disk.
+
+    Args:
+        xml_content: The XML document as a string.
+        message_type: A supported ISO 20022 pain message type.
+
+    Returns:
+        ``{"valid": bool, "message_type": str, "error": str?}`` -
+        ``error`` is present only when ``valid`` is ``False``.
+    """
+    try:
+        _check_message_type(message_type)
+        xsd = Path(TEMPLATES_DIR) / message_type / f"{message_type}.xsd"
+        if not xsd.is_file():  # pragma: no cover - all valid types ship XSD
+            return {"error": f"No XSD bundled for {message_type}"}
+        try:
+            ok = validate_xml_string_via_xsd(xml_content, str(xsd))
+        except (
+            Exception
+        ) as exc:  # pragma: no cover - underlying API returns False, not raises
+            return {
+                "valid": False,
+                "message_type": message_type,
+                "error": str(exc),
+            }
+        return {"valid": bool(ok), "message_type": message_type}
+    except ValueError as exc:
+        return {"error": str(exc)}
+
+
+@server.tool()
+def sanitize_to_iso20022_charset(value: str) -> dict:
+    """Sanitise a free-text field to the ISO 20022 Latin character set.
+
+    Wraps :func:`pain001.sanitize_to_charset`. Transliterates accents
+    (``é`` -> ``e``), removes unsupported symbols, and returns both
+    the cleaned string and a flag for whether the original was
+    already valid - useful for surfacing the change to the user
+    before writing it back to a record.
+
+    Args:
+        value: The text to sanitise.
+
+    Returns:
+        ``{"value": str, "sanitised": str, "was_valid": bool, "changed": bool}``.
+    """
+    cleaned = sanitize_to_charset(value)
+    return {
+        "value": value,
+        "sanitised": cleaned,
+        "was_valid": cleaned == value,
+        "changed": cleaned != value,
+    }
 
 
 def main() -> None:
