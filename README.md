@@ -22,6 +22,7 @@
   <a href="https://github.com/sebastienrousseau/pain001-mcp/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001-mcp/ci.yml?branch=main&label=Tests&style=for-the-badge" alt="Tests" /></a>
   <a href="https://github.com/sebastienrousseau/pain001-mcp/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001-mcp/ci.yml?branch=main&label=Coverage&style=for-the-badge" alt="Coverage" /></a>
   <a href="#license"><img src="https://img.shields.io/pypi/l/pain001-mcp?style=for-the-badge" alt="License" /></a>
+  <a href="https://glama.ai/mcp/servers/sebastienrousseau/pain001-mcp"><img src="https://glama.ai/mcp/servers/sebastienrousseau/pain001-mcp/badges/score.svg" alt="Glama MCP server score" /></a>
 </p>
 
 ---
