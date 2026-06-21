@@ -1,0 +1,42 @@
+{
+  "$schema": "https://glama.ai/api/mcp/v1/schemas/glama.json",
+  "maintainers": ["sebastienrousseau"],
+  "title": "pain001-mcp",
+  "display_name": "Pain001 MCP",
+  "description": "Model Context Protocol server for the pain001 ISO 20022 payment library. Exposes 16 tools spanning schema discovery, payment-record validation, IBAN/BIC identifier validation, XML-against-XSD validation, generation (sync + async + from CSV), cross-version pain.001 migration, ISO 20022 charset sanitisation, SEPA SCT/SDD/INST/B2B + cross-border rulebook checks, and bank-reply parsing (camt.053 statements + pain.002 status reports). 100% line + branch coverage, sigstore-attested releases.",
+  "version": "0.0.53",
+  "repository": "https://github.com/sebastienrousseau/pain001-mcp",
+  "homepage": "https://pain001.com",
+  "license": "Apache-2.0",
+  "language": "Python",
+  "runtime": "python",
+  "categories": ["finance"],
+  "tags": [
+    "iso20022",
+    "pain001",
+    "pain008",
+    "sepa",
+    "sepa-credit-transfer",
+    "sepa-direct-debit",
+    "sepa-instant",
+    "cross-border-payments",
+    "iban",
+    "bic",
+    "camt053",
+    "pain002",
+    "payment-validation",
+    "xsd-validation",
+    "fastmcp",
+    "financial-services",
+    "fintech"
+  ],
+  "mcpServers": {
+    "pain001": {
+      "command": "pain001-mcp"
+    }
+  },
+  "installation": {
+    "pip": "pip install pain001-mcp",
+    "docker": "docker run --rm -i ghcr.io/sebastienrousseau/pain001-mcp:0.0.53"
+  }
+}
