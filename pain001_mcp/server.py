@@ -73,7 +73,13 @@ from pain001.migration import VersionMapper
 from pain001.validation import validate_bic, validate_iban
 from pain001.xml.validate_via_xsd import validate_xml_string_via_xsd
 
+from pain001_mcp import __version__
+
 server = FastMCP("pain001")
+# FastMCP does not expose a version kwarg; without this override the
+# MCP SDK's own version leaks into serverInfo.version, breaking
+# manifest/runtime coherence checks (e.g. Glama scoring).
+server._mcp_server.version = __version__
 
 _HUMAN_NAMES = {
     "pain.001.001.03": "Customer Credit Transfer Initiation V03",
