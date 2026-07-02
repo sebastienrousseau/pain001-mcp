@@ -151,4 +151,6 @@ prompt.
 - Versioning aligned with `pain001` and `pain001-lsp`: the three packages
   in the suite ship under matching release numbers
 
+[0.0.54]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.54
+[0.0.53]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.53
 [0.0.52]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.52
