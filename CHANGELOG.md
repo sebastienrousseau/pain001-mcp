@@ -5,6 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.54] - 2026-07-02
+
+The **discoverability** cut. Registers `pain001-mcp` with the official
+Model Context Protocol Registry, adds MCP-spec conformance CI, and
+positions the server as part of the ISO 20022 MCP Suite. No functional
+or API changes — the same 16 tools, 1 resource, and 1 prompt as
+v0.0.53.
+
+### Added
+
+- **Official MCP Registry integration.** `pain001-mcp` is now
+  registered with the official Model Context Protocol Registry
+  (`registry.modelcontextprotocol.io`) as
+  `io.github.sebastienrousseau/pain001-mcp`. A new `server.json` at
+  the repo root provides the registry metadata (PyPI package
+  identifier, stdio transport), and the README carries an
+  `mcp-name: io.github.sebastienrousseau/pain001-mcp` marker that the
+  registry uses to verify PyPI package ownership. Discoverable in
+  Claude Desktop's built-in "Add server" catalog once the registry
+  entry is live.
+- **Auto-publish workflow** (`.github/workflows/publish-mcp.yml`).
+  Authenticates to the MCP Registry via GitHub OIDC (no secrets
+  required) on every `v*.*.*` tag push, syncs the tag version into
+  `server.json`, and runs `mcp-publisher publish`. Registry metadata
+  now stays in lockstep with each PyPI release automatically.
+- **Protocol conformance CI** (`.github/workflows/mcp-inspect.yml`).
+  Runs `@modelcontextprotocol/inspector --cli` against `tools/list`,
+  `resources/list`, and `prompts/list` on every push and PR. A green
+  run is the spec-compliance evidence that enterprise buyers ask for.
+- **Glama directory manifest** (`glama.json`). Moves the Glama listing
+  from anonymous-crawl into the verified-owner tier so the
+  description, tags, and install commands are author-controlled.
+- **Suite discoverability.** The README now cross-links the sibling
+  banking MCP servers under a "Related MCP Servers" section,
+  positioning `pain001-mcp` as part of the ISO 20022 MCP Suite
+  alongside `bankstatementparser-mcp`, `camt053-mcp`, `acmt001-mcp`,
+  and `noyalib-mcp`.
+
+### Changed
+
+- GitHub repository description and topics refreshed: description now
+  positions the server as part of the ISO 20022 MCP Suite; topics
+  extended with `mcp-server`, `financial-services`, and `cbpr-plus`.
+
+### No functional / API changes
+
+- Same 16 MCP tools, 1 resource, and 1 prompt as v0.0.53. This release
+  is metadata, CI, and discoverability only. Existing Claude Desktop /
+  Cursor / Zed configurations continue to work unchanged.
+
 ## [0.0.53] - 2026-06-19
 
 ### Added
