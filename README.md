@@ -344,6 +344,12 @@ who have helped build `pain001-mcp`.
 
 ---
 
+## MCP Registry
+
+`mcp-name: io.github.sebastienrousseau/pain001-mcp`
+
+---
+
 ## License
 
 Licensed under the [Apache License, Version 2.0](https://opensource.org/license/apache-2-0/).
