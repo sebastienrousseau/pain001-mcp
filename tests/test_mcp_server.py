@@ -260,7 +260,7 @@ def test_call_tool_through_fastmcp():
             "validate_identifier",
             {"kind": "iban", "value": "DE89370400440532013000"},
         )
-        block = result[0] if isinstance(result, (list, tuple)) else result
+        block = result[0] if isinstance(result, list | tuple) else result
         text = getattr(block, "text", None)
         if text is None and isinstance(result, tuple):
             text = json.dumps(result[1])
@@ -275,7 +275,7 @@ def test_call_tool_list_supported_formats_through_fastmcp():
 
     async def go():
         result = await server.server.call_tool("list_supported_formats", {})
-        block = result[0] if isinstance(result, (list, tuple)) else result
+        block = result[0] if isinstance(result, list | tuple) else result
         text = getattr(block, "text", None)
         if text is None and isinstance(result, tuple):
             text = json.dumps(result[1])
