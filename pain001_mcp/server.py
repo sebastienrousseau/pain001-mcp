@@ -59,6 +59,7 @@ from pathlib import Path
 
 from jsonschema import Draft7Validator
 from mcp.server.fastmcp import FastMCP
+from mcp.types import ToolAnnotations
 from pain001 import (
     generate_xml_string,
     parse_camt053_statement,
@@ -80,6 +81,29 @@ server = FastMCP("pain001")
 # MCP SDK's own version leaks into serverInfo.version, breaking
 # manifest/runtime coherence checks (e.g. Glama scoring).
 server._mcp_server.version = __version__
+
+# Shared MCP tool annotations. Every tool in this server is a pure,
+# side-effect-free reader over the pain001 API, so all are marked
+# ``readOnlyHint`` + ``idempotentHint`` and never ``destructiveHint``.
+# The only axis that varies is whether a tool reads a caller-supplied
+# path from the local filesystem (``openWorldHint``): compute-only tools
+# that operate solely on their arguments or on data bundled with the
+# server are closed-world; tools that open an arbitrary path are not.
+#
+# These hints let MCP clients (and the Glama quality grader) reason about
+# safety, caching, and auto-approval without executing the tool.
+_PURE_READ = ToolAnnotations(
+    readOnlyHint=True,
+    destructiveHint=False,
+    idempotentHint=True,
+    openWorldHint=False,
+)
+_FS_READ = ToolAnnotations(
+    readOnlyHint=True,
+    destructiveHint=False,
+    idempotentHint=True,
+    openWorldHint=True,
+)
 
 _HUMAN_NAMES = {
     "pain.001.001.03": "Customer Credit Transfer Initiation V03",
@@ -136,9 +160,14 @@ def _load_schema(message_type: str) -> dict:
         return loaded
 
 
-@server.tool()
+@server.tool(title="List pain message types", annotations=_PURE_READ)
 def list_message_types() -> list[dict]:
-    """List every supported ISO 20022 pain message type.
+    """List every supported ISO 20022 pain message type and its human name.
+
+    Use this first, before any generation or validation call, to discover
+    the exact ``message_type`` strings this server accepts. Do not use it to
+    fetch a type's fields or schema — call ``get_required_fields`` or
+    ``get_input_schema`` for that.
 
     Returns a list of ``{"message_type": ..., "name": ...}`` dictionaries,
     one per supported message type (e.g. ``pain.001.001.09``).
@@ -152,9 +181,13 @@ def list_message_types() -> list[dict]:
     ]
 
 
-@server.tool()
+@server.tool(title="Get required fields", annotations=_PURE_READ)
 def get_required_fields(message_type: str) -> list[str]:
-    """List the required input field names for a given pain message type.
+    """List only the required input field names for a pain message type.
+
+    Use this for a quick checklist of the mandatory columns before building
+    records. When you need full type/format constraints (not just which
+    fields are required), call ``get_input_schema`` instead.
 
     Args:
         message_type: A supported ISO 20022 pain message type.
@@ -167,9 +200,14 @@ def get_required_fields(message_type: str) -> list[str]:
         return [f"error: {exc}"]
 
 
-@server.tool()
+@server.tool(title="Get input JSON Schema", annotations=_PURE_READ)
 def get_input_schema(message_type: str) -> dict:
-    """Return the JSON Schema describing the flat input record for a type.
+    """Return the full JSON Schema for a message type's flat input record.
+
+    Use this to learn every field, its type, and its constraints before
+    assembling records, or to drive a form/UI. For just the required-field
+    names use ``get_required_fields``; to actually check records against
+    this schema use ``validate_records``.
 
     Args:
         message_type: A supported ISO 20022 pain message type.
@@ -180,9 +218,14 @@ def get_input_schema(message_type: str) -> dict:
         return {"error": str(exc)}
 
 
-@server.tool()
+@server.tool(title="Validate records against schema", annotations=_PURE_READ)
 def validate_records(message_type: str, records: list[dict]) -> dict:
     """Validate flat records against a message type's input JSON Schema.
+
+    Use this before ``generate_message`` to catch structural/type errors
+    per record and get a row-by-row error report. This checks JSON-Schema
+    shape only; for payment-scheme rulebook checks (SEPA field lengths,
+    charset, etc.) also run ``validate_payment_scheme``.
 
     Returns a report ``{"valid": bool, "total": int, "valid_count": int,
     "errors": [...]}``.
@@ -224,9 +267,14 @@ def validate_records(message_type: str, records: list[dict]) -> dict:
     }
 
 
-@server.tool()
+@server.tool(title="Validate IBAN or BIC", annotations=_PURE_READ)
 def validate_identifier(kind: str, value: str) -> dict:
-    """Validate a financial identifier (IBAN or BIC).
+    """Validate a single financial identifier (IBAN or BIC).
+
+    Use this for a one-off identifier check with a clear pass/fail and
+    reason. To validate identifiers embedded across a whole batch, prefer
+    ``validate_records`` / ``validate_payment_scheme`` instead of calling
+    this per field.
 
     Returns ``{"kind": str, "value": str, "valid": bool, "error": str}``
     (the ``error`` key is present only when ``valid`` is ``False``).
@@ -254,9 +302,15 @@ def validate_identifier(kind: str, value: str) -> dict:
         return {"error": str(exc)}
 
 
-@server.tool()
+@server.tool(title="Generate pain XML from records", annotations=_PURE_READ)
 def generate_message(message_type: str, records: list[dict]) -> str:
-    """Generate a validated ISO 20022 pain XML message from flat records.
+    """Generate a validated ISO 20022 pain XML message from in-memory records.
+
+    This is the primary generation tool: pass records you already hold in
+    memory. Use ``generate_message_from_file`` when the data lives in a CSV
+    on disk, and ``generate_message_async`` for very large batches you want
+    to run off the event loop. The result is XSD-validated before return; no
+    file is written.
 
     Returns the validated XML document as a string, or a JSON-encoded
     ``{"error": ...}`` payload if generation fails.
@@ -282,9 +336,14 @@ def generate_message(message_type: str, records: list[dict]) -> str:
         return json.dumps({"error": str(exc)})
 
 
-@server.tool()
+@server.tool(title="List supported input formats", annotations=_PURE_READ)
 def list_supported_formats() -> list[dict]:
-    """List the input data formats the pain001 library can load.
+    """List the on-disk data formats the pain001 loader can read.
+
+    Use this to tell a user which file types they may supply to
+    ``generate_message_from_file``. This lists *data-source* formats (CSV,
+    SQLite, …); for the list of ISO 20022 *message* types call
+    ``list_message_types`` instead.
 
     Returns a list of ``{"id", "name", "extension"}`` dictionaries
     covering CSV, SQLite, JSON, JSONL, and Parquet (the last requires the
@@ -293,16 +352,22 @@ def list_supported_formats() -> list[dict]:
     return [dict(fmt) for fmt in _SUPPORTED_FORMATS]
 
 
-@server.tool()
+@server.tool(
+    title="Generate pain XML (async, large batches)", annotations=_PURE_READ
+)
 async def generate_message_async(
     message_type: str, records: list[dict]
 ) -> str:
-    """Async variant of :func:`generate_message` for long batches.
+    """Generate validated pain XML off the event loop, for large batches.
 
-    Delegates to :func:`pain001.async_adapter.generate_xml_string_async`,
-    which runs the synchronous renderer in a worker thread so an agent
-    can interleave long XML generations with other tool calls. Returns
-    the validated XML, or a JSON-encoded ``{"error": ...}`` payload.
+    Behaves exactly like ``generate_message`` but runs the synchronous
+    renderer in a worker thread so an agent can interleave a long
+    generation with other tool calls. Use ``generate_message`` for small
+    or interactive batches; use this only when the record count is large
+    enough that blocking would matter.
+
+    Delegates to :func:`pain001.async_adapter.generate_xml_string_async`.
+    Returns the validated XML, or a JSON-encoded ``{"error": ...}`` payload.
 
     Args:
         message_type: A supported ISO 20022 pain message type.
@@ -325,14 +390,18 @@ async def generate_message_async(
         return json.dumps({"error": str(exc)})
 
 
-@server.tool()
+@server.tool(title="Generate pain XML from a CSV file", annotations=_FS_READ)
 def generate_message_from_file(message_type: str, data_file_path: str) -> str:
-    """Generate a validated pain XML message from a CSV file on disk.
+    """Generate validated pain XML from a CSV file on the local disk.
+
+    Use this when the records live in a CSV file rather than in memory; it
+    reads ``data_file_path`` from the local filesystem, then delegates to
+    ``generate_message``. If you already have the records as dicts, call
+    ``generate_message`` directly. Only CSV is supported today (JSON / JSONL
+    / SQLite / Parquet are planned for a follow-up release).
 
     Loads ``data_file_path`` via :func:`pain001.csv.load_csv_data.load_csv_data`
-    so the same path-safety guards apply as in the core library, then
-    delegates to :func:`generate_message`. JSON / JSONL / SQLite /
-    Parquet inputs are planned for a follow-up release.
+    so the same path-safety guards apply as in the core library.
 
     Args:
         message_type: A supported ISO 20022 pain message type.
@@ -348,11 +417,17 @@ def generate_message_from_file(message_type: str, data_file_path: str) -> str:
     return generate_message(message_type, records)
 
 
-@server.tool()
+@server.tool(title="Parse camt.053 statement file", annotations=_FS_READ)
 def parse_camt053(
     xml_file_path: str, xsd_file_path: str | None = None
 ) -> dict:
-    """Parse a camt.053 bank statement XML file into structured data.
+    """Parse a camt.053 bank-statement XML file on disk into structured data.
+
+    Use this to read a bank's account statement (the reply that confirms
+    settlement) into a header + entry list. Reads ``xml_file_path`` from the
+    local filesystem. For the payment-status reply (accepted/rejected per
+    transaction) use ``parse_pain002`` instead; to validate a camt.053
+    string you already hold, this is not it — this tool needs a file path.
 
     Wraps :func:`pain001.parse_camt053_statement`. When ``xsd_file_path``
     is provided, the document is first validated against that XSD; on a
@@ -374,11 +449,16 @@ def parse_camt053(
         return {"error": str(exc)}
 
 
-@server.tool()
+@server.tool(title="Parse pain.002 status report file", annotations=_FS_READ)
 def parse_pain002(
     xml_file_path: str, xsd_file_path: str | None = None
 ) -> dict:
-    """Parse a pain.002 payment-status report XML file into structured data.
+    """Parse a pain.002 payment-status report file on disk into structured data.
+
+    Use this to read the bank's acknowledgement of a submitted pain.001 —
+    the per-transaction accepted/rejected status and reason codes. Reads
+    ``xml_file_path`` from the local filesystem. For the account statement
+    that later confirms booked entries, use ``parse_camt053`` instead.
 
     Wraps :func:`pain001.parse_pain002_report`. When ``xsd_file_path`` is
     provided, the document is first validated against that XSD; on a
@@ -400,9 +480,14 @@ def parse_pain002(
         return {"error": str(exc)}
 
 
-@server.tool()
+@server.tool(title="Inspect CSV template columns", annotations=_PURE_READ)
 def inspect_template(message_type: str) -> dict:
-    """Return the payment-row columns the message type's bundled CSV expects.
+    """Return the CSV column headers the message type's bundled template uses.
+
+    Use this to see the exact column order for hand-building a CSV before
+    ``generate_message_from_file``. This returns column *names* from the
+    bundled sample; for the typed JSON contract (types, required flags) use
+    ``get_input_schema``.
 
     Mirrors the in-tree ``pain001.mcp.server.inspect_template`` tool so an
     agent can introspect the column layout before assembling rows.
@@ -426,11 +511,16 @@ def inspect_template(message_type: str) -> dict:
         return {"error": str(exc)}
 
 
-@server.tool()
+@server.tool(title="Validate against scheme rulebook", annotations=_PURE_READ)
 def validate_payment_scheme(
     records: list[dict], profile: str = "sepa-sct"
 ) -> dict:
     """Validate records against a payment-scheme rulebook (e.g. SEPA).
+
+    Use this after ``validate_records`` to enforce scheme-specific business
+    rules (SEPA field lengths, allowed characters, currency/BIC constraints)
+    that JSON-Schema validation alone does not cover. ``validate_records``
+    checks structural shape; this checks rulebook compliance for one profile.
 
     Delegates to :func:`pain001.validate_scheme`. Supported profiles:
     ``sepa-sct``, ``sepa-sdd``, ``sepa-inst``, ``xborder-ct``.
@@ -456,7 +546,9 @@ def validate_payment_scheme(
     }
 
 
-@server.resource("pain001://schema/{message_type}")
+@server.resource(
+    "pain001://schema/{message_type}", title="pain.001 XSD schema"
+)
 def schema_resource(message_type: str) -> str:
     """Expose the official XSD schema text for a message type as a resource.
 
@@ -474,7 +566,7 @@ def schema_resource(message_type: str) -> str:
     return xsd.read_text(encoding="utf-8")
 
 
-@server.prompt()
+@server.prompt(title="Build a compliant payment batch")
 def build_payment_batch(
     message_type: str = "pain.001.001.09",
 ) -> str:
@@ -499,13 +591,19 @@ def build_payment_batch(
     )
 
 
-@server.tool()
+@server.tool(title="Migrate records between versions", annotations=_PURE_READ)
 def migrate_records(
     records: list[dict],
     from_version: str,
     to_version: str,
 ) -> dict:
-    """Migrate flat payment records between pain.001 schema versions.
+    """Migrate flat payment records between two pain.001 schema versions.
+
+    Use this to upgrade/downgrade records when your bank requires a
+    different pain.001 version than your source data uses (e.g. move
+    ``.03`` rows to ``.09``); it reports which fields were renamed, derived,
+    or dropped. This transforms records only — run ``validate_records``
+    afterwards, then ``generate_message`` to emit XML.
 
     Wraps :class:`pain001.migration.VersionMapper`. Returns the
     migrated rows plus a summary of which fields were renamed,
@@ -534,13 +632,16 @@ def migrate_records(
         return {"error": str(exc)}
 
 
-@server.tool()
+@server.tool(title="Validate XML string against XSD", annotations=_PURE_READ)
 def validate_xml_against_schema(xml_content: str, message_type: str) -> dict:
-    """Validate a raw pain.001 / pain.008 XML string against its XSD.
+    """Validate a raw pain.001 / pain.008 XML string against its official XSD.
 
-    Wraps :func:`pain001.xml.validate_via_xsd.validate_xml_string_via_xsd`
-    so an agent can verify an XML payload it received from another
-    system without writing it to disk.
+    Use this to check XML you already have as a string (e.g. received from
+    another system) without touching the filesystem. To validate records
+    *before* they become XML, use ``validate_records``; to parse a statement
+    or status-report file, use ``parse_camt053`` / ``parse_pain002``.
+
+    Wraps :func:`pain001.xml.validate_via_xsd.validate_xml_string_via_xsd`.
 
     Args:
         xml_content: The XML document as a string.
@@ -570,9 +671,16 @@ def validate_xml_against_schema(xml_content: str, message_type: str) -> dict:
         return {"error": str(exc)}
 
 
-@server.tool()
+@server.tool(
+    title="Sanitise text to ISO 20022 charset", annotations=_PURE_READ
+)
 def sanitize_to_iso20022_charset(value: str) -> dict:
-    """Sanitise a free-text field to the ISO 20022 Latin character set.
+    """Sanitise one free-text field to the ISO 20022 Latin character set.
+
+    Use this on a single free-text value (name, remittance info) to
+    transliterate accents and drop unsupported symbols before placing it in
+    a record, and to see whether the value changed. Operates on one string;
+    to check a whole batch's rulebook compliance use ``validate_payment_scheme``.
 
     Wraps :func:`pain001.sanitize_to_charset`. Transliterates accents
     (``é`` -> ``e``), removes unsupported symbols, and returns both
