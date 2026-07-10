@@ -56,6 +56,7 @@ import csv
 import io
 import json
 from pathlib import Path
+from typing import Annotated
 
 from jsonschema import Draft7Validator
 from mcp.server.fastmcp import FastMCP
@@ -73,6 +74,7 @@ from pain001.csv.load_csv_data import load_csv_data
 from pain001.migration import VersionMapper
 from pain001.validation import validate_bic, validate_iban
 from pain001.xml.validate_via_xsd import validate_xml_string_via_xsd
+from pydantic import Field
 
 from pain001_mcp import __version__
 
@@ -182,7 +184,18 @@ def list_message_types() -> list[dict]:
 
 
 @server.tool(title="Get required fields", annotations=_PURE_READ)
-def get_required_fields(message_type: str) -> list[str]:
+def get_required_fields(
+    message_type: Annotated[
+        str,
+        Field(
+            description=(
+                "A supported ISO 20022 pain message type, e.g. "
+                "'pain.001.001.09' — see list_message_types for the exact "
+                "accepted strings."
+            )
+        ),
+    ],
+) -> list[str]:
     """List only the required input field names for a pain message type.
 
     Use this for a quick checklist of the mandatory columns before building
@@ -201,7 +214,18 @@ def get_required_fields(message_type: str) -> list[str]:
 
 
 @server.tool(title="Get input JSON Schema", annotations=_PURE_READ)
-def get_input_schema(message_type: str) -> dict:
+def get_input_schema(
+    message_type: Annotated[
+        str,
+        Field(
+            description=(
+                "A supported ISO 20022 pain message type, e.g. "
+                "'pain.001.001.09' — see list_message_types for the exact "
+                "accepted strings."
+            )
+        ),
+    ],
+) -> dict:
     """Return the full JSON Schema for a message type's flat input record.
 
     Use this to learn every field, its type, and its constraints before
@@ -219,7 +243,28 @@ def get_input_schema(message_type: str) -> dict:
 
 
 @server.tool(title="Validate records against schema", annotations=_PURE_READ)
-def validate_records(message_type: str, records: list[dict]) -> dict:
+def validate_records(
+    message_type: Annotated[
+        str,
+        Field(
+            description=(
+                "A supported ISO 20022 pain message type whose input JSON "
+                "Schema the records are checked against, e.g. "
+                "'pain.001.001.09' — see list_message_types."
+            )
+        ),
+    ],
+    records: Annotated[
+        list[dict],
+        Field(
+            description=(
+                "One or more flat payment records to validate, each a dict "
+                "of field name → value (see get_input_schema for the fields "
+                "and get_required_fields for the mandatory ones)."
+            )
+        ),
+    ],
+) -> dict:
     """Validate flat records against a message type's input JSON Schema.
 
     Use this before ``generate_message`` to catch structural/type errors
@@ -268,7 +313,26 @@ def validate_records(message_type: str, records: list[dict]) -> dict:
 
 
 @server.tool(title="Validate IBAN or BIC", annotations=_PURE_READ)
-def validate_identifier(kind: str, value: str) -> dict:
+def validate_identifier(
+    kind: Annotated[
+        str,
+        Field(
+            description=(
+                "Which identifier to validate: 'iban' or 'bic' "
+                "(case-insensitive). Any other value returns an error."
+            )
+        ),
+    ],
+    value: Annotated[
+        str,
+        Field(
+            description=(
+                "The identifier string to check — an IBAN or BIC/SWIFT code "
+                "matching the chosen kind."
+            )
+        ),
+    ],
+) -> dict:
     """Validate a single financial identifier (IBAN or BIC).
 
     Use this for a one-off identifier check with a clear pass/fail and
@@ -303,7 +367,27 @@ def validate_identifier(kind: str, value: str) -> dict:
 
 
 @server.tool(title="Generate pain XML from records", annotations=_PURE_READ)
-def generate_message(message_type: str, records: list[dict]) -> str:
+def generate_message(
+    message_type: Annotated[
+        str,
+        Field(
+            description=(
+                "The target ISO 20022 pain message type to render, e.g. "
+                "'pain.001.001.09' — see list_message_types."
+            )
+        ),
+    ],
+    records: Annotated[
+        list[dict],
+        Field(
+            description=(
+                "One or more flat payment records (each a dict of field "
+                "name → value) to render into the XML; validate them first "
+                "with validate_records. See get_input_schema for the fields."
+            )
+        ),
+    ],
+) -> str:
     """Generate a validated ISO 20022 pain XML message from in-memory records.
 
     This is the primary generation tool: pass records you already hold in
@@ -356,7 +440,25 @@ def list_supported_formats() -> list[dict]:
     title="Generate pain XML (async, large batches)", annotations=_PURE_READ
 )
 async def generate_message_async(
-    message_type: str, records: list[dict]
+    message_type: Annotated[
+        str,
+        Field(
+            description=(
+                "The target ISO 20022 pain message type to render, e.g. "
+                "'pain.001.001.09' — see list_message_types."
+            )
+        ),
+    ],
+    records: Annotated[
+        list[dict],
+        Field(
+            description=(
+                "One or more flat payment records (each a dict of field "
+                "name → value) to render into the XML; use this async "
+                "variant only when the batch is large. See get_input_schema."
+            )
+        ),
+    ],
 ) -> str:
     """Generate validated pain XML off the event loop, for large batches.
 
@@ -391,7 +493,27 @@ async def generate_message_async(
 
 
 @server.tool(title="Generate pain XML from a CSV file", annotations=_FS_READ)
-def generate_message_from_file(message_type: str, data_file_path: str) -> str:
+def generate_message_from_file(
+    message_type: Annotated[
+        str,
+        Field(
+            description=(
+                "The target ISO 20022 pain message type to render, e.g. "
+                "'pain.001.001.09' — see list_message_types."
+            )
+        ),
+    ],
+    data_file_path: Annotated[
+        str,
+        Field(
+            description=(
+                "Local filesystem path to a CSV file with one payment record "
+                "per row and a header matching the template columns (see "
+                "inspect_template). Only CSV is supported today."
+            )
+        ),
+    ],
+) -> str:
     """Generate validated pain XML from a CSV file on the local disk.
 
     Use this when the records live in a CSV file rather than in memory; it
@@ -419,7 +541,25 @@ def generate_message_from_file(message_type: str, data_file_path: str) -> str:
 
 @server.tool(title="Parse camt.053 statement file", annotations=_FS_READ)
 def parse_camt053(
-    xml_file_path: str, xsd_file_path: str | None = None
+    xml_file_path: Annotated[
+        str,
+        Field(
+            description=(
+                "Local filesystem path to the camt.053 bank-statement XML "
+                "file to parse."
+            )
+        ),
+    ],
+    xsd_file_path: Annotated[
+        str | None,
+        Field(
+            description=(
+                "Optional local path to a camt.053 XSD; when given, the "
+                "document is validated against it before parsing. Omit to "
+                "skip schema validation."
+            )
+        ),
+    ] = None,
 ) -> dict:
     """Parse a camt.053 bank-statement XML file on disk into structured data.
 
@@ -451,7 +591,25 @@ def parse_camt053(
 
 @server.tool(title="Parse pain.002 status report file", annotations=_FS_READ)
 def parse_pain002(
-    xml_file_path: str, xsd_file_path: str | None = None
+    xml_file_path: Annotated[
+        str,
+        Field(
+            description=(
+                "Local filesystem path to the pain.002 payment-status report "
+                "XML file to parse."
+            )
+        ),
+    ],
+    xsd_file_path: Annotated[
+        str | None,
+        Field(
+            description=(
+                "Optional local path to a pain.002 XSD; when given, the "
+                "document is validated against it before parsing. Omit to "
+                "skip schema validation."
+            )
+        ),
+    ] = None,
 ) -> dict:
     """Parse a pain.002 payment-status report file on disk into structured data.
 
@@ -481,7 +639,18 @@ def parse_pain002(
 
 
 @server.tool(title="Inspect CSV template columns", annotations=_PURE_READ)
-def inspect_template(message_type: str) -> dict:
+def inspect_template(
+    message_type: Annotated[
+        str,
+        Field(
+            description=(
+                "A supported ISO 20022 pain message type whose bundled CSV "
+                "template columns to return, e.g. 'pain.001.001.09' — see "
+                "list_message_types."
+            )
+        ),
+    ],
+) -> dict:
     """Return the CSV column headers the message type's bundled template uses.
 
     Use this to see the exact column order for hand-building a CSV before
@@ -513,7 +682,25 @@ def inspect_template(message_type: str) -> dict:
 
 @server.tool(title="Validate against scheme rulebook", annotations=_PURE_READ)
 def validate_payment_scheme(
-    records: list[dict], profile: str = "sepa-sct"
+    records: Annotated[
+        list[dict],
+        Field(
+            description=(
+                "Payment records as a list of flat dicts (field name → "
+                "value) to check against the scheme rulebook."
+            )
+        ),
+    ],
+    profile: Annotated[
+        str,
+        Field(
+            description=(
+                "The payment-scheme rulebook profile to enforce. One of "
+                "'sepa-sct', 'sepa-sdd', 'sepa-inst', or 'xborder-ct'. "
+                "Defaults to 'sepa-sct'."
+            )
+        ),
+    ] = "sepa-sct",
 ) -> dict:
     """Validate records against a payment-scheme rulebook (e.g. SEPA).
 
@@ -549,7 +736,18 @@ def validate_payment_scheme(
 @server.resource(
     "pain001://schema/{message_type}", title="pain.001 XSD schema"
 )
-def schema_resource(message_type: str) -> str:
+def schema_resource(
+    message_type: Annotated[
+        str,
+        Field(
+            description=(
+                "A supported ISO 20022 pain message type whose official XSD "
+                "text to return, e.g. 'pain.001.001.09' — see "
+                "list_message_types."
+            )
+        ),
+    ],
+) -> str:
     """Expose the official XSD schema text for a message type as a resource.
 
     MCP clients can subscribe to or fetch ``pain001://schema/{type}`` to
@@ -568,7 +766,16 @@ def schema_resource(message_type: str) -> str:
 
 @server.prompt(title="Build a compliant payment batch")
 def build_payment_batch(
-    message_type: str = "pain.001.001.09",
+    message_type: Annotated[
+        str,
+        Field(
+            description=(
+                "The target ISO 20022 pain message type the batch will "
+                "produce, e.g. 'pain.001.001.09' — see list_message_types. "
+                "Defaults to 'pain.001.001.09'."
+            )
+        ),
+    ] = "pain.001.001.09",
 ) -> str:
     """Guided prompt for assembling a compliant payment batch.
 
@@ -593,9 +800,33 @@ def build_payment_batch(
 
 @server.tool(title="Migrate records between versions", annotations=_PURE_READ)
 def migrate_records(
-    records: list[dict],
-    from_version: str,
-    to_version: str,
+    records: Annotated[
+        list[dict],
+        Field(
+            description=(
+                "Flat payment records in the from_version shape, each a dict "
+                "of field name → value, to transform to to_version."
+            )
+        ),
+    ],
+    from_version: Annotated[
+        str,
+        Field(
+            description=(
+                "Source pain.001 schema version the records currently use, "
+                "e.g. 'pain.001.001.03' — see list_message_types."
+            )
+        ),
+    ],
+    to_version: Annotated[
+        str,
+        Field(
+            description=(
+                "Target pain.001 schema version to migrate the records to, "
+                "e.g. 'pain.001.001.09' — see list_message_types."
+            )
+        ),
+    ],
 ) -> dict:
     """Migrate flat payment records between two pain.001 schema versions.
 
@@ -633,7 +864,26 @@ def migrate_records(
 
 
 @server.tool(title="Validate XML string against XSD", annotations=_PURE_READ)
-def validate_xml_against_schema(xml_content: str, message_type: str) -> dict:
+def validate_xml_against_schema(
+    xml_content: Annotated[
+        str,
+        Field(
+            description=(
+                "The full pain.001 / pain.008 XML document as a string, "
+                "validated against the message type's official XSD."
+            )
+        ),
+    ],
+    message_type: Annotated[
+        str,
+        Field(
+            description=(
+                "The ISO 20022 pain message type whose XSD to validate "
+                "against, e.g. 'pain.001.001.09' — see list_message_types."
+            )
+        ),
+    ],
+) -> dict:
     """Validate a raw pain.001 / pain.008 XML string against its official XSD.
 
     Use this to check XML you already have as a string (e.g. received from
@@ -674,7 +924,17 @@ def validate_xml_against_schema(xml_content: str, message_type: str) -> dict:
 @server.tool(
     title="Sanitise text to ISO 20022 charset", annotations=_PURE_READ
 )
-def sanitize_to_iso20022_charset(value: str) -> dict:
+def sanitize_to_iso20022_charset(
+    value: Annotated[
+        str,
+        Field(
+            description=(
+                "A single free-text field value (e.g. a name or remittance "
+                "line) to transliterate to the ISO 20022 Latin character set."
+            )
+        ),
+    ],
+) -> dict:
     """Sanitise one free-text field to the ISO 20022 Latin character set.
 
     Use this on a single free-text value (name, remittance info) to
