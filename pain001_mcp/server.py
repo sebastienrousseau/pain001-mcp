@@ -78,6 +78,25 @@ from pydantic import Field
 
 from pain001_mcp import __version__
 
+# Enumerated value list for the ``message_type`` MCP parameter. Surfacing the
+# concrete allowed values as a JSON Schema ``enum`` (and in the description)
+# lets clients — and the Glama TDQS grader — see the valid inputs without a
+# tool call. Derived from the pain001 library so it never drifts. The enum is
+# schema metadata only; ``_check_message_type`` remains the runtime guard.
+_PAIN_MESSAGE_TYPES: list[str] = sorted(valid_xml_types)
+_MSG_TYPE_LIST = ", ".join(f"'{t}'" for t in _PAIN_MESSAGE_TYPES)
+
+_MessageType = Annotated[
+    str,
+    Field(
+        description=(
+            "A supported ISO 20022 pain message type. Must be exactly one of: "
+            f"{_MSG_TYPE_LIST} (see list_message_types)."
+        ),
+        json_schema_extra={"enum": _PAIN_MESSAGE_TYPES},
+    ),
+]
+
 server = FastMCP("pain001")
 # FastMCP does not expose a version kwarg; without this override the
 # MCP SDK's own version leaks into serverInfo.version, breaking
@@ -185,16 +204,7 @@ def list_message_types() -> list[dict]:
 
 @server.tool(title="Get required fields", annotations=_PURE_READ)
 def get_required_fields(
-    message_type: Annotated[
-        str,
-        Field(
-            description=(
-                "A supported ISO 20022 pain message type, e.g. "
-                "'pain.001.001.09' — see list_message_types for the exact "
-                "accepted strings."
-            )
-        ),
-    ],
+    message_type: _MessageType,
 ) -> list[str]:
     """List only the required input field names for a pain message type.
 
@@ -215,16 +225,7 @@ def get_required_fields(
 
 @server.tool(title="Get input JSON Schema", annotations=_PURE_READ)
 def get_input_schema(
-    message_type: Annotated[
-        str,
-        Field(
-            description=(
-                "A supported ISO 20022 pain message type, e.g. "
-                "'pain.001.001.09' — see list_message_types for the exact "
-                "accepted strings."
-            )
-        ),
-    ],
+    message_type: _MessageType,
 ) -> dict:
     """Return the full JSON Schema for a message type's flat input record.
 
@@ -244,16 +245,7 @@ def get_input_schema(
 
 @server.tool(title="Validate records against schema", annotations=_PURE_READ)
 def validate_records(
-    message_type: Annotated[
-        str,
-        Field(
-            description=(
-                "A supported ISO 20022 pain message type whose input JSON "
-                "Schema the records are checked against, e.g. "
-                "'pain.001.001.09' — see list_message_types."
-            )
-        ),
-    ],
+    message_type: _MessageType,
     records: Annotated[
         list[dict],
         Field(
@@ -368,15 +360,7 @@ def validate_identifier(
 
 @server.tool(title="Generate pain XML from records", annotations=_PURE_READ)
 def generate_message(
-    message_type: Annotated[
-        str,
-        Field(
-            description=(
-                "The target ISO 20022 pain message type to render, e.g. "
-                "'pain.001.001.09' — see list_message_types."
-            )
-        ),
-    ],
+    message_type: _MessageType,
     records: Annotated[
         list[dict],
         Field(
@@ -440,15 +424,7 @@ def list_supported_formats() -> list[dict]:
     title="Generate pain XML (async, large batches)", annotations=_PURE_READ
 )
 async def generate_message_async(
-    message_type: Annotated[
-        str,
-        Field(
-            description=(
-                "The target ISO 20022 pain message type to render, e.g. "
-                "'pain.001.001.09' — see list_message_types."
-            )
-        ),
-    ],
+    message_type: _MessageType,
     records: Annotated[
         list[dict],
         Field(
@@ -494,15 +470,7 @@ async def generate_message_async(
 
 @server.tool(title="Generate pain XML from a CSV file", annotations=_FS_READ)
 def generate_message_from_file(
-    message_type: Annotated[
-        str,
-        Field(
-            description=(
-                "The target ISO 20022 pain message type to render, e.g. "
-                "'pain.001.001.09' — see list_message_types."
-            )
-        ),
-    ],
+    message_type: _MessageType,
     data_file_path: Annotated[
         str,
         Field(
@@ -640,16 +608,7 @@ def parse_pain002(
 
 @server.tool(title="Inspect CSV template columns", annotations=_PURE_READ)
 def inspect_template(
-    message_type: Annotated[
-        str,
-        Field(
-            description=(
-                "A supported ISO 20022 pain message type whose bundled CSV "
-                "template columns to return, e.g. 'pain.001.001.09' — see "
-                "list_message_types."
-            )
-        ),
-    ],
+    message_type: _MessageType,
 ) -> dict:
     """Return the CSV column headers the message type's bundled template uses.
 
@@ -737,16 +696,7 @@ def validate_payment_scheme(
     "pain001://schema/{message_type}", title="pain.001 XSD schema"
 )
 def schema_resource(
-    message_type: Annotated[
-        str,
-        Field(
-            description=(
-                "A supported ISO 20022 pain message type whose official XSD "
-                "text to return, e.g. 'pain.001.001.09' — see "
-                "list_message_types."
-            )
-        ),
-    ],
+    message_type: _MessageType,
 ) -> str:
     """Expose the official XSD schema text for a message type as a resource.
 
@@ -766,16 +716,7 @@ def schema_resource(
 
 @server.prompt(title="Build a compliant payment batch")
 def build_payment_batch(
-    message_type: Annotated[
-        str,
-        Field(
-            description=(
-                "The target ISO 20022 pain message type the batch will "
-                "produce, e.g. 'pain.001.001.09' — see list_message_types. "
-                "Defaults to 'pain.001.001.09'."
-            )
-        ),
-    ] = "pain.001.001.09",
+    message_type: _MessageType = "pain.001.001.09",
 ) -> str:
     """Guided prompt for assembling a compliant payment batch.
 
@@ -874,15 +815,7 @@ def validate_xml_against_schema(
             )
         ),
     ],
-    message_type: Annotated[
-        str,
-        Field(
-            description=(
-                "The ISO 20022 pain message type whose XSD to validate "
-                "against, e.g. 'pain.001.001.09' — see list_message_types."
-            )
-        ),
-    ],
+    message_type: _MessageType,
 ) -> dict:
     """Validate a raw pain.001 / pain.008 XML string against its official XSD.
 
