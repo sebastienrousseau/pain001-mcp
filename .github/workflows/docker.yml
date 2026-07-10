@@ -72,7 +72,9 @@ jobs:
         id: pin
         run: |
           REF="${{ github.head_ref || github.ref_name }}"
-          if [[ "$REF" == feat/* ]]; then
+          if [[ "$REF" == feat/* ]] && \
+             git ls-remote --exit-code --heads \
+               https://github.com/sebastienrousseau/pain001 "$REF" >/dev/null 2>&1; then
             echo "spec=pain001 @ git+https://github.com/sebastienrousseau/pain001@${REF}" >> "$GITHUB_OUTPUT"
           else
             echo "spec=pain001>=0.0.52,<0.0.54" >> "$GITHUB_OUTPUT"
