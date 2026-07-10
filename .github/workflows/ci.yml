@@ -34,7 +34,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           REF="${{ github.head_ref || github.ref_name }}"
-          if [[ "$REF" == feat/* ]]; then
+          # Use a matching parent-lib branch for coordinated changes, but
+          # fall back to the pinned release when no such branch exists so a
+          # standalone feat/* PR isn't blocked by a phantom parent branch.
+          if [[ "$REF" == feat/* ]] && \
+             git ls-remote --exit-code --heads \
+               https://github.com/sebastienrousseau/pain001 "$REF" >/dev/null 2>&1; then
             pip install "pain001 @ git+https://github.com/sebastienrousseau/pain001@${REF}"
           else
             pip install "pain001>=0.0.52,<0.0.54"
@@ -77,7 +82,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           REF="${{ github.head_ref || github.ref_name }}"
-          if [[ "$REF" == feat/* ]]; then
+          # Use a matching parent-lib branch for coordinated changes, but
+          # fall back to the pinned release when no such branch exists so a
+          # standalone feat/* PR isn't blocked by a phantom parent branch.
+          if [[ "$REF" == feat/* ]] && \
+             git ls-remote --exit-code --heads \
+               https://github.com/sebastienrousseau/pain001 "$REF" >/dev/null 2>&1; then
             pip install "pain001 @ git+https://github.com/sebastienrousseau/pain001@${REF}"
           else
             pip install "pain001>=0.0.52,<0.0.54"
@@ -111,7 +121,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           REF="${{ github.head_ref || github.ref_name }}"
-          if [[ "$REF" == feat/* ]]; then
+          # Use a matching parent-lib branch for coordinated changes, but
+          # fall back to the pinned release when no such branch exists so a
+          # standalone feat/* PR isn't blocked by a phantom parent branch.
+          if [[ "$REF" == feat/* ]] && \
+             git ls-remote --exit-code --heads \
+               https://github.com/sebastienrousseau/pain001 "$REF" >/dev/null 2>&1; then
             pip install "pain001 @ git+https://github.com/sebastienrousseau/pain001@${REF}"
           else
             pip install "pain001>=0.0.52,<0.0.54"
