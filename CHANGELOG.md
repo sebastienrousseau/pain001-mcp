@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.55] - 2026-07-12
+
+The **MT→MX migration** cut. Adds a single new tool that bridges the
+legacy SWIFT FIN world to ISO 20022 ahead of the November-2025+ MT/MX
+coexistence cutover. 16 tools become 17; no other API changes.
+
+### Added
+
+- **`convert_mt101` tool.** Converts a legacy SWIFT **MT101** (*Request
+  for Transfer*) message into pain.001-ready flat records — one record
+  per sequence-B transaction, since an MT101 can request many transfers
+  in a single message. The output feeds straight into `validate_records`
+  / `validate_payment_scheme` and `generate_message` to emit
+  `pain.001.001.09` XML. Compute-only (no file I/O); on a malformed or
+  incomplete MT101 it returns `{"error": ...}` like the other tools.
+  Wraps the newly published
+  [`pain001-loader-mt101`](https://pypi.org/project/pain001-loader-mt101/)
+  library (`parse_mt101`), added as a runtime dependency.
+
 ## [0.0.54] - 2026-07-02
 
 The **discoverability** cut. Registers `pain001-mcp` with the official

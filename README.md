@@ -37,7 +37,7 @@
 
 **Library reference**
 
-- [Tools](#tools) — the 16 tools, one resource, one prompt
+- [Tools](#tools) — the 17 tools, one resource, one prompt
 - [Using the tools](#using-the-tools) — call them in-process from Python
 - [The pain001 suite](#the-pain001-suite) — core lib, MCP server, LSP server
 
@@ -118,7 +118,7 @@ Register the server with any MCP client (Claude Desktop shown):
 }
 ```
 
-That's it. Restart the client and the 16 tools are available to the
+That's it. Restart the client and the 17 tools are available to the
 agent. To check the server starts cleanly before wiring an editor:
 
 ```bash
@@ -133,7 +133,7 @@ be launched by an MCP client, not used interactively.
 
 ## Tools
 
-All 16 tools delegate to the `pain001` public API, so they behave
+All 17 tools delegate to the `pain001` public API, so they behave
 identically to the CLI and REST API.
 
 | Tool | Purpose |
@@ -156,6 +156,7 @@ identically to the CLI and REST API.
 | `parse_pain002` | Parse a `pain.002` payment-status report XML into structured data |
 | `migrate_records` | Migrate flat records between pain.001 schema versions |
 | `sanitize_to_iso20022_charset` | Transliterate text to the ISO 20022 Latin set |
+| `convert_mt101` | Convert a legacy SWIFT MT101 (Request for Transfer) into pain.001 records (one per transaction) |
 
 Plus one resource and one prompt:
 

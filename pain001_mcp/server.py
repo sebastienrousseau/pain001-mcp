@@ -74,6 +74,7 @@ from pain001.csv.load_csv_data import load_csv_data
 from pain001.migration import VersionMapper
 from pain001.validation import validate_bic, validate_iban
 from pain001.xml.validate_via_xsd import validate_xml_string_via_xsd
+from pain001_loader_mt101.loader import parse_mt101
 from pydantic import Field
 
 from pain001_mcp import __version__
@@ -894,6 +895,51 @@ def sanitize_to_iso20022_charset(
         "was_valid": cleaned == value,
         "changed": cleaned != value,
     }
+
+
+@server.tool(title="Convert MT101 to pain.001 records", annotations=_PURE_READ)
+def convert_mt101(
+    mt101_text: Annotated[
+        str,
+        Field(
+            description=(
+                "A legacy SWIFT MT101 (Request for Transfer) message as text "
+                "— a bare ':tag:' field list or a raw '{4:...-}' block-4 "
+                "envelope. An MT101 may carry several sequence-B transfers; "
+                "each becomes its own record."
+            )
+        ),
+    ],
+) -> list[dict] | dict:
+    """Convert a legacy SWIFT MT101 message into pain.001-ready records.
+
+    Use this to bridge the Nov-2025+ SWIFT MT→MX migration: parse an MT101
+    (*Request for Transfer*) into the flat records the other tools consume —
+    feed the result straight to ``validate_records`` /
+    ``validate_payment_scheme`` and then ``generate_message`` to emit
+    pain.001.001.09 XML. An MT101 can request many transfers (repeating
+    sequence B), so this returns *one record per transaction*. Operates on
+    the supplied text only; no file is read or written.
+
+    Wraps :func:`pain001_loader_mt101.loader.parse_mt101`. Sequence-A
+    ordering-customer / account-servicing fields apply to every transaction
+    unless a sequence-B block overrides them; fields the MT101 does not
+    carry are synthesised to schema defaults (``payment_method`` ``"TRF"``,
+    ``service_level_code`` ``"SEPA"``, etc.).
+
+    Args:
+        mt101_text: The MT101 payload as a string.
+
+    Returns:
+        A list of flat pain.001 records (one per transaction), or an
+        ``{"error": ...}`` dict if the MT101 is missing a mandatory field
+        (``:20:``, ``:30:``, or per transaction ``:21:`` / ``:32B:`` /
+        a named beneficiary) or is otherwise malformed.
+    """
+    try:
+        return parse_mt101(mt101_text)
+    except ValueError as exc:
+        return {"error": str(exc)}
 
 
 def main() -> None:
