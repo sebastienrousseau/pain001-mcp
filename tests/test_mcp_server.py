@@ -45,6 +45,8 @@ EXPECTED_TOOLS = {
     "migrate_records",
     "validate_xml_against_schema",
     "sanitize_to_iso20022_charset",
+    # New in v0.0.55:
+    "convert_mt101",
 }
 
 
@@ -605,3 +607,89 @@ def test_sanitize_to_iso20022_charset_transliterates_accents():
     # The exact transliteration is pain001's concern; the contract here
     # is that the sanitised form differs and is no longer the original.
     assert out["sanitised"] != "Café Müller"
+
+
+# ---------------------------------------------------------------------------
+# New in v0.0.55: convert_mt101 (legacy SWIFT MT101 -> pain.001 records)
+# ---------------------------------------------------------------------------
+# A two-transaction MT101 (Request for Transfer). Sequence A carries the
+# shared ordering customer (:50H:) and account-servicing bank (:52A:); each
+# :21: opens a repeating sequence-B transfer. Mirrors the multi-transaction
+# fixture in the pain001-loader-mt101 test-suite.
+_MULTI_MT101 = (
+    ":20:MSGREF2026070901\n"
+    ":21R:CUSTREF-A\n"
+    ":50H:/DE89370400440532013000\n"
+    "GLOBAL IMPORTS GMBH\n"
+    "100 HAFEN STRASSE\n"
+    "HAMBURG\n"
+    ":52A:DEUTDEFF\n"
+    ":30:260712\n"
+    ":21:TXN-REF-0001\n"
+    ":32B:EUR12345,67\n"
+    ":57A:CHASUS33\n"
+    ":59:/GB29NWBK60161331926819\n"
+    "ACME TRADING LTD\n"
+    "1 CORPORATE AVENUE\n"
+    "LONDON\n"
+    ":70:INVOICE 998877\n"
+    ":71A:SHA\n"
+    ":21:TXN-REF-0002\n"
+    ":32B:USD5000,00\n"
+    ":57A:BOFAUS3N\n"
+    ":59:/FR1420041010050500013M02606\n"
+    "LES FLEURS SARL\n"
+    ":70:CONTRACT 445566\n"
+    ":71A:OUR\n"
+)
+
+
+def test_convert_mt101_returns_one_record_per_transaction():
+    """A two-transfer MT101 yields two flat pain.001 records, in order."""
+    records = server.convert_mt101(_MULTI_MT101)
+    assert isinstance(records, list)
+    assert len(records) == 2
+    assert [r["payment_id"] for r in records] == [
+        "TXN-REF-0001",
+        "TXN-REF-0002",
+    ]
+
+
+def test_convert_mt101_maps_expected_per_record_fields():
+    """Per-transaction amounts/currencies and shared debtor fields map through."""
+    first, second = server.convert_mt101(_MULTI_MT101)
+    # Group-header fields are repeated on every record.
+    assert first["nb_of_txs"] == second["nb_of_txs"] == 2
+    assert first["ctrl_sum"] == second["ctrl_sum"] == 17345.67
+    assert first["payment_method"] == "TRF"
+    # Sequence-A ordering customer applies to both transactions.
+    for record in (first, second):
+        assert record["debtor_name"] == "GLOBAL IMPORTS GMBH"
+        assert record["debtor_account_IBAN"] == "DE89370400440532013000"
+        assert record["debtor_agent_BIC"] == "DEUTDEFF"
+    # Each transaction keeps its own :32B: amount/currency and creditor.
+    assert (first["payment_amount"], first["currency"]) == (12345.67, "EUR")
+    assert first["creditor_name"] == "ACME TRADING LTD"
+    assert (second["payment_amount"], second["currency"]) == (5000.0, "USD")
+    assert second["creditor_name"] == "LES FLEURS SARL"
+
+
+def test_convert_mt101_records_are_schema_valid():
+    """The KEY proof: converted records validate against pain.001.001.09.
+
+    Feeds ``convert_mt101``'s output straight into the server's own
+    ``validate_records`` tool — the exact hand-off an agent performs.
+    """
+    records = server.convert_mt101(_MULTI_MT101)
+    report = server.validate_records("pain.001.001.09", records)
+    assert report["valid"] is True
+    assert report["total"] == 2
+    assert report["valid_count"] == 2
+    assert report["errors"] == []
+
+
+def test_convert_mt101_malformed_payload_returns_error():
+    """A payload missing a mandatory field returns an ``{"error": ...}`` dict."""
+    out = server.convert_mt101(":20:REF\n:30:260712\n")
+    assert isinstance(out, dict)
+    assert "error" in out

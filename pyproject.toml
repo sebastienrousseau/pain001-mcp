@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pain001-mcp"
-version = "0.0.54"
+version = "0.0.55"
 description = "Model Context Protocol (MCP) server exposing the pain001 ISO 20022 Customer Credit Transfer Initiation library as agent tools."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
 license = "Apache-2.0"
@@ -17,6 +17,7 @@ pain001-mcp = "pain001_mcp.server:main"
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
 pain001 = ">=0.0.52"
+pain001-loader-mt101 = ">=0.0.1"
 mcp = ">=1.2"
 
 [tool.poetry.group.dev.dependencies]
@@ -116,6 +117,10 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "pain001.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pain001_loader_mt101.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
