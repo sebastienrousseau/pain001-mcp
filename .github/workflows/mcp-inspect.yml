@@ -29,12 +29,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           REF="${{ github.head_ref || github.ref_name }}"
-          if [[ "$REF" == feat/* ]] && \
+          if [[ "$REF" == feat/* || "$REF" == fix/* ]] && \
              git ls-remote --exit-code --heads \
                https://github.com/sebastienrousseau/pain001 "$REF" >/dev/null 2>&1; then
-            pip install "pain001 @ git+https://github.com/sebastienrousseau/pain001@${REF}" || pip install "pain001>=0.0.52,<0.0.54"
+            pip install "pain001 @ git+https://github.com/sebastienrousseau/pain001@${REF}" || pip install "pain001>=0.0.54,<0.0.55"
           else
-            pip install "pain001>=0.0.52,<0.0.54"
+            pip install "pain001>=0.0.54,<0.0.55"
           fi
           pip install .
 
