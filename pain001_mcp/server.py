@@ -62,6 +62,7 @@ from jsonschema import Draft7Validator
 from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
 from pain001 import (
+    canonicalize_payment_record,
     generate_xml_string,
     parse_camt053_statement,
     parse_pain002_report,
@@ -71,6 +72,7 @@ from pain001 import (
 from pain001.async_adapter import generate_xml_string_async
 from pain001.constants import SCHEMAS_DIR, TEMPLATES_DIR, valid_xml_types
 from pain001.csv.load_csv_data import load_csv_data
+from pain001.exceptions import Pain001Error
 from pain001.migration import VersionMapper
 from pain001.validation import validate_bic, validate_iban
 from pain001.xml.validate_via_xsd import validate_xml_string_via_xsd
@@ -79,12 +81,23 @@ from pydantic import Field
 
 from pain001_mcp import __version__
 
+# Bare family names accepted as ergonomic aliases for a concrete version:
+# agents routinely say "pain.001" (the catalogue name) rather than a full
+# versioned message type, and previously received an unhelpful
+# "Invalid XML message type" error.
+_MESSAGE_TYPE_ALIASES: dict[str, str] = {
+    "pain.001": "pain.001.001.09",
+    "pain.008": "pain.008.001.02",
+}
+
 # Enumerated value list for the ``message_type`` MCP parameter. Surfacing the
 # concrete allowed values as a JSON Schema ``enum`` (and in the description)
 # lets clients — and the Glama TDQS grader — see the valid inputs without a
 # tool call. Derived from the pain001 library so it never drifts. The enum is
 # schema metadata only; ``_check_message_type`` remains the runtime guard.
-_PAIN_MESSAGE_TYPES: list[str] = sorted(valid_xml_types)
+_PAIN_MESSAGE_TYPES: list[str] = sorted(valid_xml_types) + sorted(
+    _MESSAGE_TYPE_ALIASES
+)
 _MSG_TYPE_LIST = ", ".join(f"'{t}'" for t in _PAIN_MESSAGE_TYPES)
 
 _MessageType = Annotated[
@@ -92,11 +105,30 @@ _MessageType = Annotated[
     Field(
         description=(
             "A supported ISO 20022 pain message type. Must be exactly one of: "
-            f"{_MSG_TYPE_LIST} (see list_message_types)."
+            f"{_MSG_TYPE_LIST} (see list_message_types). The bare family "
+            "names 'pain.001' and 'pain.008' are accepted as aliases for "
+            "'pain.001.001.09' and 'pain.008.001.02'."
         ),
         json_schema_extra={"enum": _PAIN_MESSAGE_TYPES},
     ),
 ]
+
+# What generate_message accepts per record, surfaced in the tool schema so an
+# agent can build a correct call without a discovery round-trip.
+_RECORDS_FIELD_GUIDE = (
+    "One or more flat payment records (dicts of field name → value). "
+    "Key fields (see get_input_schema for the full contract): id, date "
+    "(payment-initiation timestamp; 'YYYY-MM-DD' is accepted and rendered "
+    "as midnight), initiator_name, payment_id, requested_execution_date "
+    "('YYYY-MM-DD'), debtor_name, debtor_account_IBAN, debtor_agent_BIC, "
+    "creditor_name, creditor_account_IBAN, creditor_agent_BIC, "
+    "payment_amount (alias: 'amount'; max two decimals), currency (alias: "
+    "'payment_currency'; ISO 4217, e.g. 'EUR'), remittance_information. "
+    "batch_booking accepts JSON true/false. nb_of_txs and ctrl_sum are "
+    "computed automatically from the records and may be omitted. "
+    "payment_method defaults to 'TRF' and charge_bearer to 'SLEV'. "
+    "IBAN and BIC values are strictly validated and never coerced."
+)
 
 server = FastMCP("pain001")
 # FastMCP does not expose a version kwarg; without this override the
@@ -160,10 +192,28 @@ _SUPPORTED_FORMATS = [
 ]
 
 
-def _check_message_type(message_type: str) -> None:
-    """Raise ``ValueError`` unless ``message_type`` is bundled with pain001."""
-    if message_type not in valid_xml_types:
-        raise ValueError(f"Invalid XML message type: {message_type}")
+def _check_message_type(message_type: str) -> str:
+    """Resolve aliases and validate a message type against the bundle.
+
+    Args:
+        message_type: A full message type (``pain.001.001.09``) or a bare
+            family alias (``pain.001``).
+
+    Returns:
+        The canonical, fully-versioned message type.
+
+    Raises:
+        ValueError: If the resolved type is not bundled with pain001.
+    """
+    resolved = _MESSAGE_TYPE_ALIASES.get(
+        message_type.strip().lower(), message_type.strip()
+    )
+    if resolved not in valid_xml_types:
+        raise ValueError(
+            f"Invalid XML message type: {message_type}. Expected one of: "
+            f"{_MSG_TYPE_LIST}."
+        )
+    return resolved
 
 
 def _schema_path(message_type: str) -> Path:
@@ -173,7 +223,7 @@ def _schema_path(message_type: str) -> Path:
 
 def _load_schema(message_type: str) -> dict:
     """Load the bundled JSON Schema for ``message_type`` (raises on miss)."""
-    _check_message_type(message_type)
+    message_type = _check_message_type(message_type)
     path = _schema_path(message_type)
     if not path.is_file():  # pragma: no cover - all valid types ship a schema
         raise ValueError(f"No JSON Schema bundled for {message_type}")
@@ -274,10 +324,14 @@ def validate_records(
     """
     try:
         schema = _load_schema(message_type)
-    except (
-        ValueError
-    ) as exc:  # pragma: no cover - all valid types ship a schema
+    except ValueError as exc:
         return {"error": str(exc)}
+
+    # Map alias keys ('amount', 'currency', lower-case IBAN/BIC spellings)
+    # to their canonical names, exactly as generate_message will, so a
+    # record that generates cleanly also validates cleanly. Values keep
+    # their JSON types; only key names are rewritten.
+    records = [canonicalize_payment_record(record) for record in records]
 
     validator = Draft7Validator(schema)
     errors: list[dict] = []
@@ -364,13 +418,7 @@ def generate_message(
     message_type: _MessageType,
     records: Annotated[
         list[dict],
-        Field(
-            description=(
-                "One or more flat payment records (each a dict of field "
-                "name → value) to render into the XML; validate them first "
-                "with validate_records. See get_input_schema for the fields."
-            )
-        ),
+        Field(description=_RECORDS_FIELD_GUIDE),
     ],
 ) -> str:
     """Generate a validated ISO 20022 pain XML message from in-memory records.
@@ -381,6 +429,12 @@ def generate_message(
     to run off the event loop. The result is XSD-validated before return; no
     file is written.
 
+    Records are normalized before rendering: 'amount'/'currency' aliases,
+    JSON booleans, and bare 'YYYY-MM-DD' dates are accepted, and
+    nb_of_txs/ctrl_sum are computed from the records. On failure the
+    ``{"error": ...}`` payload lists every missing or invalid field at
+    once. IBAN/BIC values are strictly validated, never coerced.
+
     Returns the validated XML document as a string, or a JSON-encoded
     ``{"error": ...}`` payload if generation fails.
 
@@ -389,7 +443,7 @@ def generate_message(
         records: One or more flat payment records.
     """
     try:
-        _check_message_type(message_type)
+        message_type = _check_message_type(message_type)
         template_dir = Path(TEMPLATES_DIR) / message_type
         template_xml = template_dir / "template.xml"
         xsd_schema = template_dir / f"{message_type}.xsd"
@@ -401,7 +455,7 @@ def generate_message(
             str(template_xml),
             str(xsd_schema),
         )
-    except ValueError as exc:
+    except (ValueError, RuntimeError, Pain001Error) as exc:
         return json.dumps({"error": str(exc)})
 
 
@@ -430,9 +484,9 @@ async def generate_message_async(
         list[dict],
         Field(
             description=(
-                "One or more flat payment records (each a dict of field "
-                "name → value) to render into the XML; use this async "
-                "variant only when the batch is large. See get_input_schema."
+                "Same record shape and ergonomics as generate_message; use "
+                "this async variant only when the batch is large. "
+                + _RECORDS_FIELD_GUIDE
             )
         ),
     ],
@@ -453,7 +507,7 @@ async def generate_message_async(
         records: One or more flat payment records.
     """
     try:
-        _check_message_type(message_type)
+        message_type = _check_message_type(message_type)
         template_dir = Path(TEMPLATES_DIR) / message_type
         template_xml = template_dir / "template.xml"
         xsd_schema = template_dir / f"{message_type}.xsd"
@@ -465,7 +519,7 @@ async def generate_message_async(
             str(template_xml),
             str(xsd_schema),
         )
-    except ValueError as exc:
+    except (ValueError, RuntimeError, Pain001Error) as exc:
         return json.dumps({"error": str(exc)})
 
 
@@ -629,7 +683,7 @@ def inspect_template(
         ``{"error": ...}`` if the type is unsupported or no template ships.
     """
     try:
-        _check_message_type(message_type)
+        message_type = _check_message_type(message_type)
         sample = Path(TEMPLATES_DIR) / message_type / "template.csv"
         if not sample.is_file():
             raise ValueError(f"No bundled CSV template for {message_type}")
@@ -710,7 +764,7 @@ def schema_resource(
     Returns:
         The XSD schema text. Raises ``ValueError`` for an unsupported type.
     """
-    _check_message_type(message_type)
+    message_type = _check_message_type(message_type)
     xsd = Path(TEMPLATES_DIR) / message_type / f"{message_type}.xsd"
     return xsd.read_text(encoding="utf-8")
 
@@ -836,7 +890,7 @@ def validate_xml_against_schema(
         ``error`` is present only when ``valid`` is ``False``.
     """
     try:
-        _check_message_type(message_type)
+        message_type = _check_message_type(message_type)
         xsd = Path(TEMPLATES_DIR) / message_type / f"{message_type}.xsd"
         if not xsd.is_file():  # pragma: no cover - all valid types ship XSD
             return {"error": f"No XSD bundled for {message_type}"}

@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.56] - 2026-07-16
+
+The **LLM-ergonomic generate** cut. Driven by a real Claude Code
+transcript in which the natural first-try call — `amount`/`currency`
+keys, a bare `YYYY-MM-DD` date, a JSON boolean `batch_booking`, no
+`nb_of_txs` — needed 5+ retries through the iso20022-mcp gateway.
+Requires pain001 >= 0.0.54.
+
+### Added
+
+- **Bare family aliases**: `pain.001` -> `pain.001.001.09` and
+  `pain.008` -> `pain.008.001.02` are accepted everywhere a
+  `message_type` is, and are listed in the parameter's enum.
+- **First-try field guide in the tool schema**: the `records` parameter
+  of `generate_message` / `generate_message_async` now documents the
+  key fields, formats, accepted aliases, computed fields and defaults,
+  so an agent can build a correct call without a discovery round-trip.
+
+### Fixed
+
+- **Raised errors -> structured payloads**: `generate_message`,
+  `generate_message_async` and `generate_message_from_file` now catch
+  the library's `Pain001Error` hierarchy and the XSD `RuntimeError`
+  and return a JSON `{"error": ...}` payload that lists *all* missing
+  or invalid fields (with element paths on XSD failures) instead of
+  leaking one raised KeyError per retry.
+- **validate/generate coherence**: `validate_records` canonicalizes
+  alias keys (`amount`, `currency`, lower-case IBAN/BIC spellings) the
+  same way generation does, so a record that generates cleanly also
+  validates cleanly. IBAN/BIC validation itself is unchanged.
+- **Unknown message types** name the valid options in the error.
+
 ## [0.0.55] - 2026-07-12
 
 The **MT→MX migration** cut. Adds a single new tool that bridges the
