@@ -12,7 +12,7 @@
 <h1 align="center">pain001-mcp</h1>
 
 <p align="center">
-  <b>Model Context Protocol server exposing the pain001 ISO 20022 payment library as 16 first-class agent tools.</b>
+  <b>Model Context Protocol server exposing the pain001 ISO 20022 payment library as 17 first-class agent tools.</b>
 </p>
 
 <p align="center">
@@ -58,7 +58,7 @@ The [Model Context Protocol](https://modelcontextprotocol.io) (MCP) is
 an open standard that lets AI agents discover and call external tools in
 a uniform way. **pain001-mcp** is the MCP server that turns the
 [`pain001`](https://github.com/sebastienrousseau/pain001) ISO 20022
-payment library into 16 first-class agent tools — so an assistant can
+payment library into 17 first-class agent tools — so an assistant can
 generate and validate **`pain.001` Customer Credit Transfer Initiation**
 and **`pain.008` Customer Direct Debit Initiation** messages (the
 standardised payment instructions behind SEPA and cross-border credit
@@ -136,34 +136,28 @@ be launched by an MCP client, not used interactively.
 All 17 tools delegate to the `pain001` public API, so they behave
 identically to the CLI and REST API.
 
-| Tool | Purpose |
-| :--- | :--- |
-| `list_supported_versions` | List the supported `pain.001` / `pain.008` message versions |
-| `get_required_fields` | Required input fields for a message type |
-| `get_input_schema` | Full input JSON Schema for a message type |
-| `inspect_template` | Template metadata + accepted formats for a message type |
-| `validate_records` | Validate flat records against a message type |
-| `validate_payment_data` | Same as above, JSON-RPC-friendly signature |
-| `validate_payment_scheme` | Run a scheme rulebook (`sepa-sct`, `sepa-sdd`, `sepa-inst`, `sepa-b2b`, `xborder-ct`) |
-| `validate_identifier` | Validate an IBAN or BIC |
-| `validate_xml_against_schema` | Validate an XML payload against its bundled XSD without writing to disk |
-| `generate_payment_file` | Generate a payment XML file from records + a path |
-| `generate_message` | Generate a validated XML message and return the string |
-| `generate_message_async` | Async variant of `generate_message` for long batches |
-| `generate_message_from_file` | Render directly from a CSV path on disk |
-| `list_supported_formats` | List the data formats `pain001` can load (CSV, SQLite, JSON, JSONL, Parquet) |
-| `parse_camt053` | Parse a `camt.053` bank statement XML into structured data |
-| `parse_pain002` | Parse a `pain.002` payment-status report XML into structured data |
-| `migrate_records` | Migrate flat records between pain.001 schema versions |
-| `sanitize_to_iso20022_charset` | Transliterate text to the ISO 20022 Latin set |
-| `convert_mt101` | Convert a legacy SWIFT MT101 (Request for Transfer) into pain.001 records (one per transaction) |
+- `list_message_types` — List the supported `pain.001` / `pain.008` message types
+- `get_required_fields` — Required input fields for a message type
+- `get_input_schema` — Full input JSON Schema for a message type
+- `inspect_template` — Template metadata + accepted formats for a message type
+- `validate_records` — Validate flat records against a message type
+- `validate_payment_scheme` — Run a scheme rulebook (`sepa-sct`, `sepa-sdd`, `sepa-inst`, `sepa-b2b`, `xborder-ct`)
+- `validate_identifier` — Validate an IBAN or BIC
+- `validate_xml_against_schema` — Validate an XML payload against its bundled XSD without writing to disk
+- `generate_message` — Generate a validated XML message and return the string
+- `generate_message_async` — Async variant of `generate_message` for long batches
+- `generate_message_from_file` — Render directly from a CSV path on disk
+- `list_supported_formats` — List the data formats `pain001` can load (CSV, SQLite, JSON, JSONL, Parquet)
+- `parse_camt053` — Parse a `camt.053` bank statement XML into structured data
+- `parse_pain002` — Parse a `pain.002` payment-status report XML into structured data
+- `migrate_records` — Migrate flat records between pain.001 schema versions
+- `sanitize_to_iso20022_charset` — Transliterate text to the ISO 20022 Latin set
+- `convert_mt101` — Convert a legacy SWIFT MT101 (Request for Transfer) into pain.001 records (one per transaction)
 
 Plus one resource and one prompt:
 
-| Kind | Name | Purpose |
-| :--- | :--- | :--- |
-| Resource | `pain001://schema/{message_type}` | Read-only access to the bundled XSD for any supported message type |
-| Prompt | `build_payment_batch` | Guided multi-step prompt that walks an agent through building a valid batch |
+- Resource `pain001://schema/{message_type}` — Read-only access to the bundled XSD for any supported message type
+- Prompt `build_payment_batch` — Guided multi-step prompt that walks an agent through building a valid batch
 
 ---
 
@@ -309,9 +303,9 @@ interrogate 100%.
 
 ## Security
 
-- **No filesystem writes from tools.** `generate_message` returns the
-  XML as a string; only `generate_payment_file` writes, and only to a
-  caller-supplied path.
+- **No filesystem writes from tools.** `generate_message` and
+  `generate_message_from_file` return the XML as a string; no tool
+  writes to disk.
 - **XML parsing** of `camt.053` and `pain.002` is routed through
   `defusedxml` (via the core `pain001` library); XXE and entity
   expansion are rejected.
