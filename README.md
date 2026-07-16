@@ -78,7 +78,8 @@ JSON-serialisable data; on a validation error they return an
 | Identifier validation | `validate_identifier` checks IBAN (ISO 13616 / mod-97) and BIC |
 | Cross-version mapping | `migrate_records` round-trips data between pain.001.001.03 and .12 |
 | Charset compliance | `sanitize_to_iso20022_charset` transliterates outside-set characters |
-| Error surface | Validation failures return structured `{"error": ...}`, never tracebacks |
+| Message-type aliases | Bare family names `pain.001` / `pain.008` resolve to `pain.001.001.09` / `pain.008.001.02` |
+| Error surface | Failures return structured `{"error": ...}`, never tracebacks — listing every missing or invalid field at once |
 
 ---
 
@@ -86,7 +87,7 @@ JSON-serialisable data; on a validation error they return an
 
 | Channel | Command | Notes |
 | :--- | :--- | :--- |
-| PyPI | `pip install pain001-mcp` | Pulls in `pain001 >= 0.0.53` + MCP SDK |
+| PyPI | `pip install pain001-mcp` | Pulls in `pain001 >= 0.0.54` + MCP SDK |
 | Source | `git clone https://github.com/sebastienrousseau/pain001-mcp && cd pain001-mcp && poetry install` | For development |
 | Docker (GHCR) | `docker pull ghcr.io/sebastienrousseau/pain001-mcp:latest` | Multi-arch (linux/amd64, linux/arm64); runs `pain001-mcp` over stdio |
 
@@ -158,6 +159,34 @@ Plus one resource and one prompt:
 
 - Resource `pain001://schema/{message_type}` — Read-only access to the bundled XSD for any supported message type
 - Prompt `build_payment_batch` — Guided multi-step prompt that walks an agent through building a valid batch
+
+### First-try ergonomics
+
+The generate path is designed so an agent's first natural call succeeds:
+
+- **Records field guide in the tool schema** — the `records` parameter of
+  `generate_message` / `generate_message_async` carries a field-by-field
+  guide in its `inputSchema` description (key fields, accepted aliases,
+  defaults, computed totals), so an agent can build a correct call
+  without a discovery round-trip.
+- **Message-type aliases** — the bare family names `pain.001` and
+  `pain.008` are accepted wherever a `message_type` is, resolving to
+  `pain.001.001.09` and `pain.008.001.02`; an invalid type error lists
+  every accepted value.
+- **validate/generate key coherence** — `validate_records` canonicalizes
+  alias keys (`amount`, `currency`, lower-case IBAN/BIC spellings)
+  exactly as `generate_message` does, so a record that generates cleanly
+  also validates cleanly. Values keep their JSON types; only key names
+  are rewritten.
+- **Structured, complete error payloads** — generation failures return
+  an `{"error": ...}` payload (never a traceback) that lists every
+  missing or invalid field at once, with row numbers; XSD failures
+  report each violation as element path plus reason (via
+  `pain001 >= 0.0.54`).
+- **Computed totals and defaults** — `nb_of_txs` / `ctrl_sum` are
+  computed from the records and may be omitted; `payment_method`
+  defaults to `TRF` and `charge_bearer` to `SLEV`. IBAN and BIC values
+  are strictly validated and never coerced.
 
 ---
 
@@ -295,7 +324,7 @@ A `Makefile` orchestrates the quality gates (kept in lockstep with CI):
 | `make type-check` | `mypy --strict` |
 | `make docs` | `interrogate --fail-under=100` (docstring coverage) |
 
-Current state (v0.0.54): **54 tests passing, 100% line + branch
+Current state (v0.0.56): **71 tests passing, 100% line + branch
 coverage** against a 100% enforced floor, mypy `--strict` clean,
 interrogate 100%.
 
