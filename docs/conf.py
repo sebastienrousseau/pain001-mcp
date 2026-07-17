@@ -37,7 +37,6 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # Furo theme: lightweight, modern, mobile-friendly.
 html_theme = "furo"
 html_title = f"pain001-mcp {release}"
-html_static_path: list[str] = []
 
 # Cross-link to pain001's docs and the Python stdlib.
 intersphinx_mapping = {
