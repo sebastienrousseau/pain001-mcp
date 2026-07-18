@@ -1046,14 +1046,14 @@ files = [
 
 [[package]]
 name = "pain001"
-version = "0.0.54"
+version = "0.0.55"
 description = "Pain001 is a Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Data."
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "pain001-0.0.54-py3-none-any.whl", hash = "sha256:826c03a2d00b826ff122a5ce1692cc03976ab5978b0cc56e924ba54915e619d4"},
-    {file = "pain001-0.0.54.tar.gz", hash = "sha256:02cf48fc775b94e537ba140e2d17a4fd3e0d9c743f14f25cc3de6ad174576f6e"},
+    {file = "pain001-0.0.55-py3-none-any.whl", hash = "sha256:e9aef529d80a6ee9ab4cf86a7fd0e6bc48d249898822fb1be253efa10d0e29b2"},
+    {file = "pain001-0.0.55.tar.gz", hash = "sha256:8fadd451706bb165137226a8627c69f45cb9b76c9926e9d0bd6a152f3c14c5a5"},
 ]
 
 [package.dependencies]
@@ -1068,7 +1068,7 @@ xmlschema = ">=3.4.0,<4.0.0"
 [package.extras]
 api = ["fastapi (>=0.95)", "uvicorn[standard] (>=0.20)"]
 lsp = ["pygls (>=1.3,<2)"]
-mcp = ["mcp (>=1.23,<2)"]
+mcp = ["mcp (>=1.28.1,<2)"]
 parquet = ["pyarrow (>=23.0.1,<25.0.0)"]
 redis = ["redis (>=5,<7)"]
 
@@ -2142,4 +2142,4 @@ docs = ["jinja2", "sphinx", "sphinx_rtd_theme"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "50d4b28f7000ddba42b13c863879cfdf8ed74f15231b70f14db8d4a3e3d388c1"
+content-hash = "37281aad0c59f61b6f41e5114c56c5294de49a8a829faaf4a93414b97c14b150"

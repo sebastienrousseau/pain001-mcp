@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.57] - 2026-07-18
+
+The **security-propagation** cut. Raises the `pain001` floor to pull in
+an upstream security fix; no API changes.
+
+### Changed
+
+- **Require `pain001` >= 0.0.55.** Propagates a security fix released in
+  pain001 0.0.55 by lifting the dependency floor from `>= 0.0.54`. No
+  behavioural change to the 17 tools; the lockfile is regenerated to
+  pin the patched release.
+
 ## [0.0.56] - 2026-07-16
 
 The **LLM-ergonomic generate** cut. Driven by a real Claude Code
