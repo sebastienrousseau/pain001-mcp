@@ -609,6 +609,73 @@ def test_sanitize_to_iso20022_charset_transliterates_accents():
     assert out["sanitised"] != "Café Müller"
 
 
+def test_sanitize_default_charset_matches_swift_x_regression():
+    """Omitting ``charset`` reproduces the pre-existing SWIFT-X behaviour.
+
+    "Café & Résumé" under the basic X set: accents transliterate away and the
+    Z-only ``&`` is dropped to a space (X does not permit ``&``).
+    """
+    out = server.sanitize_to_iso20022_charset("Café & Résumé")
+    explicit_x = server.sanitize_to_iso20022_charset(
+        "Café & Résumé", charset="SWIFT_X"
+    )
+    # Default == explicit SWIFT_X == the underlying library's X sanitiser.
+    assert out == explicit_x
+    assert out["sanitised"] == "Cafe   Resume"
+    assert "&" not in out["sanitised"]
+    assert out["changed"] is True
+    assert out["was_valid"] is False
+
+
+def test_sanitize_swift_x_strips_z_only_character():
+    """Under SWIFT_X, a Z-only character (``@``) is stripped to a space."""
+    out = server.sanitize_to_iso20022_charset("a@b", charset="SWIFT_X")
+    assert out["sanitised"] == "a b"
+    assert "@" not in out["sanitised"]
+    assert out["changed"] is True
+    assert out["was_valid"] is False
+
+
+def test_sanitize_swift_z_preserves_z_only_but_strips_outside_both():
+    """SWIFT_Z keeps the Z-only ``@`` yet still drops chars outside both sets.
+
+    The accented ``é`` (outside both X and Z) transliterates to ``e``; the
+    emoji (outside both) is replaced with a space; the Z-only ``@`` and ``&``
+    survive because the Z set permits them.
+    """
+    out = server.sanitize_to_iso20022_charset(
+        "a@b & café \U0001f600", charset="SWIFT_Z"
+    )
+    assert "@" in out["sanitised"]
+    assert "&" in out["sanitised"]
+    assert out["sanitised"] == "a@b & cafe  "
+    assert "\U0001f600" not in out["sanitised"]
+    assert out["changed"] is True
+    assert out["was_valid"] is False
+
+
+def test_sanitize_swift_z_passthrough_for_clean_extended_input():
+    """A value already inside the Z set round-trips unchanged under SWIFT_Z."""
+    out = server.sanitize_to_iso20022_charset(
+        "A&B @ #1 (x_y)", charset="SWIFT_Z"
+    )
+    assert out == {
+        "value": "A&B @ #1 (x_y)",
+        "sanitised": "A&B @ #1 (x_y)",
+        "was_valid": True,
+        "changed": False,
+    }
+
+
+def test_sanitize_return_shape_is_stable_across_charsets():
+    """Both charsets return the same 4-key dict shape (no schema drift)."""
+    keys = {"value", "sanitised", "was_valid", "changed"}
+    x_out = server.sanitize_to_iso20022_charset("test", charset="SWIFT_X")
+    z_out = server.sanitize_to_iso20022_charset("test", charset="SWIFT_Z")
+    assert set(x_out) == keys
+    assert set(z_out) == keys
+
+
 # ---------------------------------------------------------------------------
 # New in v0.0.55: convert_mt101 (legacy SWIFT MT101 -> pain.001 records)
 # ---------------------------------------------------------------------------

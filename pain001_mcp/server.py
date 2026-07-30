@@ -55,8 +55,9 @@ The server communicates over stdio (FastMCP's default transport).
 import csv
 import io
 import json
+import unicodedata
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Literal
 
 from jsonschema import Draft7Validator
 from mcp.server.fastmcp import FastMCP
@@ -75,6 +76,7 @@ from pain001.csv.load_csv_data import load_csv_data
 from pain001.exceptions import Pain001Error
 from pain001.migration import VersionMapper
 from pain001.validation import validate_bic, validate_iban
+from pain001.validation.charset import ISO20022_ALLOWED_CHARACTERS
 from pain001.xml.validate_via_xsd import validate_xml_string_via_xsd
 from pain001_loader_mt101.loader import parse_mt101
 from pydantic import Field
@@ -129,6 +131,49 @@ _RECORDS_FIELD_GUIDE = (
     "payment_method defaults to 'TRF' and charge_bearer to 'SLEV'. "
     "IBAN and BIC values are strictly validated and never coerced."
 )
+
+# SWIFT extended ("Z") character set. The pain001 library only implements the
+# SWIFT basic ("X") set (``ISO20022_ALLOWED_CHARACTERS``). The Z set is a strict
+# superset that additionally permits the following 13 punctuation characters,
+# per the SWIFT Standards MT General Information character-set definitions:
+#
+#     = ! " % & * < > ; { @ # _
+#
+# (Note: the Z set does NOT include the vertical bar ``|`` or the closing brace
+# ``}`` — a ``}`` in a Z-charset field raises SWIFT error M60.) Deriving the Z
+# set from the library's X set keeps the two in lockstep if pain001 ever revises
+# its base table.
+_SWIFT_Z_EXTRA_CHARACTERS: frozenset[str] = frozenset('=!"%&*<>;{@#_')
+_SWIFT_Z_ALLOWED_CHARACTERS: frozenset[str] = (
+    ISO20022_ALLOWED_CHARACTERS | _SWIFT_Z_EXTRA_CHARACTERS
+)
+
+
+def _sanitize_to_swift_z(value: str, replacement: str = " ") -> str:
+    """Transliterate ``value`` into the SWIFT extended ("Z") character set.
+
+    Mirrors :func:`pain001.sanitize_to_charset` (NFKD-decompose, drop combining
+    marks, then replace anything outside the permitted set) but validates
+    against the wider SWIFT Z set rather than the basic X set, so extended
+    punctuation such as ``@``, ``&`` and ``_`` survives.
+
+    Args:
+        value: The text to transliterate.
+        replacement: The string substituted for characters that are outside
+            the Z set even after transliteration (default: a single space).
+
+    Returns:
+        A string containing only SWIFT Z permitted characters.
+    """
+    decomposed = unicodedata.normalize("NFKD", value)
+    stripped = "".join(
+        ch for ch in decomposed if not unicodedata.combining(ch)
+    )
+    return "".join(
+        ch if ch in _SWIFT_Z_ALLOWED_CHARACTERS else replacement
+        for ch in stripped
+    )
+
 
 server = FastMCP("pain001")
 # FastMCP does not expose a version kwarg; without this override the
@@ -922,27 +967,53 @@ def sanitize_to_iso20022_charset(
             )
         ),
     ],
+    charset: Annotated[
+        Literal["SWIFT_X", "SWIFT_Z"],
+        Field(
+            description=(
+                "Which SWIFT character set to sanitise against. 'SWIFT_X' "
+                "(default) is the basic set permitted in most ISO 20022 / "
+                "pain.001 fields: letters, digits, space and the punctuation "
+                "/ - ? : ( ) . , ' + . 'SWIFT_Z' is the extended superset that "
+                'additionally allows = ! " % & * < > ; { @ # _ (used in '
+                "narrative / envelope fields); it does NOT allow | or }. Pick "
+                "SWIFT_Z only when the target field is documented as Z-set."
+            )
+        ),
+    ] = "SWIFT_X",
 ) -> dict:
-    """Sanitise one free-text field to the ISO 20022 Latin character set.
+    """Sanitise one free-text field to a SWIFT / ISO 20022 character set.
 
     Use this on a single free-text value (name, remittance info) to
     transliterate accents and drop unsupported symbols before placing it in
     a record, and to see whether the value changed. Operates on one string;
     to check a whole batch's rulebook compliance use ``validate_payment_scheme``.
 
-    Wraps :func:`pain001.sanitize_to_charset`. Transliterates accents
-    (``é`` -> ``e``), removes unsupported symbols, and returns both
-    the cleaned string and a flag for whether the original was
-    already valid - useful for surfacing the change to the user
-    before writing it back to a record.
+    Two character sets are supported via ``charset``:
+
+    * ``"SWIFT_X"`` (default, backward-compatible) - the basic set used in
+      most ISO 20022 / pain.001 fields. Delegates to
+      :func:`pain001.sanitize_to_charset`.
+    * ``"SWIFT_Z"`` - the SWIFT extended set, a strict superset of X that also
+      permits ``= ! " % & * < > ; { @ # _`` (used in narrative / envelope
+      fields). It does not permit ``|`` or ``}``.
+
+    In both cases accents are transliterated (``é`` -> ``e``) and any remaining
+    out-of-set character is replaced with a space. The result includes flags
+    for whether the original was already valid and whether it changed - useful
+    for surfacing the change to the user before writing it back to a record.
 
     Args:
         value: The text to sanitise.
+        charset: ``"SWIFT_X"`` (default) or ``"SWIFT_Z"``.
 
     Returns:
         ``{"value": str, "sanitised": str, "was_valid": bool, "changed": bool}``.
     """
-    cleaned = sanitize_to_charset(value)
+    if charset == "SWIFT_Z":
+        cleaned = _sanitize_to_swift_z(value)
+    else:
+        cleaned = sanitize_to_charset(value)
     return {
         "value": value,
         "sanitised": cleaned,
