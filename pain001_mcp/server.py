@@ -49,7 +49,7 @@ Launching the server:
           }
         }
 
-The server communicates over stdio (FastMCP's default transport).
+The server communicates over stdio (MCPServer's default transport).
 """
 
 import csv
@@ -60,7 +60,6 @@ from pathlib import Path
 from typing import Annotated, Literal
 
 from jsonschema import Draft7Validator
-from mcp.server.fastmcp import FastMCP
 from mcp.types import ToolAnnotations
 from pain001 import (
     canonicalize_payment_record,
@@ -82,6 +81,7 @@ from pain001_loader_mt101.loader import parse_mt101
 from pydantic import Field
 
 from pain001_mcp import __version__
+from pain001_mcp._mcp_compat import build_server
 
 # Bare family names accepted as ergonomic aliases for a concrete version:
 # agents routinely say "pain.001" (the catalogue name) rather than a full
@@ -175,11 +175,7 @@ def _sanitize_to_swift_z(value: str, replacement: str = " ") -> str:
     )
 
 
-server = FastMCP("pain001")
-# FastMCP does not expose a version kwarg; without this override the
-# MCP SDK's own version leaks into serverInfo.version, breaking
-# manifest/runtime coherence checks (e.g. Glama scoring).
-server._mcp_server.version = __version__
+server = build_server("pain001", __version__)
 
 # Shared MCP tool annotations. Every tool in this server is a pure,
 # side-effect-free reader over the pain001 API, so all are marked
@@ -191,13 +187,23 @@ server._mcp_server.version = __version__
 #
 # These hints let MCP clients (and the Glama quality grader) reason about
 # safety, caching, and auto-approval without executing the tool.
-_PURE_READ = ToolAnnotations(
+# camelCase is deliberate: mcp 1.x names these fields
+# `readOnlyHint` etc.; 2.x renamed them to snake_case and kept
+# camelCase as aliases. camelCase is the only spelling correct on
+# both majors -- snake_case on 1.x lands in an extra attribute and
+# silently leaves the real field None. mypy resolves against 2.x.
+_PURE_READ = ToolAnnotations(  # type: ignore[call-arg]
     readOnlyHint=True,
     destructiveHint=False,
     idempotentHint=True,
     openWorldHint=False,
 )
-_FS_READ = ToolAnnotations(
+# camelCase is deliberate: mcp 1.x names these fields
+# `readOnlyHint` etc.; 2.x renamed them to snake_case and kept
+# camelCase as aliases. camelCase is the only spelling correct on
+# both majors -- snake_case on 1.x lands in an extra attribute and
+# silently leaves the real field None. mypy resolves against 2.x.
+_FS_READ = ToolAnnotations(  # type: ignore[call-arg]
     readOnlyHint=True,
     destructiveHint=False,
     idempotentHint=True,
@@ -941,9 +947,7 @@ def validate_xml_against_schema(
             return {"error": f"No XSD bundled for {message_type}"}
         try:
             ok = validate_xml_string_via_xsd(xml_content, str(xsd))
-        except (
-            Exception
-        ) as exc:  # pragma: no cover - underlying API returns False, not raises
+        except Exception as exc:  # pragma: no cover - underlying API returns False, not raises
             return {
                 "valid": False,
                 "message_type": message_type,
