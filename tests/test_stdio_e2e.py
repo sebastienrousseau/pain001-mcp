@@ -5,7 +5,7 @@
 
 """End-to-end stdio regression for ``pain001-mcp``.
 
-The fast in-process suite covers the FastMCP dispatch layer, but only a
+The fast in-process suite covers the MCPServer dispatch layer, but only a
 real subprocess exercises the JSON-RPC stdio framing, the ``initialize``
 handshake, and the entry-point wiring as a real MCP client would see it.
 This test drives the official MCP Python ``ClientSession`` so the

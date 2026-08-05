@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pain001-mcp"
-version = "0.0.58"
+version = "0.0.59"
 description = "Model Context Protocol (MCP) server exposing the pain001 ISO 20022 Customer Credit Transfer Initiation library as agent tools."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
 license = "Apache-2.0"
@@ -18,7 +18,7 @@ pain001-mcp = "pain001_mcp.server:main"
 python = ">=3.10,<4.0"
 pain001 = ">=0.0.55"
 pain001-loader-mt101 = ">=0.0.1"
-mcp = ">=1.2,<2"
+mcp = ">=1.2,<3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=9.0.3,<10.0.0"
@@ -110,6 +110,14 @@ exclude = [
     ".venv/",
     ".eggs/",
 ]
+
+# The MCP server object comes from _mcp_compat, which returns either
+# mcp 2.x's MCPServer or mcp 1.x's FastMCP and is therefore typed Any,
+# so @server.tool()/@server.resource() read as untyped decorators. The
+# decorated functions themselves are fully annotated.
+[[tool.mypy.overrides]]
+module = "pain001_mcp.server"
+disallow_untyped_decorators = false
 
 [[tool.mypy.overrides]]
 module = "mcp.*"

@@ -23,9 +23,12 @@ import pytest
 
 pytest.importorskip("mcp")
 
-from mcp.server.fastmcp import FastMCP  # noqa: E402
-
 import pain001_mcp.server as server  # noqa: E402
+from pain001_mcp._mcp_compat import (
+    MCPServer,  # noqa: E402
+    result_content,
+    result_structured,
+)
 
 EXPECTED_TOOLS = {
     "list_message_types",
@@ -51,7 +54,7 @@ EXPECTED_TOOLS = {
 
 
 def _registered_tool_names() -> set[str]:
-    """Return the names of every tool registered on the FastMCP server.
+    """Return the names of every tool registered on the MCPServer server.
 
     Prefers the synchronous ``_tool_manager.list_tools()`` introspection;
     falls back to the async ``list_tools()`` API if unavailable.
@@ -67,8 +70,8 @@ def _registered_tool_names() -> set[str]:
 # Server module wiring
 # ---------------------------------------------------------------------------
 def test_server_and_main_are_well_formed():
-    """The module exposes a FastMCP server and a callable ``main``."""
-    assert isinstance(server.server, FastMCP)
+    """The module exposes a MCPServer server and a callable ``main``."""
+    assert isinstance(server.server, MCPServer)
     assert callable(server.main)
 
 
@@ -252,17 +255,20 @@ def test_parse_pain002_parses_bundled_sample():
 
 
 # ---------------------------------------------------------------------------
-# FastMCP dispatch layer (end-to-end through the protocol surface)
+# MCPServer dispatch layer (end-to-end through the protocol surface)
 # ---------------------------------------------------------------------------
 def test_call_tool_through_fastmcp():
-    """Tools are invocable through the FastMCP dispatch layer."""
+    """Tools are invocable through the MCPServer dispatch layer."""
 
     async def go():
         result = await server.server.call_tool(
             "validate_identifier",
             {"kind": "iban", "value": "DE89370400440532013000"},
         )
-        block = result[0] if isinstance(result, list | tuple) else result
+        # 2.x returns a CallToolResult (read .content); 1.x returned
+        # the content list, or a (content, structured) tuple.
+        content = result_content(result)
+        block = content[0] if isinstance(content, list | tuple) else content
         text = getattr(block, "text", None)
         if text is None and isinstance(result, tuple):
             text = json.dumps(result[1])
@@ -273,18 +279,24 @@ def test_call_tool_through_fastmcp():
 
 
 def test_call_tool_list_supported_formats_through_fastmcp():
-    """``list_supported_formats`` dispatches through FastMCP and serializes."""
+    """``list_supported_formats`` dispatches through MCPServer and serializes."""
 
     async def go():
         result = await server.server.call_tool("list_supported_formats", {})
-        block = result[0] if isinstance(result, list | tuple) else result
-        text = getattr(block, "text", None)
-        if text is None and isinstance(result, tuple):
-            text = json.dumps(result[1])
-        return json.loads(text)
+        # 2.x returns a CallToolResult (read .content); 1.x returned
+        # the content list, or a (content, structured) tuple.
+        # Prefer the structured payload: 2.x emits one content block per
+        # item for a list return, where 1.x emitted a single JSON array,
+        # so parsing block[0] gives different answers per major.
+        structured = result_structured(result)
+        if structured is not None:
+            return structured
+        content = result_content(result)
+        block = content[0] if isinstance(content, list | tuple) else content
+        return json.loads(block.text)
 
     payload = asyncio.run(go())
-    # Newer FastMCP wraps list returns in ``{"result": [...]}`` when
+    # Newer MCPServer wraps list returns in ``{"result": [...]}`` when
     # serializing; older versions return the raw list. Accept both.
     items = payload["result"] if isinstance(payload, dict) else payload
     assert isinstance(items, list)

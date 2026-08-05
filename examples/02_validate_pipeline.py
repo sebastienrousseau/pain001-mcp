@@ -34,9 +34,7 @@ incomplete_record = {
 def main() -> None:
     """Demonstrate a validate-then-fix loop."""
     required = get_required_fields(MESSAGE_TYPE)
-    missing = [
-        field for field in required if field not in incomplete_record
-    ]
+    missing = [field for field in required if field not in incomplete_record]
     print(f"missing required fields: {len(missing)} (first 5: {missing[:5]})")
 
     report = validate_records(MESSAGE_TYPE, [incomplete_record])
