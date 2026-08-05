@@ -947,7 +947,9 @@ def validate_xml_against_schema(
             return {"error": f"No XSD bundled for {message_type}"}
         try:
             ok = validate_xml_string_via_xsd(xml_content, str(xsd))
-        except Exception as exc:  # pragma: no cover - underlying API returns False, not raises
+        except (
+            Exception
+        ) as exc:  # pragma: no cover - underlying API returns False, not raises
             return {
                 "valid": False,
                 "message_type": message_type,
