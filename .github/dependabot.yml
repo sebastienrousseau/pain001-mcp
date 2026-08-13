@@ -14,7 +14,6 @@ updates:
       - "automated"
     commit-message:
       prefix: "chore(deps):"
-      prefix-scope: "dependencies"
       include: "scope"
     allow:
       - dependency-type: "direct"
@@ -35,6 +34,10 @@ updates:
     labels:
       - "ci/cd"
       - "automated"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
 
   - package-ecosystem: "docker"
     directory: "/"
