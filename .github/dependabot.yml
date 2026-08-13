@@ -35,6 +35,10 @@ updates:
     labels:
       - "ci/cd"
       - "automated"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
 
   - package-ecosystem: "docker"
     directory: "/"
