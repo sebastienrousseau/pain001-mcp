@@ -96,7 +96,7 @@ RECORD: dict[str, object] = {
     "remittance_info_unstructured": "Info",
     "remittance_information": "REM",
     "requested_execution_date": "2023-03-15",
-    "service_level_code": "SEPA"
+    "service_level_code": "SEPA",
 }
 
 
@@ -145,8 +145,12 @@ def test_generate_message_batch(benchmark) -> None:
 @pytest.mark.benchmark
 def test_validate_records_scales_linearly() -> None:
     """4x the records must not cost ~16x the validation time."""
-    small = _best_of(lambda: server.validate_records(MESSAGE_TYPE, build_records(50)))
-    large = _best_of(lambda: server.validate_records(MESSAGE_TYPE, build_records(200)))
+    small = _best_of(
+        lambda: server.validate_records(MESSAGE_TYPE, build_records(50))
+    )
+    large = _best_of(
+        lambda: server.validate_records(MESSAGE_TYPE, build_records(200))
+    )
 
     ratio = large / small
     assert ratio < MAX_SCALING_RATIO, (
@@ -159,8 +163,12 @@ def test_validate_records_scales_linearly() -> None:
 @pytest.mark.benchmark
 def test_generate_message_scales_linearly() -> None:
     """4x the records must not cost ~16x the generation time."""
-    small = _best_of(lambda: server.generate_message(MESSAGE_TYPE, build_records(50)))
-    large = _best_of(lambda: server.generate_message(MESSAGE_TYPE, build_records(200)))
+    small = _best_of(
+        lambda: server.generate_message(MESSAGE_TYPE, build_records(50))
+    )
+    large = _best_of(
+        lambda: server.generate_message(MESSAGE_TYPE, build_records(200))
+    )
 
     ratio = large / small
     assert ratio < MAX_SCALING_RATIO, (
