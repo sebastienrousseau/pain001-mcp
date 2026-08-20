@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.60] - 2026-08-20
+
+Lockstep release with `pain001` 0.0.60. No functional change in this
+package.
+
+`pain001-mcp` is a lockstep member of the suite: its version tracks the
+core so an operator can pair `pain001-mcp==X` with `pain001==X` without
+consulting a table. `pain001.suite` records which members follow that
+rule and `scripts/check_suite_consistency.py` in the core enforces it
+daily; leaving this package at 0.0.59 against a 0.0.60 core would open
+the same drift that check exists to catch.
+
+The `pain001>=0.0.55` floor is deliberately unchanged. The core's 0.0.60
+changes are the SPDX licence headers, the plugin registration of the
+bundled schemes and writer, and a pygls 1.x -> 2.x migration confined to
+`pain001.lsp.server` — none of which this package imports. It uses
+`pain001.async_adapter` and `pain001.constants`, whose public surface is
+byte-identical between 0.0.59 and 0.0.60 apart from the version string.
+Raising a floor without a reason only narrows what users can resolve.
+
 ## [0.0.59] - 2026-08-20
 
 Lockstep release with `pain001` 0.0.59. Brings this package back into
