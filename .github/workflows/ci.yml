@@ -45,7 +45,7 @@ jobs:
             pip install "pain001>=0.0.54,<0.0.55"
           fi
           pip install -e .
-          pip install pytest pytest-cov interrogate
+          pip install pytest pytest-cov pytest-benchmark interrogate
 
       - name: Run tests with the 100% coverage gate
         run: |
@@ -57,6 +57,20 @@ jobs:
 
       - name: Enforce 100% docstring coverage
         run: interrogate -c pyproject.toml pain001_mcp
+
+      # The scaling guards compare each tool against itself at two batch
+      # sizes, so they do not depend on how fast this runner is.
+      - name: Benchmarks and scaling guards
+        run: |
+          mkdir -p .benchmarks
+          pytest tests/test_benchmarks.py -v --no-cov \
+            --benchmark-json=.benchmarks/results.json
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmarks-py${{ matrix.python-version }}
+          path: .benchmarks/
 
       - name: Upload coverage XML
         if: matrix.python-version == '3.12'
