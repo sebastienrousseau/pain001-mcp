@@ -57,5 +57,29 @@ jobs:
       - name: Authenticate to MCP Registry (GitHub OIDC)
         run: ./mcp-publisher login github-oidc
 
+      # The registry validates that the PyPI release exists before it will
+      # accept the server entry, and PyPI's index is not read-your-writes.
+      # v0.0.60 failed here with a 400: "PyPI package 'pain001-mcp' exists,
+      # but version '0.0.60' was not found (status: 404) ... Wait and
+      # retry". The release itself was fine; only this job failed, and a
+      # manual re-run cleared it. Wait for the version to be visible rather
+      # than leaving that to chance on every release.
+      - name: Wait for the release to appear on PyPI
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          for attempt in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' \
+              "https://pypi.org/pypi/pain001-mcp/${VERSION}/json")
+            if [ "$code" = "200" ]; then
+              echo "pain001-mcp ${VERSION} is visible on PyPI (attempt ${attempt})"
+              exit 0
+            fi
+            echo "attempt ${attempt}: PyPI returned ${code}, retrying in 10s"
+            sleep 10
+          done
+          echo "::error::pain001-mcp ${VERSION} did not appear on PyPI within 5 minutes"
+          exit 1
+
       - name: Publish to MCP Registry
         run: ./mcp-publisher publish
