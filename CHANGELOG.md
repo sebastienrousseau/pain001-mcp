@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.59] - 2026-08-20
+
+Lockstep release with `pain001` 0.0.59. Brings this package back into
+line with the core: it had been published at 0.0.58 against a 0.0.59
+core, which is the drift `pain001`'s suite-consistency check now
+reports.
+
+### Fixed
+
+- `cryptography` moved to 50.0.0, taking the patched release for the
+  high-severity advisory (#34).
+
+### Added
+
+- SWIFT-Z charset option in the charset sanitizer (#22).
+
+### Changed
+
+- Dependency updates: `cyclonedx-bom` 7.3.1, `ruff` 0.16.2, `mypy`
+  2.3.0, `pain001-loader-mt101` 0.0.2, the base image to
+  `python:3.14-slim`, and the grouped GitHub Actions bump (#28-#33).
+- Dependabot config repaired — an invalid key meant github-actions
+  updates were never grouped (#27).
+
+## [0.0.58] - 2026-07-30
+
+Backfilled: released and tagged without a changelog entry at the time.
+
+### Changed
+
+- Consolidated dependency updates (#25), and the `poetry.lock`
+  regeneration after the `mcp<2` cap.
+
 ## [0.0.57] - 2026-07-18
 
 The **security-propagation** cut. Raises the `pain001` floor to pull in
