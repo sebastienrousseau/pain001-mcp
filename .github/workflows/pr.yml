@@ -31,7 +31,7 @@ jobs:
             pip install "pain001>=0.0.54,<0.0.55"
           fi
           pip install -e .
-          pip install pytest pytest-cov interrogate ruff black mypy types-jsonschema
+          pip install pytest pytest-cov pytest-benchmark interrogate ruff black mypy types-jsonschema
 
       - name: Lint
         run: |
