@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **The `pain001` floor moves to `>=0.0.62`**, matching this package's
+  own version. Nothing here requires 0.0.62 — the `fast` extra it
+  depends on has existed since 0.0.61 — so this is alignment rather than
+  a technical requirement: the suite ships one version number, and a
+  member requiring an older core than it ships reads as an
+  inconsistency even when it resolves fine.
+
+  The trade is that anyone installing this package now takes `pain001`
+  0.0.62 or newer rather than 0.0.61 or newer. Both are already
+  published together, so in practice nobody is narrowed by it.
+
+  Takes effect in the next release; 0.0.62 shipped with `>=0.0.61`.
+
 ## [0.0.62] - 2026-08-21
 
 ### Performance
