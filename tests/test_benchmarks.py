@@ -14,12 +14,15 @@ Measured here, both tools are linear -- 4x the records costs ~4.2x for
 ``validate_records`` and ~3.5x for ``generate_message`` -- so the
 ceiling is 8 against ~16 for quadratic.
 
-One thing deliberately *not* benchmarked: ``_load_schema`` re-reads and
-re-parses the bundled JSON Schema on every call, which looks like an
-obvious caching win. Measured, it costs 0.18ms against ~15ms for a
-200-record ``generate_message`` -- roughly 1% of the work, and it was
-0.2% before the core got faster. Still not worth trading for a
-cache-invalidation question nobody needs to answer.
+The read-only tools are benchmarked separately below. ``_load_schema``
+used to re-read and re-parse the bundled JSON Schema on every call, and
+an earlier version of this file argued that was fine because the load
+costs 0.18ms against ~92ms for a 200-record ``generate_message`` -- 0.2%
+of the work.
+
+That compared it against the wrong tool. ``get_required_fields`` and
+``get_input_schema`` do essentially nothing *but* load the schema, and a
+model exploring the server calls them repeatedly. It is now cached.
 
 ``generate_message`` is dominated by XSD validation inside ``pain001``.
 pain001 0.0.61 cut that sharply by using libxml2 when ``lxml`` is
@@ -183,3 +186,59 @@ def test_generate_message_scales_linearly() -> None:
         f"({large * 1000:.0f}ms vs {small * 1000:.0f}ms); measured "
         f"behaviour is linear at ~3.4x"
     )
+
+
+class TestReadOnlyTools:
+    """The cheap discovery tools a model calls while exploring.
+
+    These do almost nothing beyond loading the bundled JSON Schema, so
+    before it was cached they all measured the same ~0.08ms: the file
+    read, not the tool.
+
+        get_required_fields   0.0788ms -> 0.0002ms  (475x)
+        get_input_schema      0.0736ms -> 0.0001ms  (888x)
+
+    ``validate_identifier`` and ``list_message_types`` never touch the
+    schema and were unchanged by the cache, which is what makes those
+    two numbers trustworthy rather than a measurement artefact.
+    """
+
+    @pytest.mark.benchmark
+    def test_get_required_fields(self, benchmark) -> None:
+        """Benchmark the required-field lookup."""
+        fields = benchmark(server.get_required_fields, MESSAGE_TYPE)
+
+        assert fields
+
+    @pytest.mark.benchmark
+    def test_get_input_schema(self, benchmark) -> None:
+        """Benchmark returning the input schema."""
+        schema = benchmark(server.get_input_schema, MESSAGE_TYPE)
+
+        assert schema
+
+    @pytest.mark.benchmark
+    def test_the_schema_is_not_reread_per_call(self) -> None:
+        """The schema load must stay cached.
+
+        A wall-clock threshold cannot guard this: the calls are now
+        sub-microsecond, so any bound loose enough for CI would not
+        notice the cache being removed. The property that matters is
+        that repeated calls do not go back to disk.
+        """
+        server._load_schema.cache_clear()
+
+        server.get_required_fields(MESSAGE_TYPE)
+        first = server._load_schema.cache_info()
+
+        for _ in range(50):
+            server.get_required_fields(MESSAGE_TYPE)
+            server.get_input_schema(MESSAGE_TYPE)
+
+        later = server._load_schema.cache_info()
+
+        assert later.misses == first.misses, (
+            f"_load_schema went to disk {later.misses - first.misses} extra "
+            f"times across 100 tool calls - the cache is gone"
+        )
+        assert later.hits > first.hits
