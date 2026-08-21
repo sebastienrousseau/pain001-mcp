@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.62] - 2026-08-21
+
+### Performance
+
+- **The bundled JSON Schema is cached.** `_load_schema` re-read and
+  re-parsed it on every call, and the read-only discovery tools do
+  essentially nothing else:
+
+  | tool | before | after |
+  |---|---|---|
+  | `get_required_fields` | 0.0788ms | **0.0002ms** (475x) |
+  | `get_input_schema` | 0.0736ms | **0.0001ms** (888x) |
+
+  `validate_identifier` and `list_message_types` never touch the schema
+  and are unchanged, which is the control that makes those numbers a
+  real effect rather than a measurement artefact.
+
+  **This corrects a decision from 0.0.61**, where the load was left
+  uncached because it costs 0.18ms against ~92ms for a 200-record
+  `generate_message` — 0.2% of the work. The arithmetic was right and
+  the comparison was wrong: `generate_message` is not what those
+  milliseconds are a fraction of when a model is calling the discovery
+  tools repeatedly.
+
+### Added
+
+- **Benchmarks for the read-only tools**, plus a guard asserting the
+  schema is not re-read across repeated calls. At sub-microsecond scale
+  a wall-clock threshold cannot detect the cache being deleted; the
+  cache-info assertion can.
+
 ## [0.0.61] - 2026-08-20
 
 Suite release with `pain001` 0.0.61.
