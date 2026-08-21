@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.61] - 2026-08-20
+
+Suite release with `pain001` 0.0.61.
+
+### Performance
+
+- **`generate_message` is ~6x faster.** pain001 0.0.61 validates
+  generated XML with libxml2 when `lxml` is installed, and XSD
+  validation was 93% of generation cost.
+
+  | | before | after |
+  |---|---|---|
+  | `generate_message`, 200 records | 93.3ms | **15.4ms** |
+
+### Changed
+
+- **Depends on `pain001[fast]`** rather than plain `pain001`. The
+  speed-up above only happens when `lxml` is present, and an MCP server
+  answering repeated tool calls is exactly the workload that wants it —
+  leaving it to whatever happens to be installed would mean a server
+  silently running 6x slower. Measured both ways to confirm that is what
+  the extra buys.
+
+- **The `pain001` floor moves to `>=0.0.61`,** because the `fast` extra
+  does not exist before then. This is a deliberate raise, not routine
+  churn: an extra that the pinned version does not provide installs
+  quietly without it.
+
 ## [0.0.60] - 2026-08-20
 
 Lockstep release with `pain001` 0.0.60. No functional change in this
