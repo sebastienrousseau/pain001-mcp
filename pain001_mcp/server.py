@@ -56,6 +56,7 @@ import csv
 import io
 import json
 import unicodedata
+from functools import lru_cache
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -272,8 +273,25 @@ def _schema_path(message_type: str) -> Path:
     return Path(SCHEMAS_DIR) / f"{message_type}.schema.json"
 
 
+@lru_cache(maxsize=16)
 def _load_schema(message_type: str) -> dict:
-    """Load the bundled JSON Schema for ``message_type`` (raises on miss)."""
+    """Load the bundled JSON Schema for ``message_type`` (raises on miss).
+
+    Cached. The schemas ship inside the installed package and are
+    read-only, so re-reading them cannot pick up a change.
+
+    This was previously left uncached on the grounds that the load costs
+    0.18ms against ~92ms for a 200-record ``generate_message`` — 0.2% of
+    the work. That compared it against the wrong tool. The read-only
+    tools do essentially nothing else, and a model exploring the server
+    calls them repeatedly:
+
+        get_required_fields   0.0788ms -> 0.0002ms  (475x)
+        get_input_schema      0.0736ms -> 0.0001ms  (888x)
+
+    ``validate_identifier`` and ``list_message_types`` do not touch the
+    schema and are unchanged, which is the control for those numbers.
+    """
     message_type = _check_message_type(message_type)
     path = _schema_path(message_type)
     if not path.is_file():  # pragma: no cover - all valid types ship a schema
