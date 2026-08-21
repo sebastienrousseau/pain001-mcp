@@ -10,20 +10,27 @@ rather than using a wall-clock threshold: a slow or noisy runner scales
 both halves equally, so the ratio holds where an absolute number would
 have to be loose enough to be useless.
 
-Measured here, both tools are linear -- 4x the records costs 4.28x for
-``validate_records`` and 3.35x for ``generate_message`` -- so the
+Measured here, both tools are linear -- 4x the records costs ~4.2x for
+``validate_records`` and ~3.5x for ``generate_message`` -- so the
 ceiling is 8 against ~16 for quadratic.
 
 One thing deliberately *not* benchmarked: ``_load_schema`` re-reads and
 re-parses the bundled JSON Schema on every call, which looks like an
-obvious caching win. Measured, it costs 0.18ms, against 92ms for a
-200-record ``generate_message``. Caching it would be optimising 0.2% of
-the work, so it is left alone rather than traded for a cache-invalidation
-question nobody needs to answer.
+obvious caching win. Measured, it costs 0.18ms against ~15ms for a
+200-record ``generate_message`` -- roughly 1% of the work, and it was
+0.2% before the core got faster. Still not worth trading for a
+cache-invalidation question nobody needs to answer.
 
-Most of ``generate_message`` is XSD validation inside ``pain001``, which
-is where the time genuinely goes; that is a core concern rather than
-something this package controls.
+``generate_message`` is dominated by XSD validation inside ``pain001``.
+pain001 0.0.61 cut that sharply by using libxml2 when ``lxml`` is
+installed, and this package now depends on ``pain001[fast]`` so a server
+gets it by default:
+
+    200-record generate_message   93.3ms -> 15.4ms  (6x)
+
+Without that extra the pure-Python validator is used and the figure goes
+back to ~93ms, which is why the dependency is declared rather than left
+to whatever happens to be in the environment.
 """
 
 from __future__ import annotations
