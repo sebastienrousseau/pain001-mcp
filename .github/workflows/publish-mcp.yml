@@ -81,5 +81,28 @@ jobs:
           echo "::error::pain001-mcp ${VERSION} did not appear on PyPI within 5 minutes"
           exit 1
 
+      # Retry the publish itself rather than trying to predict when the
+      # registry will be able to see the release.
+      #
+      # There are already two "wait for PyPI" steps above, and v0.0.61
+      # still failed: both polled PyPI's JSON API, which served the new
+      # version immediately ("visible on PyPI (attempt 1)"), while the
+      # registry's own lookup still 404'd for another few minutes. The
+      # JSON API is simply not a proxy for what the registry sees, so no
+      # amount of polling it makes this reliable.
+      #
+      # Retrying the operation that has to succeed does. A manual re-run
+      # of this job, unchanged, has been what fixed it every time.
       - name: Publish to MCP Registry
-        run: ./mcp-publisher publish
+        run: |
+          set -uo pipefail
+          for attempt in $(seq 1 10); do
+            if ./mcp-publisher publish; then
+              echo "Published on attempt ${attempt}"
+              exit 0
+            fi
+            echo "Attempt ${attempt} failed; retrying in 30s"
+            sleep 30
+          done
+          echo "::error::mcp-publisher still failing after 10 attempts (5 minutes)"
+          exit 1
