@@ -16,7 +16,7 @@ pain001-mcp = "pain001_mcp.server:main"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
-pain001 = {version = ">=0.0.61", extras = ["fast"]}
+pain001 = {version = ">=0.0.62", extras = ["fast"]}
 pain001-loader-mt101 = ">=0.0.1"
 mcp = ">=1.2,<3"
 
