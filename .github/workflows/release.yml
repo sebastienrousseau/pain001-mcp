@@ -117,6 +117,17 @@ jobs:
       - name: Install Poetry (hash-pinned)
         run: pip install --require-hashes -r requirements/build.txt
 
+      # Fail here, loudly, rather than partway through an install log.
+      # CI gates this on every PR now, so reaching a tag with a stale
+      # lock should be impossible — but a tag can be pushed by hand, and
+      # this is the last point before anything is published.
+      - name: Verify poetry.lock is current
+        run: |
+          if ! poetry check --lock; then
+            echo "::error::poetry.lock is stale — run 'poetry lock', commit, and re-tag."
+            exit 1
+          fi
+
       - name: Install runtime dependencies
         run: poetry install --no-interaction --only main
 
