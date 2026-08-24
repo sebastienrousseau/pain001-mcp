@@ -1356,21 +1356,21 @@ redis = ["redis (>=8.1.0,<9)"]
 
 [[package]]
 name = "pain001-loader-mt101"
-version = "0.0.2"
+version = "0.0.62"
 description = "Convert legacy SWIFT MT101 requests for transfer to ISO 20022 pain.001 flat records."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "pain001_loader_mt101-0.0.2-py3-none-any.whl", hash = "sha256:0cda58030cac253e0e202534cc5d6543c625e98525c6d3cf083b45ee49fbd8b7"},
-    {file = "pain001_loader_mt101-0.0.2.tar.gz", hash = "sha256:b3687a2b54761e0f627dff4fb219cd66d3bcc41451df3e3c5876e01f7f63c2b0"},
+    {file = "pain001_loader_mt101-0.0.62-py3-none-any.whl", hash = "sha256:5c7687bf35edb7881175b68337ea984bb3cb72ee004a18468fce4538a5b407a7"},
+    {file = "pain001_loader_mt101-0.0.62.tar.gz", hash = "sha256:2c68a62a4bc283e69751cee1fc0dab2fc676f08c876080a7a9dcb27ea94b3adb"},
 ]
 
 [package.dependencies]
 pain001 = ">=0.0.55,<1"
 
 [package.extras]
-dev = ["interrogate (>=1.7)", "mypy (>=1.11)", "pytest (>=8)", "pytest-cov (>=5)", "ruff (>=0.6)"]
+dev = ["interrogate (>=1.7)", "mypy (>=1.11)", "pytest (>=8)", "pytest-benchmark (>=5)", "pytest-cov (>=5)", "ruff (>=0.6)"]
 
 [[package]]
 name = "pathspec"
