@@ -38,9 +38,14 @@ jobs:
       - name: Full gate (lint + type + tests + interrogate + bandit + audit)
         run: |
           ruff check pain001_mcp/ tests/
-          black --check pain001_mcp/ tests/
+          black --check pain001_mcp/ tests/ benches/
           mypy pain001_mcp/
           pytest tests/ --cov=pain001_mcp --cov-branch --cov-report=xml --cov-fail-under=100
+          # Not a timing gate -- wall-clock is not comparable between
+          # runners. This proves the benchmark still runs against the
+          # current API rather than rotting into a file that reads as
+          # verified and is not.
+          python benches/bench_generate.py --quick
           interrogate -c pyproject.toml pain001_mcp
           bandit -r pain001_mcp/ -ll
           pip-audit

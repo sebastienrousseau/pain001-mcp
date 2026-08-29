@@ -144,7 +144,7 @@ jobs:
         run: ruff check pain001_mcp/ tests/
 
       - name: Black check
-        run: black --check pain001_mcp/ tests/
+        run: black --check pain001_mcp/ tests/ benches/
 
       - name: Mypy
         run: mypy pain001_mcp/
