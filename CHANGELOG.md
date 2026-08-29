@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.65] - 2026-08-29
+
+Aligns the `pain001` suite on one version number, and adds the scheduled
+drift check this repository was missing.
+
+### Added
+
+- `scripts/check_suite_consistency.py` and a scheduled `Suite
+  Consistency` workflow compare this tree, and every published member of
+  the suite, against PyPI. A member left a release behind still installs
+  and still passes its own tests; only the index disagrees, and only if
+  somebody looks.
+
+### Changed
+
+- Version aligned to `0.0.65` across all five `pain001` packages, which
+  had drifted to `0.0.62`, `0.0.64`, `0.0.63`, `0.0.62` and `0.0.63`.
+- Refreshed the vendored `tests/test_suite_conformance.py` to the
+  current canonical copy. Its drift-check probe now matches the bare
+  word `pypi` rather than the hostname, which CodeQL read as an
+  incomplete URL sanitisation.
+
 ## [0.0.63] - 2026-08-29
 
 Brings this repository onto the **suite conformance gate**.
