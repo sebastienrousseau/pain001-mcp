@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.63] - 2026-08-29
+
+Brings this repository onto the **suite conformance gate**.
+
+### Added
+
+- **`benches/bench_generate.py`** — a payroll run is thousands of
+  records submitted once, under a cut-off, by a job that must not still
+  be running when the window closes.
+
+  **Generation is linear** once the fixed per-call cost has amortised:
+  `us/record` settles around 15–25 us, and the one-record row is almost
+  entirely fixed cost rather than a scaling signal.
+
+  **`validate_records` costs up to 4.6x `generate_message`** — and that
+  is worth a second look. `generate_message` XSD-validates its own output
+  before returning, so the standalone validator being several times
+  dearer means the two are not doing the same work. Either the extra is
+  checking something generation does not, or there is a cheaper path
+  being missed. Nothing is changed here; the ratio is now measured and
+  watched.
+
+  The **cold-start** cost is reported separately, measured in a fresh
+  interpreter, because the XSD compiles once per process and a mean hides
+  it entirely.
+
+  Nothing asserts a timing threshold — wall-clock is not comparable
+  between machines, and a flaky performance gate teaches people to ignore
+  red. CI runs `--quick`, so a benchmark that stops compiling fails the
+  build rather than rotting into a file that reads as verified.
+
+- **`tests/test_suite_conformance.py`** — invariants shared by every
+  repository in the suite, vendored from one canonical copy and
+  checksummed by its own test.
+
+### Changed
+
+- CI lints, formats and runs `benches/` alongside everything else.
+- `tomli` (on 3.10) and `packaging` are named as dev dependencies; the
+  conformance gate parses `pyproject.toml` and needs both.
+- `tests/test_suite_conformance.py` is excluded from black: it is
+  generated, and the suite uses three different line lengths.
+
 ## [Unreleased]
 
 ### Changed

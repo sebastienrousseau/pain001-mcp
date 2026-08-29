@@ -36,7 +36,7 @@ jobs:
       - name: Lint
         run: |
           ruff check pain001_mcp/ tests/
-          black --check pain001_mcp/ tests/
+          black --check pain001_mcp/ tests/ benches/
 
       - name: Type check
         run: mypy pain001_mcp/
