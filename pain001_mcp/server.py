@@ -1210,7 +1210,7 @@ def get_corpus_file(
         Field(
             description=(
                 "An overlay id for the bank variant, e.g. "
-                "'gb.hsbc.priority'; omit for the generic file."
+                "'gb.example.priority'; omit for the generic file."
             )
         ),
     ] = None,

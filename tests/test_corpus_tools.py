@@ -47,12 +47,12 @@ _FILES = [
         "market",
         "pain.001.001.03",
         Path(
-            "gb/priority-payment/gb.chaps.property-purchase__gb.hsbc.priority.pain.001.001.03.xml"
+            "gb/priority-payment/gb.chaps.property-purchase__gb.example.priority.pain.001.001.03.xml"
         ),
         "gb.chaps.property-purchase",
         "GB",
         "priority-payment",
-        "gb.hsbc.priority",
+        "gb.example.priority",
     ),
     _File(
         "market",
@@ -155,7 +155,7 @@ def test_list_corpus_files_filters_by_kind_country_and_version(stub):
     assert server.list_corpus_files(kind="coverage")["count"] == 1
     gb = server.list_corpus_files(country="gb")
     assert gb["count"] == 2
-    assert {f["variant"] for f in gb["files"]} == {None, "gb.hsbc.priority"}
+    assert {f["variant"] for f in gb["files"]} == {None, "gb.example.priority"}
     v09 = server.list_corpus_files(kind="market", version="pain.001.001.09")
     assert [f["scenario_id"] for f in v09["files"]] == ["ch.sps.qr-bill"]
     assert server.list_corpus_files(country="SE")["count"] == 0
@@ -167,10 +167,12 @@ def test_get_corpus_file_returns_xml_for_generic_and_variant(stub):
         "gb.chaps.property-purchase", "pain.001.001.03"
     )
     variant = server.get_corpus_file(
-        "gb.chaps.property-purchase", "pain.001.001.03", "gb.hsbc.priority"
+        "gb.chaps.property-purchase", "pain.001.001.03", "gb.example.priority"
     )
     assert generic["variant"] is None and "__" not in generic["xml"]
-    assert variant["variant"] == "gb.hsbc.priority" and "__" in variant["xml"]
+    assert (
+        variant["variant"] == "gb.example.priority" and "__" in variant["xml"]
+    )
 
 
 def test_get_corpus_file_unknown_returns_error(stub):
