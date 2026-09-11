@@ -276,7 +276,7 @@ The runnable version of this snippet lives in
 [`examples/`](examples/) folder for a validation pipeline
 ([`02_validate_pipeline.py`](examples/02_validate_pipeline.py)) and a
 bank-reply parser walkthrough
-([`03_parse_bank_replies.py`](examples/03_parse_bank_replies.py)).
+([`03_parse_bank_replies.py`](examples/03_parse_bank_replies.py)) and the example-corpus tools ([`04_corpus_tools.py`](examples/04_corpus_tools.py)).
 
 ---
 
