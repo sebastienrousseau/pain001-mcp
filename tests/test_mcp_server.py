@@ -50,6 +50,11 @@ EXPECTED_TOOLS = {
     "sanitize_to_iso20022_charset",
     # New in v0.0.55:
     "convert_mt101",
+    # New in v0.0.68 (example corpus):
+    "list_corpus_files",
+    "get_corpus_file",
+    "get_corpus_provenance",
+    "get_corpus_coverage",
 }
 
 

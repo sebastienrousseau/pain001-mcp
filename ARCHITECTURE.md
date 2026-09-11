@@ -50,7 +50,11 @@ The current MCP surface:
   `generate_message`, `generate_message_async`,
   `generate_message_from_file`, `list_supported_formats`,
   `parse_camt053`, `parse_pain002`, `inspect_template`,
-  `validate_payment_scheme`.
+  `validate_payment_scheme`, `migrate_records`,
+  `validate_xml_against_schema`, `sanitize_to_iso20022_charset`,
+  `convert_mt101`, and the example-corpus four `list_corpus_files`,
+  `get_corpus_file`, `get_corpus_provenance`, `get_corpus_coverage`
+  (pain001 >= 0.0.67, else a clear error payload).
 - **Resources** - `pain001://schema/{message_type}` (returns the bundled
   XSD text).
 - **Prompts** - `build_payment_batch(message_type=...)` (guided

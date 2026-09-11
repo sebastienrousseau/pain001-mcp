@@ -72,6 +72,17 @@ Brings this repository onto the **suite conformance gate**.
 
 ## [Unreleased]
 
+### Added
+
+- **Example corpus tools.** `list_corpus_files`, `get_corpus_file`,
+  `get_corpus_provenance` and `get_corpus_coverage` expose the corpus
+  that ships in pain001 from 0.0.67: realistic market scenarios per
+  country and rail (with bank variants), the schema coverage sets, each
+  file's provenance sidecar and each edition's coverage verdict. They
+  delegate to `pain001.corpus`; with an older pain001 they return an
+  `{"error": ...}` payload rather than failing at import, so the
+  dependency floor is unchanged until the suite bumps together.
+
 ### Changed
 
 - **The `pain001` floor moves to `>=0.0.62`**, matching this package's

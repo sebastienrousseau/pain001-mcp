@@ -37,7 +37,7 @@
 
 **Library reference**
 
-- [Tools](#tools) — the 17 tools, one resource, one prompt
+- [Tools](#tools) — the 21 tools, one resource, one prompt
 - [Using the tools](#using-the-tools) — call them in-process from Python
 - [The pain001 suite](#the-pain001-suite) — core lib, MCP server, LSP server
 
@@ -119,7 +119,7 @@ Register the server with any MCP client (Claude Desktop shown):
 }
 ```
 
-That's it. Restart the client and the 17 tools are available to the
+That's it. Restart the client and the 21 tools are available to the
 agent. To check the server starts cleanly before wiring an editor:
 
 ```bash
@@ -134,7 +134,7 @@ be launched by an MCP client, not used interactively.
 
 ## Tools
 
-All 17 tools delegate to the `pain001` public API, so they behave
+All 21 tools delegate to the `pain001` public API, so they behave
 identically to the CLI and REST API.
 
 - `list_message_types` — List the supported `pain.001` / `pain.008` message types
@@ -154,6 +154,12 @@ identically to the CLI and REST API.
 - `migrate_records` — Migrate flat records between pain.001 schema versions
 - `sanitize_to_iso20022_charset` — Transliterate text to the ISO 20022 Latin set
 - `convert_mt101` — Convert a legacy SWIFT MT101 (Request for Transfer) into pain.001 records (one per transaction)
+- `list_corpus_files` — List the validated example files pain001 ships: market scenarios per country and rail (with bank variants) and schema coverage sets
+- `get_corpus_file` — Return the XML of one example file by scenario, message type and optional bank overlay
+- `get_corpus_provenance` — Return an example file's sources, evidence confidence, validation ladder result and SHA-256
+- `get_corpus_coverage` — Return the schema coverage verdict of one message type's coverage set
+
+The four corpus tools need `pain001` >= 0.0.67; with an older library they return `{"error": ...}` instead of failing.
 
 Plus one resource and one prompt:
 
