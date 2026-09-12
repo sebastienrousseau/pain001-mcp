@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.67] - 2026-09-12
+
+The example corpus reaches the agent tools: the validated pain.001
+files pain001 0.0.67 ships, with their provenance, are listable and
+readable through MCP.
+
+### Added
+
+- **Example corpus tools.** `list_corpus_files`, `get_corpus_file`,
+  `get_corpus_provenance` and `get_corpus_coverage` expose the corpus
+  that ships in pain001 from 0.0.67: realistic market scenarios per
+  country and rail (with bank variants), the schema coverage sets, each
+  file's provenance sidecar and each edition's coverage verdict. They
+  delegate to `pain001.corpus`; the dependency floor is now 0.0.67, and
+  with an older pain001 they still return an `{"error": ...}` payload
+  rather than failing at import.
+
+### Changed
+
+- `pain001` floor raised to `>=0.0.67`, the first release with
+  `pain001.corpus`.
+- Version aligned to `0.0.67` across all five `pain001` packages.
+- `mcp` 2.2.0; `httpx2` and `httpcore2` 2.12.0, which close the six
+  Dependabot advisories on the 0.0.66 lock file; `pain001-loader-mt101`
+  0.0.65; `cyclonedx-bom` 7.3.1; `poetry` 2.4.3. Dev tools: `ruff`
+  0.16.6, `packaging` 26.3, `pytest-benchmark` 5.3.0. GitHub Actions
+  group bumped.
+
 ## [0.0.66] - 2026-09-12
 
 Aligns the `pain001` suite on `0.0.66`, the core release that adds
@@ -79,21 +107,6 @@ Brings this repository onto the **suite conformance gate**.
   conformance gate parses `pyproject.toml` and needs both.
 - `tests/test_suite_conformance.py` is excluded from black: it is
   generated, and the suite uses three different line lengths.
-
-## [Unreleased]
-
-### Added
-
-- **Example corpus tools.** `list_corpus_files`, `get_corpus_file`,
-  `get_corpus_provenance` and `get_corpus_coverage` expose the corpus
-  that ships in pain001 from 0.0.67: realistic market scenarios per
-  country and rail (with bank variants), the schema coverage sets, each
-  file's provenance sidecar and each edition's coverage verdict. They
-  delegate to `pain001.corpus`; with an older pain001 they return an
-  `{"error": ...}` payload rather than failing at import, so the
-  dependency floor is unchanged until the suite bumps together.
-
-### Changed
 
 - **The `pain001` floor moves to `>=0.0.62`**, matching this package's
   own version. Nothing here requires 0.0.62 — the `fast` extra it

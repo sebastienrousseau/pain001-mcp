@@ -966,9 +966,7 @@ def validate_xml_against_schema(
             return {"error": f"No XSD bundled for {message_type}"}
         try:
             ok = validate_xml_string_via_xsd(xml_content, str(xsd))
-        except (
-            Exception
-        ) as exc:  # pragma: no cover - underlying API returns False, not raises
+        except Exception as exc:  # pragma: no cover - underlying API returns False, not raises
             return {
                 "valid": False,
                 "message_type": message_type,
@@ -1139,8 +1137,7 @@ def list_corpus_files(
         str | None,
         Field(
             description=(
-                "Keep only files of this message type, e.g. "
-                "'pain.001.001.09'."
+                "Keep only files of this message type, e.g. 'pain.001.001.09'."
             )
         ),
     ] = None,
@@ -1183,11 +1180,31 @@ def list_corpus_files(
                 "version": entry.version,
                 "country": entry.country,
                 "family": entry.family,
-                "variant": entry.variant,
+                # ``variant`` arrives with pain001 0.0.68; None before that
+                "variant": getattr(entry, "variant", None),
                 "file": entry.path.name,
             }
         )
     return {"count": len(files), "files": files}
+
+
+def _corpus_lookup(
+    fn: Any, scenario_id: str, version: str, variant: str | None
+) -> Any:
+    """Call a corpus accessor, passing ``variant`` only when one was asked for.
+
+    pain001 0.0.67 accepts ``(scenario_id, version)``; the bank-variant
+    argument arrives with 0.0.68. Asking an older core for a variant is
+    reported as a lookup failure rather than a crash.
+    """
+    if variant is None:
+        return fn(scenario_id, version)
+    try:
+        return fn(scenario_id, version, variant)
+    except TypeError:
+        raise FileNotFoundError(
+            "bank variants need pain001 >= 0.0.68; this core has no variant argument"
+        ) from None
 
 
 @server.tool(title="Get example corpus file", annotations=_PURE_READ)
@@ -1237,7 +1254,7 @@ def get_corpus_file(
     if corpus is None:
         return {"error": _CORPUS_MISSING}
     try:
-        xml = corpus.get_file(scenario_id, version, variant)
+        xml = _corpus_lookup(corpus.get_file, scenario_id, version, variant)
     except FileNotFoundError as exc:
         return {"error": str(exc)}
     return {
@@ -1290,7 +1307,9 @@ def get_corpus_provenance(
     if corpus is None:
         return {"error": _CORPUS_MISSING}
     try:
-        record: dict = corpus.provenance(scenario_id, version, variant)
+        record: dict = _corpus_lookup(
+            corpus.provenance, scenario_id, version, variant
+        )
     except FileNotFoundError as exc:
         return {"error": str(exc)}
     return record

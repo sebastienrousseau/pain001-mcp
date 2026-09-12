@@ -222,3 +222,34 @@ def test_real_corpus_when_available():
     )
     assert record["validation"]["xsd"]["errors"] == 0
     assert server.get_corpus_coverage("pain.001.001.13")["complete"] is True
+
+
+def test_variant_lookup_on_a_core_without_the_argument(monkeypatch):
+    """pain001 0.0.67 has no variant argument: a variant asks for 0.0.68."""
+    from pain001_mcp import server
+
+    class OldCorpus:
+        @staticmethod
+        def get_file(scenario_id, version):
+            return f"<xml {scenario_id} {version}/>"
+
+        @staticmethod
+        def provenance(scenario_id, version):
+            return {"scenario_id": scenario_id, "version": version}
+
+    monkeypatch.setattr(server, "_corpus_api", lambda: OldCorpus())
+    generic = server.get_corpus_file("gb.chaps.property-purchase", "09")
+    assert generic["xml"].startswith("<xml ")
+    assert "scenario_id" in server.get_corpus_provenance(
+        "gb.chaps.property-purchase", "09"
+    )
+    variant = server.get_corpus_file(
+        "gb.chaps.property-purchase", "09", variant="some-bank"
+    )
+    assert "pain001 >= 0.0.68" in variant["error"]
+    assert (
+        "pain001 >= 0.0.68"
+        in server.get_corpus_provenance(
+            "gb.chaps.property-purchase", "09", variant="some-bank"
+        )["error"]
+    )
