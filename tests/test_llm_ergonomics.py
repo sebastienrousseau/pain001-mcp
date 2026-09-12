@@ -95,7 +95,8 @@ def test_bare_family_alias_resolves_to_v09():
 def test_alias_resolves_for_schema_tools():
     """Schema discovery tools accept the bare family alias too."""
     required = server.get_required_fields("pain.001")
-    assert "creditor_account_IBAN" in required
+    # accounts are IBAN-or-number from pain001 0.0.69, so names are the stable keys
+    assert "creditor_name" in required
     schema = server.get_input_schema("pain.001")
     assert schema["title"].startswith("pain.001.001.09")
 
@@ -122,9 +123,8 @@ def test_missing_fields_return_one_structured_error_listing_all():
         "id",
         "date",
         "initiator_name",
-        "debtor_account_IBAN",
-        "creditor_agent_BIC",
-        "creditor_account_IBAN",
+        "debtor_name",
+        "creditor_name",
     ):
         assert field in payload["error"]
 
