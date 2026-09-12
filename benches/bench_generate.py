@@ -165,12 +165,35 @@ def measure_cold(records: int) -> dict:
     }
 
 
+def measure_corpus(repeats: int) -> dict:
+    """The corpus tools: a directory walk and one file read.
+
+    With a pain001 that predates the corpus the tools return an error
+    payload; that is recorded rather than failing the benchmark.
+    """
+    listed = server.list_corpus_files(kind="market")
+    if "error" in listed:
+        return {"error": listed["error"]}
+    first = listed["files"][0]
+    list_s = _best(lambda: server.list_corpus_files(kind="market"), repeats)
+    get_s = _best(
+        lambda: server.get_corpus_file(first["scenario_id"], first["version"]),
+        repeats,
+    )
+    return {
+        "files": listed["count"],
+        "list_ms": list_s * 1e3,
+        "get_ms": get_s * 1e3,
+    }
+
+
 def run(quick: bool) -> dict:
     sizes = [1, 25] if quick else [1, 25, 250, 1_000]
     repeats = 2 if quick else 5
     return {
         "sizes": [measure(n, repeats) for n in sizes],
         "cold": measure_cold(sizes[0]),
+        "corpus": measure_corpus(repeats),
     }
 
 
@@ -237,6 +260,23 @@ def render(results: dict) -> None:
         )
 
 
+def render_corpus(results: dict) -> None:
+    corpus = results.get("corpus", {})
+    print("\ncorpus tools")
+    if "error" in corpus:
+        print(f"  unavailable: {corpus['error']}")
+        return
+    print(
+        f"  list_corpus_files over {corpus['files']} files "
+        f"{corpus['list_ms']:.2f} ms, get_corpus_file {corpus['get_ms']:.2f} ms"
+    )
+    print(
+        "  The list walks the package's data tree on every call; an agent\n"
+        "  that lists before each get pays that twice. Cheap today; worth\n"
+        "  a cache the day the corpus is ten times larger."
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true", help="emit JSON")
@@ -251,6 +291,7 @@ def main() -> int:
         print()
     else:
         render(results)
+        render_corpus(results)
     return 0
 
 

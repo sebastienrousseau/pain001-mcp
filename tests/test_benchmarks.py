@@ -242,3 +242,14 @@ class TestReadOnlyTools:
             f"times across 100 tool calls - the cache is gone"
         )
         assert later.hits > first.hits
+
+
+def test_list_corpus_files_benchmark(benchmark) -> None:
+    """Listing the corpus is a data-tree walk; it must stay a cheap call.
+
+    With a pain001 that predates the corpus the tool returns its error
+    payload, which is measured the same way so the benchmark keeps
+    compiling against either library.
+    """
+    listed = benchmark(server.list_corpus_files, "market")
+    assert "error" in listed or listed["count"] > 0

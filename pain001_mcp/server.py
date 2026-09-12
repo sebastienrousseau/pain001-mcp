@@ -53,12 +53,13 @@ The server communicates over stdio (MCPServer's default transport).
 """
 
 import csv
+import importlib
 import io
 import json
 import unicodedata
 from functools import lru_cache
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from jsonschema import Draft7Validator
 from mcp.types import ToolAnnotations
@@ -1089,6 +1090,265 @@ def convert_mt101(
         return parse_mt101(mt101_text)
     except ValueError as exc:
         return {"error": str(exc)}
+
+
+# ---------------------------------------------------------------------------
+# Example corpus (pain001 >= 0.0.67)
+# ---------------------------------------------------------------------------
+
+_CORPUS_MISSING = (
+    "the example corpus needs pain001 >= 0.0.67; the installed pain001 "
+    "has no pain001.corpus module"
+)
+
+
+def _corpus_api() -> Any | None:
+    """Return :mod:`pain001.corpus`, or ``None`` when the library predates it.
+
+    The corpus shipped in pain001 0.0.67; older releases are still valid
+    peers of this server, so the four corpus tools report a clear error
+    instead of failing at import time.
+    """
+    try:
+        return importlib.import_module("pain001.corpus")
+    except ImportError:
+        return None
+
+
+@server.tool(title="List example corpus files", annotations=_PURE_READ)
+def list_corpus_files(
+    kind: Annotated[
+        str | None,
+        Field(
+            description=(
+                "'market' for the realistic per-country scenarios, "
+                "'coverage' for the schema coverage sets, or omit for both."
+            )
+        ),
+    ] = None,
+    country: Annotated[
+        str | None,
+        Field(
+            description=(
+                "Two-letter country code to keep one market pack only, "
+                "e.g. 'GB' or 'CH'. Ignored for coverage files."
+            )
+        ),
+    ] = None,
+    version: Annotated[
+        str | None,
+        Field(
+            description=(
+                "Keep only files of this message type, e.g. 'pain.001.001.09'."
+            )
+        ),
+    ] = None,
+) -> dict:
+    """List the example files pain001 ships: market scenarios and coverage sets.
+
+    Use this to discover what ready-made, validated ISO 20022 files exist
+    before calling ``get_corpus_file`` or ``get_corpus_provenance``. Market
+    files are realistic payments per country and rail (``scenario_id``
+    like ``gb.chaps.property-purchase``); a ``variant`` names the bank
+    overlay a file was built with. Coverage files exercise every element
+    and choice branch of one message type and carry no scenario.
+
+    Delegates to :func:`pain001.corpus.list_files`.
+
+    Args:
+        kind: ``market``, ``coverage`` or ``None`` for both.
+        country: Optional two-letter country filter for market files.
+        version: Optional message-type filter.
+
+    Returns:
+        ``{"count", "files": [{"kind", "scenario_id", "version", "country",
+        "family", "variant", "file"}, ...]}``, or ``{"error": ...}`` when
+        the installed pain001 has no corpus.
+    """
+    corpus = _corpus_api()
+    if corpus is None:
+        return {"error": _CORPUS_MISSING}
+    wanted_country = country.upper() if country else None
+    files = []
+    for entry in corpus.list_files(kind):
+        if wanted_country and entry.country != wanted_country:
+            continue
+        if version and entry.version != version:
+            continue
+        files.append(
+            {
+                "kind": entry.kind,
+                "scenario_id": entry.scenario_id,
+                "version": entry.version,
+                "country": entry.country,
+                "family": entry.family,
+                # ``variant`` arrives with pain001 0.0.68; None before that
+                "variant": getattr(entry, "variant", None),
+                "file": entry.path.name,
+            }
+        )
+    return {"count": len(files), "files": files}
+
+
+def _corpus_lookup(
+    fn: Any, scenario_id: str, version: str, variant: str | None
+) -> Any:
+    """Call a corpus accessor, passing ``variant`` only when one was asked for.
+
+    pain001 0.0.67 accepts ``(scenario_id, version)``; the bank-variant
+    argument arrives with 0.0.68. Asking an older core for a variant is
+    reported as a lookup failure rather than a crash.
+    """
+    if variant is None:
+        return fn(scenario_id, version)
+    try:
+        return fn(scenario_id, version, variant)
+    except TypeError:
+        raise FileNotFoundError(
+            "bank variants need pain001 >= 0.0.68; this core has no variant argument"
+        ) from None
+
+
+@server.tool(title="Get example corpus file", annotations=_PURE_READ)
+def get_corpus_file(
+    scenario_id: Annotated[
+        str,
+        Field(
+            description=(
+                "The market scenario, e.g. 'gb.chaps.property-purchase' "
+                "(from list_corpus_files)."
+            )
+        ),
+    ],
+    version: Annotated[
+        str,
+        Field(description="The message type, e.g. 'pain.001.001.09'."),
+    ],
+    variant: Annotated[
+        str | None,
+        Field(
+            description=(
+                "An overlay id for the bank variant, e.g. "
+                "'gb.example.priority'; omit for the generic file."
+            )
+        ),
+    ] = None,
+) -> dict:
+    """Return the XML of one validated example file from the market corpus.
+
+    Use this to show a model, a tester or a mapping exercise what a
+    correct file for a given country and rail looks like in a given
+    edition. The text is exactly what pain001 ships; it passed the XSD,
+    the ISO MDR rules, the rail profile and the overlay when it was built.
+
+    Delegates to :func:`pain001.corpus.get_file`.
+
+    Args:
+        scenario_id: The scenario.
+        version: The message type.
+        variant: The overlay id of a bank variant, else ``None``.
+
+    Returns:
+        ``{"scenario_id", "version", "variant", "xml"}``, or
+        ``{"error": ...}`` when there is no such file or no corpus.
+    """
+    corpus = _corpus_api()
+    if corpus is None:
+        return {"error": _CORPUS_MISSING}
+    try:
+        xml = _corpus_lookup(corpus.get_file, scenario_id, version, variant)
+    except FileNotFoundError as exc:
+        return {"error": str(exc)}
+    return {
+        "scenario_id": scenario_id,
+        "version": version,
+        "variant": variant,
+        "xml": xml,
+    }
+
+
+@server.tool(title="Get example corpus provenance", annotations=_PURE_READ)
+def get_corpus_provenance(
+    scenario_id: Annotated[
+        str,
+        Field(description="The market scenario (from list_corpus_files)."),
+    ],
+    version: Annotated[
+        str,
+        Field(description="The message type, e.g. 'pain.001.001.09'."),
+    ],
+    variant: Annotated[
+        str | None,
+        Field(
+            description=(
+                "An overlay id for the bank variant; omit for the generic "
+                "file."
+            )
+        ),
+    ] = None,
+) -> dict:
+    """Return the provenance sidecar of one example file.
+
+    Use this to know how far to trust a file: the sources it was derived
+    from, the confidence of the evidence (``verified``, ``derived`` or
+    ``assumed``), the validation ladder result per rung, what the builder
+    renamed or dropped to fit the edition, and the file's SHA-256.
+
+    Delegates to :func:`pain001.corpus.provenance`.
+
+    Args:
+        scenario_id: The scenario.
+        version: The message type.
+        variant: The overlay id of a bank variant, else ``None``.
+
+    Returns:
+        The parsed sidecar as a dict, or ``{"error": ...}`` when there is
+        no such file or no corpus.
+    """
+    corpus = _corpus_api()
+    if corpus is None:
+        return {"error": _CORPUS_MISSING}
+    try:
+        record: dict = _corpus_lookup(
+            corpus.provenance, scenario_id, version, variant
+        )
+    except FileNotFoundError as exc:
+        return {"error": str(exc)}
+    return record
+
+
+@server.tool(title="Get schema coverage report", annotations=_PURE_READ)
+def get_corpus_coverage(
+    version: Annotated[
+        str,
+        Field(description="The message type, e.g. 'pain.001.001.13'."),
+    ],
+) -> dict:
+    """Return the schema coverage verdict of one message type's coverage set.
+
+    Use this to check that the shipped coverage files reach every element
+    path and choice branch of an edition's XSD before relying on them to
+    smoke a parser or a mapping.
+
+    Delegates to :func:`pain001.corpus.coverage_report`.
+
+    Args:
+        version: The message type.
+
+    Returns:
+        The ``coverage.json`` content (path and branch counts and
+        percentages, completeness, missing and exempt lists), or
+        ``{"error": ...}`` when the edition has no set or there is no
+        corpus.
+    """
+    corpus = _corpus_api()
+    if corpus is None:
+        return {"error": _CORPUS_MISSING}
+    try:
+        report: dict = corpus.coverage_report(version)
+    except FileNotFoundError as exc:
+        return {"error": str(exc)}
+    return report
 
 
 def main() -> None:

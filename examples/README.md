@@ -19,3 +19,5 @@ package (and the core `pain001` library it depends on) first:
 ```sh
 pip install pain001-mcp   # Python 3.10+
 ```
+
+- `04_corpus_tools.py` — the four example-corpus tools (`list_corpus_files`, `get_corpus_file`, `get_corpus_provenance`, `get_corpus_coverage`), including the error payload an older pain001 returns
