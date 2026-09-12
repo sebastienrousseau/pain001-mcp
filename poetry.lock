@@ -1571,14 +1571,14 @@ redis = ["redis (>=8.1.0,<9)"]
 
 [[package]]
 name = "pain001-loader-mt101"
-version = "0.0.62"
+version = "0.0.65"
 description = "Convert legacy SWIFT MT101 requests for transfer to ISO 20022 pain.001 flat records."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "pain001_loader_mt101-0.0.62-py3-none-any.whl", hash = "sha256:5c7687bf35edb7881175b68337ea984bb3cb72ee004a18468fce4538a5b407a7"},
-    {file = "pain001_loader_mt101-0.0.62.tar.gz", hash = "sha256:2c68a62a4bc283e69751cee1fc0dab2fc676f08c876080a7a9dcb27ea94b3adb"},
+    {file = "pain001_loader_mt101-0.0.65-py3-none-any.whl", hash = "sha256:7ebd6abb62fe2e62ea262676a4167f8809b0faeff3a7140c47aa1e9421ec3864"},
+    {file = "pain001_loader_mt101-0.0.65.tar.gz", hash = "sha256:9046c7afa5ee7f1637897f450e307803d2313fb105baab9cda78dbd3cbde9b51"},
 ]
 
 [package.dependencies]
