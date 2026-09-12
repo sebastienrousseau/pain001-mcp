@@ -102,7 +102,7 @@ def test_get_required_fields_returns_known_field():
     """Required fields for pain.001.001.09 include known mandatory keys."""
     fields = server.get_required_fields("pain.001.001.09")
     assert "id" in fields
-    assert "debtor_account_IBAN" in fields
+    assert "debtor_name" in fields
 
 
 def test_get_input_schema_returns_properties():
