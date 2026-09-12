@@ -1182,31 +1182,11 @@ def list_corpus_files(
                 "version": entry.version,
                 "country": entry.country,
                 "family": entry.family,
-                # ``variant`` arrives with pain001 0.0.68; None before that
-                "variant": getattr(entry, "variant", None),
+                "variant": entry.variant,
                 "file": entry.path.name,
             }
         )
     return {"count": len(files), "files": files}
-
-
-def _corpus_lookup(
-    fn: Any, scenario_id: str, version: str, variant: str | None
-) -> Any:
-    """Call a corpus accessor, passing ``variant`` only when one was asked for.
-
-    pain001 0.0.67 accepts ``(scenario_id, version)``; the bank-variant
-    argument arrives with 0.0.68. Asking an older core for a variant is
-    reported as a lookup failure rather than a crash.
-    """
-    if variant is None:
-        return fn(scenario_id, version)
-    try:
-        return fn(scenario_id, version, variant)
-    except TypeError:
-        raise FileNotFoundError(
-            "bank variants need pain001 >= 0.0.68; this core has no variant argument"
-        ) from None
 
 
 @server.tool(title="Get example corpus file", annotations=_PURE_READ)
@@ -1256,7 +1236,7 @@ def get_corpus_file(
     if corpus is None:
         return {"error": _CORPUS_MISSING}
     try:
-        xml = _corpus_lookup(corpus.get_file, scenario_id, version, variant)
+        xml = corpus.get_file(scenario_id, version, variant)
     except FileNotFoundError as exc:
         return {"error": str(exc)}
     return {
@@ -1309,9 +1289,7 @@ def get_corpus_provenance(
     if corpus is None:
         return {"error": _CORPUS_MISSING}
     try:
-        record: dict = _corpus_lookup(
-            corpus.provenance, scenario_id, version, variant
-        )
+        record: dict = corpus.provenance(scenario_id, version, variant)
     except FileNotFoundError as exc:
         return {"error": str(exc)}
     return record
