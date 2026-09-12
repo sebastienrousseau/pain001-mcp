@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.68] - 2026-09-12
+
+Aligns on pain001 0.0.68, the second example-corpus release, and makes
+bank variants real in the corpus tools.
+
+### Changed
+
+- `pain001` floor raised to `>=0.0.68`. `list_corpus_files` reports the
+  `variant` the core now records, and `get_corpus_file` and
+  `get_corpus_provenance` pass the requested variant straight through;
+  the 0.0.67 fallback that answered a variant request on an older core
+  with an error payload is gone.
+- Version aligned to `0.0.68` across all five `pain001` packages.
+
 ## [0.0.67] - 2026-09-12
 
 The example corpus reaches the agent tools: the validated pain.001
