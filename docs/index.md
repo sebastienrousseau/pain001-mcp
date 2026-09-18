@@ -9,7 +9,9 @@ as agent tools.
 :caption: Contents
 
 readme
+tools
 api
+adr/index
 roadmap
 changelog
 ```

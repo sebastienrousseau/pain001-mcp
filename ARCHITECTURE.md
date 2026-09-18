@@ -81,9 +81,11 @@ The current MCP surface:
 
 ## Extension points
 
-- **Add a tool:** add a `@server.tool()`-decorated function in
-  `pain001_mcp/server.py`; pair it with tests in
-  `tests/test_mcp_server.py` and add it to `EXPECTED_TOOLS` there.
+- **Add a tool:** add a plain function in `pain001_mcp/server.py` and one
+  `server.tool(...)(name)` line in the registration block before `main()`
+  (decorators are not used: mutmut never mutates a decorated function, see
+  ADR 0003); pair it with tests in `tests/test_mcp_server.py`, add it to
+  `EXPECTED_TOOLS` there, and run `scripts/tool_catalogue.py`.
 - **Add a resource:** `@server.resource("pain001://...")` decorator.
 - **Add a prompt:** `@server.prompt()` decorator.
 - **Match a new `pain001` feature:** when a new public helper lands

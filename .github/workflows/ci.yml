@@ -81,6 +81,9 @@ jobs:
           pip install -e .
           pip install pytest pytest-cov pytest-benchmark interrogate
 
+      - name: Tool catalogue is current
+        run: python scripts/tool_catalogue.py --check
+
       - name: Run tests with the 100% coverage gate
         run: |
           pytest tests/ \

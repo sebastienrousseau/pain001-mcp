@@ -27,6 +27,9 @@
 
 ---
 
+> **Tool catalogue:** every tool, its description and its arguments, generated
+> from the running server, is in [`docs/tools.md`](docs/tools.md).
+
 ## Contents
 
 **Getting started**
