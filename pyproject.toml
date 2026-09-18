@@ -29,6 +29,7 @@ ruff = ">=0.1,<0.17"
 mypy = ">=1.11,<3.0"
 bandit = "^1.7.0"
 interrogate = "^1.7.0"
+mutmut = "^3.7.0"
 # tests/test_suite_conformance.py parses pyproject.toml. tomllib is
 # stdlib only from 3.11 and the suite floor is 3.10, so without the
 # backport the conformance gate does not run there at all.
@@ -165,3 +166,25 @@ disallow_incomplete_defs = false
 disallow_untyped_calls = false
 warn_unused_ignores = false
 disable_error_code = ["arg-type", "return-value", "attr-defined", "assignment"]
+
+[tool.mutmut]
+# Mutation testing (mutmut 3): every tool handler is mutated and each
+# mutant must be caught by the fast tests. Benchmarks, the stdio
+# end-to-end run and the suite conformance file are excluded from the
+# selection because they do not test handler logic and dominate runtime.
+source_paths = ["pain001_mcp"]
+# The examples are executed by a test, so they must exist in mutmut's
+# working copy beside the tests.
+also_copy = ["examples"]
+# The SDK-compat shim branches on the installed MCP SDK version; the
+# branches for other versions cannot be reached on one install, so its
+# surviving mutants say nothing about the tests. Handlers only.
+do_not_mutate = ["pain001_mcp/_mcp_compat.py"]
+pytest_add_cli_args = ["-q", "-p", "no:cacheprovider", "--no-cov", "--benchmark-disable"]
+pytest_add_cli_args_test_selection = [
+    "tests/test_mcp_server.py",
+    "tests/test_corpus_tools.py",
+    "tests/test_llm_ergonomics.py",
+    "tests/test_mcp_sdk_compat.py",
+    "tests/test_tool_result_shapes.py",
+]

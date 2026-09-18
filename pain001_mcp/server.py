@@ -302,7 +302,6 @@ def _load_schema(message_type: str) -> dict:
         return loaded
 
 
-@server.tool(title="List pain message types", annotations=_PURE_READ)
 def list_message_types() -> list[dict]:
     """List every supported ISO 20022 pain message type and its human name.
 
@@ -323,7 +322,6 @@ def list_message_types() -> list[dict]:
     ]
 
 
-@server.tool(title="Get required fields", annotations=_PURE_READ)
 def get_required_fields(
     message_type: _MessageType,
 ) -> list[str]:
@@ -344,7 +342,6 @@ def get_required_fields(
         return [f"error: {exc}"]
 
 
-@server.tool(title="Get input JSON Schema", annotations=_PURE_READ)
 def get_input_schema(
     message_type: _MessageType,
 ) -> dict:
@@ -364,7 +361,6 @@ def get_input_schema(
         return {"error": str(exc)}
 
 
-@server.tool(title="Validate records against schema", annotations=_PURE_READ)
 def validate_records(
     message_type: _MessageType,
     records: Annotated[
@@ -429,7 +425,6 @@ def validate_records(
     }
 
 
-@server.tool(title="Validate IBAN or BIC", annotations=_PURE_READ)
 def validate_identifier(
     kind: Annotated[
         str,
@@ -483,7 +478,6 @@ def validate_identifier(
         return {"error": str(exc)}
 
 
-@server.tool(title="Generate pain XML from records", annotations=_PURE_READ)
 def generate_message(
     message_type: _MessageType,
     records: Annotated[
@@ -529,7 +523,6 @@ def generate_message(
         return json.dumps({"error": str(exc)})
 
 
-@server.tool(title="List supported input formats", annotations=_PURE_READ)
 def list_supported_formats() -> list[dict]:
     """List the on-disk data formats the pain001 loader can read.
 
@@ -545,9 +538,6 @@ def list_supported_formats() -> list[dict]:
     return [dict(fmt) for fmt in _SUPPORTED_FORMATS]
 
 
-@server.tool(
-    title="Generate pain XML (async, large batches)", annotations=_PURE_READ
-)
 async def generate_message_async(
     message_type: _MessageType,
     records: Annotated[
@@ -593,7 +583,6 @@ async def generate_message_async(
         return json.dumps({"error": str(exc)})
 
 
-@server.tool(title="Generate pain XML from a CSV file", annotations=_FS_READ)
 def generate_message_from_file(
     message_type: _MessageType,
     data_file_path: Annotated[
@@ -632,7 +621,6 @@ def generate_message_from_file(
     return generate_message(message_type, records)
 
 
-@server.tool(title="Parse camt.053 statement file", annotations=_FS_READ)
 def parse_camt053(
     xml_file_path: Annotated[
         str,
@@ -682,7 +670,6 @@ def parse_camt053(
         return {"error": str(exc)}
 
 
-@server.tool(title="Parse pain.002 status report file", annotations=_FS_READ)
 def parse_pain002(
     xml_file_path: Annotated[
         str,
@@ -731,7 +718,6 @@ def parse_pain002(
         return {"error": str(exc)}
 
 
-@server.tool(title="Inspect CSV template columns", annotations=_PURE_READ)
 def inspect_template(
     message_type: _MessageType,
 ) -> dict:
@@ -764,7 +750,6 @@ def inspect_template(
         return {"error": str(exc)}
 
 
-@server.tool(title="Validate against scheme rulebook", annotations=_PURE_READ)
 def validate_payment_scheme(
     records: Annotated[
         list[dict],
@@ -864,7 +849,6 @@ def build_payment_batch(
     )
 
 
-@server.tool(title="Migrate records between versions", annotations=_PURE_READ)
 def migrate_records(
     records: Annotated[
         list[dict],
@@ -929,7 +913,6 @@ def migrate_records(
         return {"error": str(exc)}
 
 
-@server.tool(title="Validate XML string against XSD", annotations=_PURE_READ)
 def validate_xml_against_schema(
     xml_content: Annotated[
         str,
@@ -979,9 +962,6 @@ def validate_xml_against_schema(
         return {"error": str(exc)}
 
 
-@server.tool(
-    title="Sanitise text to ISO 20022 charset", annotations=_PURE_READ
-)
 def sanitize_to_iso20022_charset(
     value: Annotated[
         str,
@@ -1047,7 +1027,6 @@ def sanitize_to_iso20022_charset(
     }
 
 
-@server.tool(title="Convert MT101 to pain.001 records", annotations=_PURE_READ)
 def convert_mt101(
     mt101_text: Annotated[
         str,
@@ -1115,7 +1094,6 @@ def _corpus_api() -> Any | None:
         return None
 
 
-@server.tool(title="List example corpus files", annotations=_PURE_READ)
 def list_corpus_files(
     kind: Annotated[
         str | None,
@@ -1189,7 +1167,6 @@ def list_corpus_files(
     return {"count": len(files), "files": files}
 
 
-@server.tool(title="Get example corpus file", annotations=_PURE_READ)
 def get_corpus_file(
     scenario_id: Annotated[
         str,
@@ -1247,7 +1224,6 @@ def get_corpus_file(
     }
 
 
-@server.tool(title="Get example corpus provenance", annotations=_PURE_READ)
 def get_corpus_provenance(
     scenario_id: Annotated[
         str,
@@ -1295,7 +1271,6 @@ def get_corpus_provenance(
     return record
 
 
-@server.tool(title="Get schema coverage report", annotations=_PURE_READ)
 def get_corpus_coverage(
     version: Annotated[
         str,
@@ -1327,6 +1302,76 @@ def get_corpus_coverage(
     except FileNotFoundError as exc:
         return {"error": str(exc)}
     return report
+
+
+# Tools are registered here, in definition order, rather than with
+# decorators on each function: mutmut 3 never mutates a decorated function,
+# so the decorator form left every handler outside mutation testing. The
+# registered object is the same function, docstring and signature, and
+# clients list the tools in this order.
+server.tool(title="List pain message types", annotations=_PURE_READ)(
+    list_message_types
+)
+server.tool(title="Get required fields", annotations=_PURE_READ)(
+    get_required_fields
+)
+server.tool(title="Get input JSON Schema", annotations=_PURE_READ)(
+    get_input_schema
+)
+server.tool(title="Validate records against schema", annotations=_PURE_READ)(
+    validate_records
+)
+server.tool(title="Validate IBAN or BIC", annotations=_PURE_READ)(
+    validate_identifier
+)
+server.tool(title="Generate pain XML from records", annotations=_PURE_READ)(
+    generate_message
+)
+server.tool(title="List supported input formats", annotations=_PURE_READ)(
+    list_supported_formats
+)
+server.tool(
+    title="Generate pain XML (async, large batches)", annotations=_PURE_READ
+)(generate_message_async)
+server.tool(title="Generate pain XML from a CSV file", annotations=_FS_READ)(
+    generate_message_from_file
+)
+server.tool(title="Parse camt.053 statement file", annotations=_FS_READ)(
+    parse_camt053
+)
+server.tool(title="Parse pain.002 status report file", annotations=_FS_READ)(
+    parse_pain002
+)
+server.tool(title="Inspect CSV template columns", annotations=_PURE_READ)(
+    inspect_template
+)
+server.tool(title="Validate against scheme rulebook", annotations=_PURE_READ)(
+    validate_payment_scheme
+)
+server.tool(title="Migrate records between versions", annotations=_PURE_READ)(
+    migrate_records
+)
+server.tool(title="Validate XML string against XSD", annotations=_PURE_READ)(
+    validate_xml_against_schema
+)
+server.tool(
+    title="Sanitise text to ISO 20022 charset", annotations=_PURE_READ
+)(sanitize_to_iso20022_charset)
+server.tool(title="Convert MT101 to pain.001 records", annotations=_PURE_READ)(
+    convert_mt101
+)
+server.tool(title="List example corpus files", annotations=_PURE_READ)(
+    list_corpus_files
+)
+server.tool(title="Get example corpus file", annotations=_PURE_READ)(
+    get_corpus_file
+)
+server.tool(title="Get example corpus provenance", annotations=_PURE_READ)(
+    get_corpus_provenance
+)
+server.tool(title="Get schema coverage report", annotations=_PURE_READ)(
+    get_corpus_coverage
+)
 
 
 def main() -> None:

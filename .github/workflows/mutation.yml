@@ -1,0 +1,53 @@
+# Mutation testing of the tool handlers. A silently wrong tool result is
+# the one failure an agent will not notice, so the tests must prove they
+# would notice: every mutant of the handlers the fast tests reach has to
+# be caught, at or above the floor in the Makefile.
+name: 🧬 Mutation Testing
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 1 * * 0" # weekly, Sunday 01:00 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  mutation:
+    name: Mutants of the tool handlers
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install the package, its test tools and mutmut
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pytest pytest-cov pytest-benchmark "mutmut>=3.7,<4"
+
+      - name: Run the mutants
+        run: |
+          rm -rf mutants
+          mutmut run
+          mutmut export-cicd-stats
+
+      - name: Gate on the mutation score
+        run: python scripts/mutation_gate.py --floor 85
+
+      - name: Upload mutation results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: mutation-results
+          path: mutants/mutmut-cicd-stats.json
+          if-no-files-found: warn

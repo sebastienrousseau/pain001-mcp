@@ -1,5 +1,11 @@
 .PHONY: help install dev test lint format type-check security clean examples doc-coverage check
 
+# Mutation score floor for the tool handlers: 88.8% (366 of 412) on
+# 2026-09-18. The floor sits under it so one flaky mutant cannot block a
+# release, and above the 80% the handlers scored before the result-shape
+# tests. Raise it when the score rises.
+MUTATION_FLOOR ?= 85
+
 PYTHON ?= python3
 POETRY ?= poetry
 
@@ -48,5 +54,11 @@ examples: ## Verify example scripts run
 
 doc-coverage: ## Enforce the 100% docstring coverage gate
 	$(POETRY) run interrogate -c pyproject.toml -v pain001_mcp
+
+mutate: ## Mutation testing over the tool handlers (mutmut 3, config in pyproject)
+	rm -rf mutants
+	$(POETRY) run mutmut run
+	$(POETRY) run mutmut export-cicd-stats
+	$(POETRY) run python scripts/mutation_gate.py --floor $(MUTATION_FLOOR)
 
 check: lint type-check test doc-coverage examples ## Run all gates

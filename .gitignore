@@ -36,3 +36,6 @@ tmp/
 .mypy_cache/
 .ruff_cache/
 pain001_mcp.egg-info/
+
+# mutmut 3 working copy and results
+mutants/
