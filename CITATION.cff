@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+cff-version: 1.2.0
+message: "If you use pain001-mcp in research or production write-ups, please cite it as below."
+type: software
+title: "pain001-mcp: Model Context Protocol server for ISO 20022 payment files"
+abstract: >-
+  A Model Context Protocol server exposing the pain001 library to AI agents:
+  twenty-one tools for generating and validating ISO 20022 pain.001 and
+  pain.008 files, checking identifiers, parsing bank replies, converting MT101
+  and reading the validated example corpus with its provenance.
+authors:
+  - family-names: Rousseau
+    given-names: Sebastien
+    email: sebastian.rousseau@gmail.com
+version: "0.0.70"
+date-released: "2026-09-13"
+license: "Apache-2.0 OR MIT"
+repository-code: "https://github.com/sebastienrousseau/pain001-mcp"
+url: "https://pain001.com"
+keywords:
+  - ISO 20022
+  - pain.001
+  - Model Context Protocol
+  - MCP
+  - AI agents
+  - payments
