@@ -31,7 +31,13 @@ def render() -> str:
         "",
     ]
     for tool in tools:
-        schema = tool.inputSchema or {}
+        # The SDK has renamed this field across versions.
+        schema = (
+            getattr(tool, "inputSchema", None)
+            or getattr(tool, "input_schema", None)
+            or getattr(tool, "parameters", None)
+            or {}
+        )
         props = schema.get("properties", {}) or {}
         required = set(schema.get("required", []) or [])
         args = (
