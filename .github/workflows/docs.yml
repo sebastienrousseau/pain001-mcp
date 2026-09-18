@@ -24,18 +24,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.12"
           cache: "pip"
 
       - name: Install dependencies
+        env:
+          # Untrusted input (a fork's branch name) passed through the
+          # environment, never interpolated into the script.
+          REF: ${{ github.head_ref || github.ref_name }}
         run: |
           python -m pip install --upgrade pip
-          REF="${{ github.head_ref || github.ref_name }}"
           if [[ "$REF" == feat/* || "$REF" == fix/* ]] && \
              git ls-remote --exit-code --heads \
                https://github.com/sebastienrousseau/pain001 "$REF" >/dev/null 2>&1; then
@@ -52,7 +55,7 @@ jobs:
           make html
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v5
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           path: "docs/_build/html"
 
@@ -65,4 +68,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
