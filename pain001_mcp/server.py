@@ -1033,9 +1033,6 @@ def validate_payment_scheme(
     }
 
 
-@server.resource(
-    "pain001://schema/{message_type}", title="pain.001 XSD schema"
-)
 def schema_resource(
     message_type: _MessageType,
 ) -> str:
@@ -1055,7 +1052,6 @@ def schema_resource(
     return xsd.read_text(encoding="utf-8")
 
 
-@server.prompt(title="Build a compliant payment batch")
 def build_payment_batch(
     message_type: _MessageType = "pain.001.001.09",
 ) -> str:
@@ -1540,6 +1536,12 @@ def get_corpus_coverage(
 # so the decorator form left every handler outside mutation testing. The
 # registered object is the same function, docstring and signature, and
 # clients list the tools in this order.
+# The resource and the prompt are registered the same way as the tools,
+# so mutmut reaches them too (it never mutates a decorated function).
+server.resource(
+    "pain001://schema/{message_type}", title="pain.001 XSD schema"
+)(schema_resource)
+server.prompt(title="Build a compliant payment batch")(build_payment_batch)
 server.tool(title="List pain message types", annotations=_PURE_READ)(
     list_message_types
 )

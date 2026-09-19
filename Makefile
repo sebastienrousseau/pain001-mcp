@@ -55,6 +55,11 @@ examples: ## Verify example scripts run
 doc-coverage: ## Enforce the 100% docstring coverage gate
 	$(POETRY) run interrogate -c pyproject.toml -v pain001_mcp
 
+# urllib's macOS proxy lookup (_scproxy) can crash inside mutmut's forked
+# workers and silently drop those mutants from the score; a loopback proxy
+# makes urllib skip the lookup (the tests mock the transport anyway).
+mutate: export http_proxy ?= http://127.0.0.1:9
+mutate: export https_proxy ?= http://127.0.0.1:9
 mutate: ## Mutation testing over the tool handlers (mutmut 3, config in pyproject)
 	rm -rf mutants
 	$(POETRY) run mutmut run
