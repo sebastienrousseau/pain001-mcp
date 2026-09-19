@@ -98,10 +98,20 @@ def test_legacy_sdk_is_configured_through_settings(transport: str) -> None:
 
 
 def test_run_rejects_a_bad_transport_and_port() -> None:
-    with pytest.raises(ValueError, match="unknown transport"):
+    with pytest.raises(ValueError, match="unknown transport 'carrier-pigeon'"):
         _transports.run(_Modern(), "carrier-pigeon")
-    with pytest.raises(ValueError, match="port must be"):
-        _transports.run(_Modern(), "sse", port=70000)
+    for bad in (0, 65536, -1):
+        with pytest.raises(
+            ValueError, match=f"between 1 and 65535, got {bad}"
+        ):
+            _transports.run(_Modern(), "sse", port=bad)
+
+
+@pytest.mark.parametrize("port", [1, 65535])
+def test_run_accepts_the_port_range_edges(port: int) -> None:
+    srv = _Modern()
+    _transports.run(srv, "sse", port=port)
+    assert srv.calls[0][1]["port"] == port
 
 
 def test_serve_wires_the_flags_to_run(monkeypatch: pytest.MonkeyPatch) -> None:
