@@ -4,9 +4,11 @@
 
 Reads ``mutants/mutmut-cicd-stats.json`` (``mutmut export-cicd-stats``).
 The score is killed over checked: mutants no test reached, skipped
-mutants and timeouts are reported but do not count either way, so the
-number answers one question only: of the mutants the tests saw, how
-many did they catch?
+mutants, timeouts and crashed test runs are reported but do not count
+either way, so the number answers one question only: of the mutants the
+tests saw, how many did they catch? A non-zero crashed count means the
+score is measured over fewer mutants than exist; read it, do not
+trust the percentage alone.
 
 Usage: mutation_gate.py --floor 80 [--stats mutants/mutmut-cicd-stats.json]
 """
@@ -46,7 +48,8 @@ def main(argv: list[str] | None = None) -> int:
     print(
         f"mutation score {pct:.1f}% ({killed} of {checked} checked mutants killed; "
         f"{stats.get('no_tests', 0)} unreached, "
-        f"{stats.get('timeout', 0)} timed out, floor {args.floor:g}%)"
+        f"{stats.get('timeout', 0)} timed out, "
+        f"{stats.get('segfault', 0)} crashed, floor {args.floor:g}%)"
     )
     return 0 if pct >= args.floor else 1
 
