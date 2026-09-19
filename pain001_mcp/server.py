@@ -59,7 +59,7 @@ import json
 import unicodedata
 from functools import lru_cache
 from pathlib import Path
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any, Literal, cast
 
 from jsonschema import Draft7Validator
 from mcp.types import ToolAnnotations
@@ -81,6 +81,10 @@ from pain001.validation.charset import ISO20022_ALLOWED_CHARACTERS
 from pain001.xml.validate_via_xsd import validate_xml_string_via_xsd
 from pain001_loader_mt101.loader import parse_mt101
 from pydantic import Field
+
+# pydantic resolves nested TypedDicts on Python 3.10 and 3.11 only for the
+# typing_extensions class; typing.TypedDict there yields no output schema.
+from typing_extensions import TypedDict
 
 from pain001_mcp import __version__
 from pain001_mcp._mcp_compat import build_server
@@ -116,6 +120,222 @@ _MessageType = Annotated[
         json_schema_extra={"enum": _PAIN_MESSAGE_TYPES},
     ),
 ]
+
+# ---------------------------------------------------------------------------
+# Result shapes. Every tool returns a JSON object, and any tool can answer
+# with {"error": "..."} instead of its payload (ADR 0001: errors as data),
+# so each shape lists the payload keys plus ``error`` and marks all of them
+# optional. The MCP SDK derives the tool's outputSchema from these, which is
+# what an agent reads to know the keys before it calls; the exact keys and
+# wording are pinned by tests/test_tool_result_shapes.py.
+# ---------------------------------------------------------------------------
+
+
+class ErrorResult(TypedDict, total=False):
+    """The failure payload every tool may return instead of its result."""
+
+    error: str
+
+
+class SchemaResult(TypedDict, total=False):
+    """A JSON Schema (draft 7) for one message type's flat records."""
+
+    error: str
+    title: str
+    description: str
+    type: str
+    properties: dict[str, Any]
+    required: list[str]
+    additionalProperties: bool
+    version: str
+
+
+class RecordError(TypedDict):
+    """One schema violation: the record's row, the field path, the message."""
+
+    row: int
+    path: str
+    message: str
+
+
+class ValidateRecordsResult(TypedDict, total=False):
+    """Verdict over a batch: one entry per violation, plus the counts."""
+
+    error: str
+    valid: bool
+    total: int
+    valid_count: int
+    errors: list[RecordError]
+
+
+class ValidateIdentifierResult(TypedDict, total=False):
+    """An IBAN or BIC verdict, with the library's message when invalid."""
+
+    error: str
+    kind: str
+    value: str
+    valid: bool
+
+
+class Camt053Result(TypedDict, total=False):
+    """A parsed camt.053 statement, as the core library reports it."""
+
+    error: str
+    statement_id: str
+    electronic_sequence_number: str
+    iban: str
+    currency: str
+    entries: list[dict[str, Any]]
+
+
+class Pain002Result(TypedDict, total=False):
+    """A parsed pain.002 status report, as the core library reports it."""
+
+    error: str
+    message_id: str
+    creation_datetime: str
+    original_message_id: str
+    original_message_name_id: str
+    group_status: str
+    payment_statuses: list[dict[str, Any]]
+
+
+class TemplateResult(TypedDict, total=False):
+    """The bundled CSV template's column names for one message type."""
+
+    error: str
+    message_type: str
+    columns: list[str]
+
+
+class SchemeViolation(TypedDict):
+    """One rulebook violation, with the remediation the library suggests."""
+
+    rule: str
+    field: str
+    index: int
+    message: str
+    remediation: str
+    severity: str
+
+
+class SchemeResult(TypedDict, total=False):
+    """Verdict against a scheme rulebook profile."""
+
+    error: str
+    profile: str
+    is_valid: bool
+    violations: list[SchemeViolation]
+
+
+MigrateResult = TypedDict(
+    "MigrateResult",
+    {
+        "error": str,
+        "records": list[dict[str, Any]],
+        "migrated": int,
+        "from": str,
+        "to": str,
+    },
+    total=False,
+)
+MigrateResult.__doc__ = (
+    "Records rewritten from one message edition to another."
+)
+
+
+class XsdResult(TypedDict, total=False):
+    """Verdict of an XML document against the official XSD."""
+
+    error: str
+    valid: bool
+    message_type: str
+
+
+class SanitiseResult(TypedDict, total=False):
+    """A value and its ISO 20022 charset-clean rendering."""
+
+    value: str
+    sanitised: str
+    was_valid: bool
+    changed: bool
+
+
+class CorpusFileEntry(TypedDict, total=False):
+    """One file of the example corpus, as the index lists it.
+
+    Market files name a scenario, a country and a rail family; coverage
+    files carry the edition only, so those three are null for them.
+    """
+
+    scenario_id: str | None
+    version: str
+    variant: str | None
+    kind: str
+    file: str
+    country: str | None
+    family: str | None
+
+
+class CorpusListResult(TypedDict, total=False):
+    """The example corpus index."""
+
+    error: str
+    count: int
+    files: list[CorpusFileEntry]
+
+
+class CorpusFileResult(TypedDict, total=False):
+    """One corpus XML file with the request echoed beside it."""
+
+    error: str
+    scenario_id: str
+    version: str
+    variant: str | None
+    xml: str
+
+
+class CorpusProvenanceResult(TypedDict, total=False):
+    """A scenario's provenance record, as the corpus ships it."""
+
+    error: str
+    scenario: str
+    message_type: str
+    variant: str | None
+    country: str
+    family: str
+    description: str
+    sha256: str
+    provenance: dict[str, Any]
+    validation: dict[str, Any]
+    constraints: list[Any]
+    twins: dict[str, Any]
+    build: dict[str, Any]
+
+
+class CoverageCount(TypedDict):
+    """Declared schema elements, how many the corpus hits, as a percentage."""
+
+    declared: int
+    hit: int
+    percent: float
+
+
+class CorpusCoverageResult(TypedDict, total=False):
+    """Schema-path coverage of the corpus for one message edition."""
+
+    error: str
+    message_type: str
+    complete: bool
+    sources: list[Any]
+    files: list[dict[str, Any]]
+    paths: CoverageCount
+    branches: CoverageCount
+    missing_paths: list[str]
+    missing_branches: list[str]
+    exempt: list[str]
+    unknown: list[str]
+
 
 # What generate_message accepts per record, surfaced in the tool schema so an
 # agent can build a correct call without a discovery round-trip.
@@ -344,7 +564,7 @@ def get_required_fields(
 
 def get_input_schema(
     message_type: _MessageType,
-) -> dict:
+) -> SchemaResult:
     """Return the full JSON Schema for a message type's flat input record.
 
     Use this to learn every field, its type, and its constraints before
@@ -356,7 +576,7 @@ def get_input_schema(
         message_type: A supported ISO 20022 pain message type.
     """
     try:
-        return _load_schema(message_type)
+        return cast(SchemaResult, _load_schema(message_type))
     except ValueError as exc:
         return {"error": str(exc)}
 
@@ -373,7 +593,7 @@ def validate_records(
             )
         ),
     ],
-) -> dict:
+) -> ValidateRecordsResult:
     """Validate flat records against a message type's input JSON Schema.
 
     Use this before ``generate_message`` to catch structural/type errors
@@ -400,7 +620,7 @@ def validate_records(
     records = [canonicalize_payment_record(record) for record in records]
 
     validator = Draft7Validator(schema)
-    errors: list[dict] = []
+    errors: list[RecordError] = []
     valid_count = 0
     for row, record in enumerate(records):
         record_errors = sorted(
@@ -444,7 +664,7 @@ def validate_identifier(
             )
         ),
     ],
-) -> dict:
+) -> ValidateIdentifierResult:
     """Validate a single financial identifier (IBAN or BIC).
 
     Use this for a one-off identifier check with a clear pass/fail and
@@ -470,7 +690,11 @@ def validate_identifier(
                 f"Unsupported identifier kind: {kind!r} "
                 f"(expected 'iban' or 'bic')"
             )
-        payload: dict = {"kind": kind_norm, "value": value, "valid": bool(ok)}
+        payload: ValidateIdentifierResult = {
+            "kind": kind_norm,
+            "value": value,
+            "valid": bool(ok),
+        }
         if not ok and err:
             payload["error"] = err
         return payload
@@ -641,7 +865,7 @@ def parse_camt053(
             )
         ),
     ] = None,
-) -> dict:
+) -> Camt053Result:
     """Parse a camt.053 bank-statement XML file on disk into structured data.
 
     Use this to read a bank's account statement (the reply that confirms
@@ -665,7 +889,10 @@ def parse_camt053(
         ``{"error": ...}`` payload on failure.
     """
     try:
-        return parse_camt053_statement(xml_file_path, xsd_file_path)
+        return cast(
+            Camt053Result,
+            parse_camt053_statement(xml_file_path, xsd_file_path),
+        )
     except Exception as exc:  # noqa: BLE001 - pain001 raises several types
         return {"error": str(exc)}
 
@@ -690,7 +917,7 @@ def parse_pain002(
             )
         ),
     ] = None,
-) -> dict:
+) -> Pain002Result:
     """Parse a pain.002 payment-status report file on disk into structured data.
 
     Use this to read the bank's acknowledgement of a submitted pain.001 —
@@ -713,14 +940,16 @@ def parse_pain002(
         ``{"error": ...}`` payload on failure.
     """
     try:
-        return parse_pain002_report(xml_file_path, xsd_file_path)
+        return cast(
+            Pain002Result, parse_pain002_report(xml_file_path, xsd_file_path)
+        )
     except Exception as exc:  # noqa: BLE001 - pain001 raises several types
         return {"error": str(exc)}
 
 
 def inspect_template(
     message_type: _MessageType,
-) -> dict:
+) -> TemplateResult:
     """Return the CSV column headers the message type's bundled template uses.
 
     Use this to see the exact column order for hand-building a CSV before
@@ -770,7 +999,7 @@ def validate_payment_scheme(
             )
         ),
     ] = "sepa-sct",
-) -> dict:
+) -> SchemeResult:
     """Validate records against a payment-scheme rulebook (e.g. SEPA).
 
     Use this after ``validate_records`` to enforce scheme-specific business
@@ -798,7 +1027,9 @@ def validate_payment_scheme(
     return {
         "profile": result.profile,
         "is_valid": result.is_valid,
-        "violations": [v.as_dict() for v in result.violations],
+        "violations": [
+            cast(SchemeViolation, v.as_dict()) for v in result.violations
+        ],
     }
 
 
@@ -877,7 +1108,7 @@ def migrate_records(
             )
         ),
     ],
-) -> dict:
+) -> MigrateResult:
     """Migrate flat payment records between two pain.001 schema versions.
 
     Use this to upgrade/downgrade records when your bank requires a
@@ -924,7 +1155,7 @@ def validate_xml_against_schema(
         ),
     ],
     message_type: _MessageType,
-) -> dict:
+) -> XsdResult:
     """Validate a raw pain.001 / pain.008 XML string against its official XSD.
 
     Use this to check XML you already have as a string (e.g. received from
@@ -986,7 +1217,7 @@ def sanitize_to_iso20022_charset(
             )
         ),
     ] = "SWIFT_X",
-) -> dict:
+) -> SanitiseResult:
     """Sanitise one free-text field to a SWIFT / ISO 20022 character set.
 
     Use this on a single free-text value (name, remittance info) to
@@ -1121,7 +1352,7 @@ def list_corpus_files(
             )
         ),
     ] = None,
-) -> dict:
+) -> CorpusListResult:
     """List the example files pain001 ships: market scenarios and coverage sets.
 
     Use this to discover what ready-made, validated ISO 20022 files exist
@@ -1147,7 +1378,7 @@ def list_corpus_files(
     if corpus is None:
         return {"error": _CORPUS_MISSING}
     wanted_country = country.upper() if country else None
-    files = []
+    files: list[CorpusFileEntry] = []
     for entry in corpus.list_files(kind):
         if wanted_country and entry.country != wanted_country:
             continue
@@ -1190,7 +1421,7 @@ def get_corpus_file(
             )
         ),
     ] = None,
-) -> dict:
+) -> CorpusFileResult:
     """Return the XML of one validated example file from the market corpus.
 
     Use this to show a model, a tester or a mapping exercise what a
@@ -1242,7 +1473,7 @@ def get_corpus_provenance(
             )
         ),
     ] = None,
-) -> dict:
+) -> CorpusProvenanceResult:
     """Return the provenance sidecar of one example file.
 
     Use this to know how far to trust a file: the sources it was derived
@@ -1268,7 +1499,7 @@ def get_corpus_provenance(
         record: dict = corpus.provenance(scenario_id, version, variant)
     except FileNotFoundError as exc:
         return {"error": str(exc)}
-    return record
+    return cast(CorpusProvenanceResult, record)
 
 
 def get_corpus_coverage(
@@ -1276,7 +1507,7 @@ def get_corpus_coverage(
         str,
         Field(description="The message type, e.g. 'pain.001.001.13'."),
     ],
-) -> dict:
+) -> CorpusCoverageResult:
     """Return the schema coverage verdict of one message type's coverage set.
 
     Use this to check that the shipped coverage files reach every element
@@ -1301,7 +1532,7 @@ def get_corpus_coverage(
         report: dict = corpus.coverage_report(version)
     except FileNotFoundError as exc:
         return {"error": str(exc)}
-    return report
+    return cast(CorpusCoverageResult, report)
 
 
 # Tools are registered here, in definition order, rather than with
