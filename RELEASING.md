@@ -34,8 +34,11 @@ A release is ready only when **all** of the following hold on `main`:
    has a documented, expiring suppression.
 4. `CHANGELOG.md` has a dated section for the new version describing the
    change set (this is the single source of truth for the release).
-5. The version is identical in `pyproject.toml` and
-   `pain001_mcp/__init__.py` (enforced by `scripts/verify_versions.py`).
+5. The version is identical in `pyproject.toml`, `pain001_mcp/__init__.py`,
+   `glama.json` (including its Docker tag) and `server.json` (enforced by
+   `scripts/verify_versions.py`, which CI runs). The Glama directory and
+   the MCP registry read those two files; a release that forgets them
+   shows an old version to every agent that browses for the server.
 
 ## Cutting the release
 
