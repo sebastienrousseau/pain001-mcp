@@ -183,7 +183,11 @@ also_copy = ["examples"]
 # The SDK-compat shim branches on the installed MCP SDK version; the
 # branches for other versions cannot be reached on one install, so its
 # surviving mutants say nothing about the tests. Handlers only.
-do_not_mutate = ["pain001_mcp/_mcp_compat.py"]
+# _cli.py is argparse wiring: flag names, defaults and help prose. Its
+# tests pin the flags and defaults; a mutant of a help sentence or a
+# parser description is not a bug a test should have to name. The
+# transport dispatch it drives, _transports.run, is mutated.
+do_not_mutate = ["pain001_mcp/_mcp_compat.py", "pain001_mcp/_cli.py"]
 pytest_add_cli_args = ["-q", "-p", "no:cacheprovider", "--no-cov", "--benchmark-disable"]
 pytest_add_cli_args_test_selection = [
     "tests/test_mcp_server.py",
@@ -192,4 +196,5 @@ pytest_add_cli_args_test_selection = [
     "tests/test_mcp_sdk_compat.py",
     "tests/test_tool_result_shapes.py",
     "tests/test_structured_output.py",
+    "tests/test_transports.py",
 ]

@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `--transport streamable-http` and `--transport sse`, with `--host` and
+  `--port`. Streamable HTTP serves both current protocol revisions
+  (2026-07-28 stateless with `server/discover`, and 2025-11-25 with the
+  `initialize` handshake) on one endpoint and streams responses as
+  server-sent events; `sse` serves the older HTTP+SSE transport. stdio
+  stays the default and is unchanged. `--version` prints the version.
+  ADR 0004 records the decision and supersedes ADR 0002 (stdio only).
+
 ## [0.0.70] - 2026-09-13
 
 Aligns on pain001 0.0.70: importing the core no longer loads its CLI, and
