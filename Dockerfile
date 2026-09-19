@@ -16,7 +16,11 @@ ENV PIP_NO_CACHE_DIR=1 \
 # PyPI; the default resolves the published version once available. The
 # git client is needed only when the override spec is a git+ URL; it
 # stays in this build stage and never ships in the final image.
-ARG PAIN001_PIP_SPEC="pain001>=0.0.52,<0.0.54"
+# Empty by default: `pip install .` resolves the pain001 version this
+# release declares in pyproject.toml, so the image tracks the release
+# without a second pin to forget. Set it to a git+ spec to build against
+# an unreleased core branch.
+ARG PAIN001_PIP_SPEC=""
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/*
@@ -31,7 +35,7 @@ COPY pain001_mcp ./pain001_mcp
 # package on top inside a self-contained virtualenv.
 RUN python -m venv /opt/venv \
     && /opt/venv/bin/pip install --upgrade pip \
-    && /opt/venv/bin/pip install "$PAIN001_PIP_SPEC" \
+    && if [ -n "$PAIN001_PIP_SPEC" ]; then /opt/venv/bin/pip install "$PAIN001_PIP_SPEC"; fi \
     && /opt/venv/bin/pip install .
 
 

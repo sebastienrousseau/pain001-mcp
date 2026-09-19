@@ -1,34 +1,50 @@
 {
   "$schema": "https://glama.ai/api/mcp/v1/schemas/glama.json",
-  "maintainers": ["sebastienrousseau"],
-  "title": "pain001-mcp",
-  "display_name": "Pain001 MCP",
-  "description": "Model Context Protocol server for the pain001 ISO 20022 payment library. Exposes 21 tools spanning schema discovery, payment-record validation, IBAN/BIC identifier validation, XML-against-XSD validation, generation (sync + async + from CSV), cross-version pain.001 migration, ISO 20022 charset sanitisation, SEPA SCT/SDD/INST/B2B + cross-border rulebook checks, legacy SWIFT MT101 -> pain.001 conversion, bank-reply parsing (camt.053 statements + pain.002 status reports), and the validated example corpus (market scenarios per country and rail with bank variants, schema coverage sets, provenance). 100% line + branch coverage, sigstore-attested releases.",
-  "version": "0.0.57",
+  "maintainers": [
+    "sebastienrousseau"
+  ],
+  "title": "pain001-mcp: ISO 20022 pain.001 and pain.008 payment files (SEPA, cross-border, MT101)",
+  "display_name": "Pain001 MCP (ISO 20022 pain.001)",
+  "description": "ISO 20022 payment initiation for AI agents: generate and validate pain.001 (SEPA credit transfer, cross-border) and pain.008 (SEPA direct debit) files, check IBAN and BIC, validate against the official XSD and the SEPA SCT/SDD/INST/B2B and cross-border rulebooks, convert legacy SWIFT MT101, parse camt.053 statements and pain.002 status reports, migrate records between message editions, and read a validated example corpus of 42 scenarios with provenance. 21 tools, every one with an output schema; errors as data, no stack traces; stdio only, no network listener; 100% line and branch coverage, mutation-tested handlers, SLSA provenance and signed releases. Ships with the pain001 suite at the suite's version.",
+  "version": "0.0.70",
   "repository": "https://github.com/sebastienrousseau/pain001-mcp",
   "homepage": "https://pain001.com",
-  "license": "Apache-2.0",
+  "license": "Apache-2.0 OR MIT",
   "language": "Python",
   "runtime": "python",
-  "categories": ["finance"],
+  "categories": [
+    "finance"
+  ],
   "tags": [
     "iso20022",
+    "iso-20022",
     "pain001",
+    "pain.001",
     "pain008",
+    "pain.008",
     "sepa",
     "sepa-credit-transfer",
     "sepa-direct-debit",
     "sepa-instant",
     "cross-border-payments",
+    "cbpr",
+    "swift",
+    "mt101",
+    "mt-to-mx",
     "iban",
     "bic",
     "camt053",
+    "camt.053",
     "pain002",
+    "pain.002",
+    "payment-initiation",
     "payment-validation",
     "xsd-validation",
-    "fastmcp",
+    "treasury",
+    "banking",
+    "fintech",
     "financial-services",
-    "fintech"
+    "fastmcp"
   ],
   "mcpServers": {
     "pain001": {
@@ -37,6 +53,6 @@
   },
   "installation": {
     "pip": "pip install pain001-mcp",
-    "docker": "docker run --rm -i ghcr.io/sebastienrousseau/pain001-mcp:0.0.57"
+    "docker": "docker run --rm -i ghcr.io/sebastienrousseau/pain001-mcp:0.0.70"
   }
 }

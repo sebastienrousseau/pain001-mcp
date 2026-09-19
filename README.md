@@ -12,7 +12,7 @@
 <h1 align="center">pain001-mcp</h1>
 
 <p align="center">
-  <b>Model Context Protocol server exposing the pain001 ISO 20022 payment library as 17 first-class agent tools.</b>
+  <b>ISO 20022 pain.001 and pain.008 payment files for AI agents: generate, validate, convert MT101 and parse bank replies through 21 Model Context Protocol tools over the pain001 library.</b>
 </p>
 
 <p align="center">
@@ -61,7 +61,7 @@ The [Model Context Protocol](https://modelcontextprotocol.io) (MCP) is
 an open standard that lets AI agents discover and call external tools in
 a uniform way. **pain001-mcp** is the MCP server that turns the
 [`pain001`](https://github.com/sebastienrousseau/pain001) ISO 20022
-payment library into 17 first-class agent tools — so an assistant can
+payment library into 21 first-class agent tools — so an assistant can
 generate and validate **`pain.001` Customer Credit Transfer Initiation**
 and **`pain.008` Customer Direct Debit Initiation** messages (the
 standardised payment instructions behind SEPA and cross-border credit
@@ -341,9 +341,11 @@ A `Makefile` orchestrates the quality gates (kept in lockstep with CI):
 | `make type-check` | `mypy --strict` |
 | `make docs` | `interrogate --fail-under=100` (docstring coverage) |
 
-Current state (v0.0.57): **71 tests passing, 100% line + branch
-coverage** against a 100% enforced floor, mypy `--strict` clean,
-interrogate 100%.
+Every release ships at **100% line + branch coverage** against an
+enforced floor, with the tool handlers mutation-tested (floor 85%, see
+`make mutate`), every result validated against its declared output
+schema, mypy `--strict` clean and interrogate 100%. The counts move with
+every release; the gates do not.
 
 ---
 

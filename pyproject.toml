@@ -7,6 +7,10 @@ license = "Apache-2.0 OR MIT"
 readme = "README.md"
 repository = "https://github.com/sebastienrousseau/pain001-mcp"
 homepage = "https://pain001.com"
+keywords = [
+    "iso20022", "pain.001", "pain.008", "sepa", "payments", "mcp",
+    "model-context-protocol", "iban", "bic", "mt101", "camt.053", "pain.002",
+]
 packages = [
     { include = "pain001_mcp" },
 ]
