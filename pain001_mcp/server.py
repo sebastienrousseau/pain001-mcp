@@ -86,7 +86,7 @@ from pydantic import Field
 # typing_extensions class; typing.TypedDict there yields no output schema.
 from typing_extensions import TypedDict
 
-from pain001_mcp import __version__
+from pain001_mcp import __version__, _transports
 from pain001_mcp._mcp_compat import build_server
 
 # Bare family names accepted as ergonomic aliases for a concrete version:
@@ -1605,9 +1605,16 @@ server.tool(title="Get schema coverage report", annotations=_PURE_READ)(
 )
 
 
-def main() -> None:
-    """Run the pain001 MCP server over stdio (the ``pain001-mcp`` entry point)."""
-    server.run()
+def main(argv: list[str] | None = None) -> None:
+    """Run the pain001 MCP server (the ``pain001-mcp`` entry point).
+
+    stdio by default; ``--transport streamable-http`` or ``--transport sse``
+    listens on ``--host``/``--port`` instead. See :mod:`pain001_mcp._transports`.
+
+    Args:
+        argv: Command-line arguments; ``None`` reads ``sys.argv[1:]``.
+    """
+    _transports.serve(server, argv, "pain001-mcp", __version__)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 # 0002. Speak stdio only
 
-- **Status:** Accepted
+- **Status:** Superseded by [0004](0004-three-transports-one-command-line.md)
 - **Date:** 2026-09-18 (practised since the first release; written down today)
 - **Deciders:** maintainer
 

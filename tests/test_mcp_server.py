@@ -350,7 +350,7 @@ def test_main_runs_the_fastmcp_server(monkeypatch):
         calls.append((args, kwargs))
 
     monkeypatch.setattr(server.server, "run", fake_run)
-    server.main()
+    server.main([])
     assert calls == [((), {})]
 
 

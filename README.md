@@ -37,6 +37,7 @@
 - [What is pain001-mcp?](#what-is-pain001-mcp) — the problem it solves
 - [Install](#install) — PyPI, virtualenv, Docker
 - [Quick start](#quick-start) — register with Claude Desktop in 30 seconds
+- [Transports](#transports) — stdio, streamable HTTP (2026-07-28 and 2025-11-25) and SSE from one command line
 
 **Library reference**
 
@@ -92,7 +93,7 @@ JSON-serialisable data; on a validation error they return an
 | :--- | :--- | :--- |
 | PyPI | `pip install pain001-mcp` | Pulls in `pain001 >= 0.0.54` + MCP SDK |
 | Source | `git clone https://github.com/sebastienrousseau/pain001-mcp && cd pain001-mcp && poetry install` | For development |
-| Docker (GHCR) | `docker pull ghcr.io/sebastienrousseau/pain001-mcp:latest` | Multi-arch (linux/amd64, linux/arm64); runs `pain001-mcp` over stdio |
+| Docker (GHCR) | `docker pull ghcr.io/sebastienrousseau/pain001-mcp:latest` | Multi-arch (linux/amd64, linux/arm64); runs `pain001-mcp` over stdio; pass `--transport streamable-http --host 0.0.0.0` and publish port 8000 for HTTP |
 
 Requires Python 3.10 or later. Works on macOS, Linux, and Windows.
 
@@ -130,8 +131,37 @@ pain001-mcp --help
 # -> usage: pain001-mcp [-h] ...
 ```
 
-The server speaks LSP-style JSON-RPC over stdin/stdout — it is meant to
-be launched by an MCP client, not used interactively.
+The server speaks JSON-RPC over stdin/stdout by default — it is meant to
+be launched by an MCP client, not used interactively. For a shared
+deployment or an HTTP client, see [Transports](#transports).
+
+---
+
+## Transports
+
+One command line, three transports:
+
+| Command | Transport | Endpoint | Protocol revisions |
+| :--- | :--- | :--- | :--- |
+| `pain001-mcp` | stdio | the client spawns the process | 2026-07-28, 2025-11-25 |
+| `pain001-mcp --transport streamable-http` | Streamable HTTP | `http://127.0.0.1:8000/mcp` | 2026-07-28 (stateless, `server/discover`) and 2025-11-25 (`initialize`, `Mcp-Session-Id`) on the same endpoint; responses stream as server-sent events, `GET` opens the server-to-client stream |
+| `pain001-mcp --transport sse` | HTTP+SSE (2024-11-05) | `http://127.0.0.1:8000/sse` and `/messages/` | for clients that still expect the older transport |
+
+`--host` and `--port` change the bind address (defaults `127.0.0.1` and
+`8000`). The HTTP transports carry no authentication of their own: bind
+loopback, or put the server behind a gateway you trust before binding a
+routable address. Every release is verified over streamable HTTP with
+[scout](https://github.com/sebastienrousseau/scout) in both protocol
+eras and over SSE with the MCP SDK client; see
+[ADR 0004](docs/adr/0004-three-transports-one-command-line.md).
+
+```json
+{
+  "mcpServers": {
+    "pain001": { "url": "http://127.0.0.1:8000/mcp" }
+  }
+}
+```
 
 ---
 
