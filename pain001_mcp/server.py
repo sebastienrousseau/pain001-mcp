@@ -59,7 +59,7 @@ import json
 import unicodedata
 from functools import lru_cache
 from pathlib import Path
-from typing import Annotated, Any, Literal, TypedDict, cast
+from typing import Annotated, Any, Literal, cast
 
 from jsonschema import Draft7Validator
 from mcp.types import ToolAnnotations
@@ -81,6 +81,10 @@ from pain001.validation.charset import ISO20022_ALLOWED_CHARACTERS
 from pain001.xml.validate_via_xsd import validate_xml_string_via_xsd
 from pain001_loader_mt101.loader import parse_mt101
 from pydantic import Field
+
+# pydantic resolves nested TypedDicts on Python 3.10 and 3.11 only for the
+# typing_extensions class; typing.TypedDict there yields no output schema.
+from typing_extensions import TypedDict
 
 from pain001_mcp import __version__
 from pain001_mcp._mcp_compat import build_server
