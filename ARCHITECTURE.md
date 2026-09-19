@@ -34,7 +34,7 @@ public API of that library, exposed in a way an MCP client can call.
 | Area | Module | Responsibility |
 | :--- | :--- | :--- |
 | **Server** | `pain001_mcp/server.py` | The FastMCP server, all tool / resource / prompt registrations |
-| **Entry point** | `pain001_mcp.server:main` (console script: `pain001-mcp`) | Launches the server over stdio, or over streamable HTTP / SSE with `--transport` (`_transports.py`, ADR 0004) |
+| **Entry point** | `pain001_mcp.server:main` (console script: `pain001-mcp`) | Launches the server over stdio, or over streamable HTTP / SSE with `--transport` (`_cli.py` + `_transports.py`, ADR 0004) |
 | **Version** | `pain001_mcp/__init__.py` | Single source of truth (`__version__`); the LSP reads it for the protocol handshake |
 | **Tests** | `tests/test_mcp_server.py`, `tests/test_stdio_e2e.py` | In-process + end-to-end-via-subprocess regressions |
 | **Fixtures** | `tests/fixtures/` | Bundled `camt053_sample.xml` and `pain002_sample.xml` for reproducible parser tests |

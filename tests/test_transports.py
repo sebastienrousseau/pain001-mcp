@@ -1,7 +1,7 @@
 """The one command line every server in the suite shares.
 
-``_transports`` is copied verbatim into each server, so these tests pin
-its contract: the flags, the defaults, and what ``run`` asks of the SDK on
+``_transports`` and ``_cli`` are copied verbatim into each server, so these
+tests pin their contract: the flags, the defaults, and what ``run`` asks of the SDK on
 either major. The listeners themselves are the SDK's; a fake server
 records the call instead of opening a port.
 """
@@ -13,7 +13,7 @@ from typing import Any
 
 import pytest
 
-from pain001_mcp import _transports, server
+from pain001_mcp import _cli, _transports, server
 
 
 class _Modern:
@@ -36,7 +36,7 @@ class _Legacy(_Modern):
 
 def test_flags_and_defaults() -> None:
     parser = argparse.ArgumentParser()
-    _transports.add_arguments(parser)
+    _cli.add_arguments(parser)
     args = parser.parse_args([])
     assert (args.transport, args.host, args.port) == (
         "stdio",
@@ -51,7 +51,7 @@ def test_flags_and_defaults() -> None:
 
 def test_unknown_transport_is_rejected_by_the_parser() -> None:
     parser = argparse.ArgumentParser()
-    _transports.add_arguments(parser)
+    _cli.add_arguments(parser)
     with pytest.raises(SystemExit):
         parser.parse_args(["--transport", "carrier-pigeon"])
 
@@ -107,17 +107,15 @@ def test_run_rejects_a_bad_transport_and_port() -> None:
 def test_serve_wires_the_flags_to_run(monkeypatch: pytest.MonkeyPatch) -> None:
     seen: list[tuple[Any, ...]] = []
     monkeypatch.setattr(
-        _transports, "run", lambda s, t, h, p: seen.append((s, t, h, p))
+        _cli, "run", lambda s, t, h, p: seen.append((s, t, h, p))
     )
-    _transports.serve(
-        "srv", ["--transport", "sse", "--port", "8002"], "x", "1"
-    )
+    _cli.serve("srv", ["--transport", "sse", "--port", "8002"], "x", "1")
     assert seen == [("srv", "sse", "127.0.0.1", 8002)]
 
 
 def test_version_flag(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as info:
-        _transports.serve("srv", ["--version"], "pain001-mcp", "9.9.9")
+        _cli.serve("srv", ["--version"], "pain001-mcp", "9.9.9")
     assert info.value.code == 0
     assert "pain001-mcp 9.9.9" in capsys.readouterr().out
 

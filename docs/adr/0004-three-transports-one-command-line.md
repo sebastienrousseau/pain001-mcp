@@ -38,8 +38,8 @@ HTTP keep it as additional flags on the same command line.
 
 ## Consequences
 
-`main()` delegates to `_transports.serve`, which is the same file in
-every server, so the suite is started, documented and tested the same
+`main()` delegates to `_cli.serve`, which with `_transports.run` is the
+same pair of files in every server, so the suite is started, documented and tested the same
 way. Each server is verified over streamable HTTP with scout in both
 protocol eras and over SSE with the SDK client before release; the
 conformance workflow lists tools over every transport. The stdio
