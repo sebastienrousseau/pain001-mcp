@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Use the coordinated core main branch after merging, as well as matching
+  feature branches, across CI, mutation, documentation and image builds.
+  Release tags continue to select the declared published dependency.
 - Include correction-tool tests in mutation selection and use the matching
   core feature branch in that job; retain the 85% mutation score floor.
 
