@@ -645,6 +645,44 @@ def validate_records(
     }
 
 
+def suggest_record_fix(
+    record: Annotated[
+        dict[str, Any],
+        Field(description="One flat payment record; never modified."),
+    ],
+    validation_error: Annotated[
+        dict[str, Any],
+        Field(description="Finding with field (or path) and rule keys."),
+    ],
+    message_type: _MessageType = "pain.001.001.03",
+) -> dict[str, Any]:
+    """Suggest deterministic, review-only fixes to non-financial fields.
+
+    Returns patches or a cannot_autofix reason. Never changes IBANs, BICs,
+    accounts, amounts or currencies, even for whitespace. Review every
+    candidate and validate the full record before generating a payment.
+
+    Args:
+        record: A flat payment record, left unchanged.
+        validation_error: Finding with field (or path) and rule keys.
+        message_type: Supported schema supplying trusted field bounds.
+    """
+    try:
+        from pain001.validation.corrections import (
+            suggest_record_fix as suggest,
+        )
+    except ImportError:
+        return {
+            "error": "This tool requires the matching core feature build with record corrections."
+        }
+    try:
+        return suggest(
+            record, validation_error, _check_message_type(message_type)
+        )
+    except ValueError as exc:
+        return {"error": str(exc)}
+
+
 def validate_identifier(
     kind: Annotated[
         str,
@@ -1553,6 +1591,9 @@ server.tool(title="Get input JSON Schema", annotations=_PURE_READ)(
 )
 server.tool(title="Validate records against schema", annotations=_PURE_READ)(
     validate_records
+)
+server.tool(title="Suggest review-only record fixes", annotations=_PURE_READ)(
+    suggest_record_fix
 )
 server.tool(title="Validate IBAN or BIC", annotations=_PURE_READ)(
     validate_identifier

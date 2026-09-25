@@ -4,7 +4,7 @@ Every tool the server registers, with the description an agent sees and the
 arguments it accepts. Generated from the running server by
 `scripts/tool_catalogue.py`; CI fails if this file drifts from the code.
 
-21 tools. Every one returns JSON; a failure is an `{"error": ...}`
+22 tools. Every one returns JSON; a failure is an `{"error": ...}`
 payload, never an exception.
 
 ## `list_message_types`
@@ -30,6 +30,12 @@ Arguments: `message_type`
 Validate flat records against a message type's input JSON Schema.
 
 Arguments: `message_type`, `records`
+
+## `suggest_record_fix`
+
+Suggest deterministic, review-only fixes to non-financial fields.
+
+Arguments: `record`, `validation_error`, `message_type` (optional)
 
 ## `validate_identifier`
 

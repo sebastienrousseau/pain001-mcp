@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -8,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+- `suggest_record_fix` delegates deterministic, review-only corrections to
+  the matching core feature build. Financial fields are always refused;
+  older core builds return an actionable error without disabling other tools
+  (pain001#185).
 
 - `--transport streamable-http` and `--transport sse`, with `--host` and
   `--port`. Streamable HTTP serves both current protocol revisions
