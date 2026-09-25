@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- Require patched AnyIO and regenerate runtime/build locks to address the
+  nine Dependabot findings across those manifests (#12–#20).
+
+### Fixed
+
+- Include correction-tool tests in mutation selection and use the matching
+  core feature branch in that job; retain the 85% mutation score floor.
+
 ### Documentation
 
 - Generate the canonical README, check drift in CI, and replace stale feature,

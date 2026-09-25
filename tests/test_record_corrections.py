@@ -47,3 +47,38 @@ def test_old_core(monkeypatch):
     """Older core builds retain other tools and explain the missing feature."""
     monkeypatch.setitem(sys.modules, "pain001.validation.corrections", None)
     assert "matching core feature build" in suggest_record_fix({}, {})["error"]
+
+
+def test_delegates_exact_arguments_and_result(monkeypatch):
+    """The wrapper must preserve the record, finding, edition and response."""
+    from pain001.validation import corrections
+
+    record = {"debtor_name": "Example"}
+    finding = {"field": "debtor_name", "rule": "CHARSET"}
+    expected = {"patches": [{"value": "sentinel", "requires_review": True}]}
+    calls = []
+
+    def suggest(actual_record, actual_finding, message_type):
+        """Capture delegated values without performing any correction."""
+        calls.append((actual_record, actual_finding, message_type))
+        return expected
+
+    monkeypatch.setattr(corrections, "suggest_record_fix", suggest)
+    assert suggest_record_fix(record, finding, "pain.001.001.09") is expected
+    assert calls == [(record, finding, "pain.001.001.09")]
+    assert calls[0][0] is record
+    assert calls[0][1] is finding
+
+
+def test_core_value_error_keeps_error_envelope(monkeypatch):
+    """Core validation errors retain their exact diagnostic in the envelope."""
+    from pain001.validation import corrections
+
+    def reject(*args):
+        """Simulate a deterministic core validation failure."""
+        raise ValueError("synthetic validation failure")
+
+    monkeypatch.setattr(corrections, "suggest_record_fix", reject)
+    assert suggest_record_fix({}, {}) == {
+        "error": "synthetic validation failure"
+    }
