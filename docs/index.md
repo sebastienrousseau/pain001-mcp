@@ -9,6 +9,9 @@ as agent tools.
 :caption: Contents
 
 readme
+POLICIES
+COMPARISON
+BENCHMARKS
 tools
 api
 adr/index

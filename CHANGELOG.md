@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- Generate the canonical README, check drift in CI, and replace stale feature,
+  tool-count and safety claims with current source-backed guidance.
+
 ### Added
 
 - `suggest_record_fix` delegates deterministic, review-only corrections to

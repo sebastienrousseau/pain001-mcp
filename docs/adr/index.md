@@ -10,5 +10,6 @@ new record that supersedes the old one.
 0001-thin-tools-over-the-core-api
 0002-stdio-only
 0003-register-tools-explicitly
+0004-three-transports-one-command-line
 ```
 - [0004. Serve stdio, streamable HTTP and SSE from one command line](0004-three-transports-one-command-line.md)

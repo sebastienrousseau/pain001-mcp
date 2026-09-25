@@ -14,6 +14,7 @@ examples and any agent that wraps the FastMCP instance directly).
 ```{eval-rst}
 .. automodule:: pain001_mcp.server
    :members:
+   :exclude-members: Field
    :undoc-members:
    :show-inheritance:
 ```
