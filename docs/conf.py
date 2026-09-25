@@ -32,7 +32,7 @@ myst_enable_extensions = ["colon_fence", "deflist", "linkify"]
 source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
 
 templates_path = ["_templates"]
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "readme-template.md"]
 
 # Furo theme: lightweight, modern, mobile-friendly.
 html_theme = "furo"

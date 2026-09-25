@@ -35,6 +35,7 @@ EXPECTED_TOOLS = {
     "get_required_fields",
     "get_input_schema",
     "validate_records",
+    "suggest_record_fix",
     "validate_identifier",
     "generate_message",
     "generate_message_async",

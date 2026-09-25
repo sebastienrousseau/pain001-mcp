@@ -1,3 +1,5 @@
 # Build/publish tooling for the release "publish" + "sbom" jobs.
 poetry
 twine
+# Match the patched async-runtime floor used by the MCP environment.
+anyio>=4.14.2,<5

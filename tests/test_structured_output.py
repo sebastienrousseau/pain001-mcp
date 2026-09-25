@@ -46,6 +46,11 @@ CALLS = {
     "get_required_fields": {"message_type": MT},
     "get_input_schema": {"message_type": MT},
     "validate_records": {"message_type": MT, "records": [RECORD]},
+    "suggest_record_fix": {
+        "record": RECORD,
+        "validation_error": {"field": "payment_amount", "rule": "CHARSET"},
+        "message_type": MT,
+    },
     "validate_identifier": {"kind": "iban", "value": "DE89370400440532013000"},
     "generate_message": {"message_type": MT, "records": [RECORD]},
     "list_supported_formats": {},

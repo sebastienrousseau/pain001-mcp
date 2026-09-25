@@ -1,4 +1,4 @@
-name: CI
+name: ci
 
 on:
   push:
@@ -86,6 +86,9 @@ jobs:
 
       - name: Tool catalogue is current
         run: python scripts/tool_catalogue.py --check
+
+      - name: Canonical README is current
+        run: python scripts/render_readme.py --check
 
       - name: Run tests with the 100% coverage gate
         run: |

@@ -1,453 +1,212 @@
-<!-- SPDX-License-Identifier: Apache-2.0 OR MIT>
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
 
 <p align="center">
-  <img
-    src="https://cloudcdn.pro/pain001/v1/logos/pain001.svg"
-    alt="pain001-mcp logo"
-    width="120"
-    height="120"
-  />
+  <img src="https://cloudcdn.pro/pain001/v1/logos/pain001.svg" alt="pain001-mcp logo" width="128" />
 </p>
 
 <h1 align="center">pain001-mcp</h1>
 
 <p align="center">
-  <b>ISO 20022 pain.001 and pain.008 payment files for AI agents: generate, validate, convert MT101 and parse bank replies through 21 Model Context Protocol tools over the pain001 library.</b>
+  Expose pain001 validation, generation and inspection as MCP tools.
 </p>
 
 <p align="center">
-  <a href="https://pypi.org/project/pain001-mcp/"><img src="https://img.shields.io/pypi/v/pain001-mcp?style=for-the-badge" alt="PyPI version" /></a>
-  <a href="https://pypi.org/project/pain001-mcp/"><img src="https://img.shields.io/pypi/pyversions/pain001-mcp.svg?style=for-the-badge" alt="Python versions" /></a>
-  <a href="https://pypi.org/project/pain001-mcp/"><img src="https://img.shields.io/pypi/dm/pain001-mcp.svg?style=for-the-badge" alt="PyPI downloads" /></a>
-  <a href="https://github.com/sebastienrousseau/pain001-mcp/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001-mcp/ci.yml?branch=main&label=Tests&style=for-the-badge" alt="Tests" /></a>
-  <a href="https://github.com/sebastienrousseau/pain001-mcp/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001-mcp/ci.yml?branch=main&label=Coverage&style=for-the-badge" alt="Coverage" /></a>
-  <a href="#license"><img src="https://img.shields.io/pypi/l/pain001-mcp?style=for-the-badge" alt="License" /></a>
-  <a href="https://glama.ai/mcp/servers/sebastienrousseau/pain001-mcp"><img src="https://glama.ai/mcp/servers/sebastienrousseau/pain001-mcp/badges/score.svg" alt="Glama MCP server score" /></a>
+  <a href="https://github.com/sebastienrousseau/pain001-mcp/actions"><img src="https://github.com/sebastienrousseau/pain001-mcp/workflows/ci/badge.svg?style=for-the-badge&logo=github" alt="Build" /></a>
+  <a href="https://pypi.org/project/pain001-mcp/"><img src="https://img.shields.io/pypi/v/pain001-mcp?style=for-the-badge&color=fc8d62&logo=python" alt="Registry" /></a>
+  <a href="docs/index.md"><img src="https://img.shields.io/badge/docs-source?style=for-the-badge&labelColor=555555&logo=readthedocs" alt="Docs" /></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/pain001-mcp"><img src="https://img.shields.io/ossf-scorecard/github.com/sebastienrousseau/pain001-mcp?style=for-the-badge&label=OpenSSF%20Scorecard&logo=openssf" alt="OpenSSF Scorecard" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT-blue.svg?style=for-the-badge" alt="License: Apache-2.0 OR MIT" /></a>
+  <a href="https://github.com/sebastienrousseau/pain001-mcp/blob/main/docs/POLICIES.md"><img src="https://img.shields.io/badge/Python-3.10%2B-93450a.svg?style=for-the-badge&logo=python" alt="Python 3.10 or newer" /></a>
 </p>
 
 ---
-
-> **Tool catalogue:** every tool, its description and its arguments, generated
-> from the running server, is in [`docs/tools.md`](docs/tools.md).
 
 ## Contents
 
 **Getting started**
 
-- [What is pain001-mcp?](#what-is-pain001-mcp) — the problem it solves
-- [Install](#install) — PyPI, virtualenv, Docker
-- [Quick start](#quick-start) — register with Claude Desktop in 30 seconds
-- [Transports](#transports) — stdio, streamable HTTP (2026-07-28 and 2025-11-25) and SSE from one command line
+- [Install](#install) — PyPI and source
+- [Requirements](#requirements) — toolchain floor, platforms
+- [Quick Start](#quick-start) — use the installed companion
+
+**The pain001-mcp ecosystem**
+
+- [The pain001-mcp ecosystem](#the-pain001-mcp-ecosystem) — core and this companion
 
 **Library reference**
 
-- [Tools](#tools) — the 21 tools, one resource, one prompt
-- [Using the tools](#using-the-tools) — call them in-process from Python
-- [The pain001 suite](#the-pain001-suite) — core lib, MCP server, LSP server
+- [Capabilities at a glance](#capabilities-at-a-glance) — the current surface by theme
+- [Ecosystem comparison](#ecosystem-comparison) — short matrix; full table at [`docs/COMPARISON.md`](docs/COMPARISON.md)
+- [Benchmarks](#benchmarks) — headline numbers; full table at [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md)
+- [Features](#features) — module-level capability list
+- [Configuration](#configuration) — core options
+- [Examples](#examples) — runnable example index
 
 **Operational**
 
-- [When not to use pain001-mcp](#when-not-to-use-pain001-mcp) — honest boundaries
-- [Development](#development) — gates, make targets
-- [Security](#security) — sandboxing posture
-- [Documentation](#documentation) — examples, guides
-- [Contributing](#contributing) — how to get changes in
-- [License](#license) — Apache-2.0
-
----
-
-## What is pain001-mcp?
-
-The [Model Context Protocol](https://modelcontextprotocol.io) (MCP) is
-an open standard that lets AI agents discover and call external tools in
-a uniform way. **pain001-mcp** is the MCP server that turns the
-[`pain001`](https://github.com/sebastienrousseau/pain001) ISO 20022
-payment library into 21 first-class agent tools — so an assistant can
-generate and validate **`pain.001` Customer Credit Transfer Initiation**
-and **`pain.008` Customer Direct Debit Initiation** messages (the
-standardised payment instructions behind SEPA and cross-border credit
-transfers) directly from a conversation.
-
-Every tool is a thin, typed wrapper over the `pain001` public API
-(validators, schema loaders, `generate_xml_string`, parsers, the version
-mapper, the ISO 20022 charset sanitiser), so all interfaces behave
-identically to the CLI, REST API, and in-tree MCP server. Tools return
-JSON-serialisable data; on a validation error they return an
-`{"error": ...}` payload rather than raising.
-
-| Concern | How pain001-mcp handles it |
-| :--- | :--- |
-| Transport | stdio (FastMCP default); zero config beyond the client manifest |
-| Schema fidelity | Tools delegate to `pain001`'s XSD-validated generator |
-| Identifier validation | `validate_identifier` checks IBAN (ISO 13616 / mod-97) and BIC |
-| Cross-version mapping | `migrate_records` round-trips data between pain.001.001.03 and .12 |
-| Charset compliance | `sanitize_to_iso20022_charset` transliterates outside-set characters |
-| Message-type aliases | Bare family names `pain.001` / `pain.008` resolve to `pain.001.001.09` / `pain.008.001.02` |
-| Error surface | Failures return structured `{"error": ...}`, never tracebacks — listing every missing or invalid field at once |
+- [When not to use pain001-mcp](#when-not-to-use-pain001-mcp) — limitations
+- [Development](#development) — make targets, fuzzing, CI
+- [Security](#security) — guarantees and compliance
+- [Documentation](#documentation) — all reference docs
+- [Stability guarantees](#stability-guarantees) — SemVer axis, output stability, minimum toolchain discipline
+- [License](#license)
 
 ---
 
 ## Install
 
-| Channel | Command | Notes |
-| :--- | :--- | :--- |
-| PyPI | `pip install pain001-mcp` | Pulls in `pain001 >= 0.0.54` + MCP SDK |
-| Source | `git clone https://github.com/sebastienrousseau/pain001-mcp && cd pain001-mcp && poetry install` | For development |
-| Docker (GHCR) | `docker pull ghcr.io/sebastienrousseau/pain001-mcp:latest` | Multi-arch (linux/amd64, linux/arm64); runs `pain001-mcp` over stdio; pass `--transport streamable-http --host 0.0.0.0` and publish port 8000 for HTTP |
+### As a Python library
 
-Requires Python 3.10 or later. Works on macOS, Linux, and Windows.
-
-<details>
-<summary>Using an isolated virtual environment (recommended)</summary>
-
-```sh
-python -m venv venv
-source venv/bin/activate        # macOS/Linux
-venv\Scripts\activate           # Windows
-python -m pip install -U pain001-mcp
+```bash
+python -m pip install pain001-mcp
 ```
 
-</details>
+Published packages and development branches are distinct. Test unreleased
+changes on this companion's `feat/v0.0.71` branch against the matching core
+branch. No PyPI release or version bump is part of this work.
 
 ---
 
-## Quick start
+## Requirements
 
-Register the server with any MCP client (Claude Desktop shown):
+Python 3.10 or newer. CI tests 3.10–3.14 on Linux. See
+[toolchain policy](docs/POLICIES.md); no distro-system-Python claim is made.
 
-```json
-{
-  "mcpServers": {
-    "pain001": { "command": "pain001-mcp" }
-  }
-}
-```
+---
 
-That's it. Restart the client and the 21 tools are available to the
-agent. To check the server starts cleanly before wiring an editor:
+## Quick Start
 
 ```bash
 pain001-mcp --help
-# -> usage: pain001-mcp [-h] ...
+pain001-mcp
 ```
 
-The server speaks JSON-RPC over stdin/stdout by default — it is meant to
-be launched by an MCP client, not used interactively. For a shared
-deployment or an HTTP client, see [Transports](#transports).
+The second command starts the stdio MCP server and waits for a client.
+Configure your client to launch `pain001-mcp`. Use generated help for optional
+HTTP/SSE transports; secure network access before exposing any listener.
 
 ---
 
-## Transports
+## The pain001-mcp ecosystem
 
-One command line, three transports:
+This independently installed companion delegates payment behavior to core.
+Coordinated versioning does not imply branch changes have been released.
 
-| Command | Transport | Endpoint | Protocol revisions |
-| :--- | :--- | :--- | :--- |
-| `pain001-mcp` | stdio | the client spawns the process | 2026-07-28, 2025-11-25 |
-| `pain001-mcp --transport streamable-http` | Streamable HTTP | `http://127.0.0.1:8000/mcp` | 2026-07-28 (stateless, `server/discover`) and 2025-11-25 (`initialize`, `Mcp-Session-Id`) on the same endpoint; responses stream as server-sent events, `GET` opens the server-to-client stream |
-| `pain001-mcp --transport sse` | HTTP+SSE (2024-11-05) | `http://127.0.0.1:8000/sse` and `/messages/` | for clients that still expect the older transport |
-
-`--host` and `--port` change the bind address (defaults `127.0.0.1` and
-`8000`). The HTTP transports carry no authentication of their own: bind
-loopback, or put the server behind a gateway you trust before binding a
-routable address. Every release is verified over streamable HTTP with
-[scout](https://github.com/sebastienrousseau/scout) in both protocol
-eras and over SSE with the MCP SDK client; see
-[ADR 0004](docs/adr/0004-three-transports-one-command-line.md).
-
-```json
-{
-  "mcpServers": {
-    "pain001": { "url": "http://127.0.0.1:8000/mcp" }
-  }
-}
-```
+| Component | Purpose | Use case |
+| :--- | :--- | :--- |
+| [pain001](https://github.com/sebastienrousseau/pain001) | Generation and validation | Shared contracts and XML engine |
 
 ---
 
-## Tools
+## Capabilities at a glance
 
-All 21 tools delegate to the `pain001` public API, so they behave
-identically to the CLI and REST API.
-
-- `list_message_types` — List the supported `pain.001` / `pain.008` message types
-- `get_required_fields` — Required input fields for a message type
-- `get_input_schema` — Full input JSON Schema for a message type
-- `inspect_template` — Template metadata + accepted formats for a message type
-- `validate_records` — Validate flat records against a message type
-- `validate_payment_scheme` — Run a scheme rulebook (`sepa-sct`, `sepa-sdd`, `sepa-inst`, `sepa-b2b`, `xborder-ct`)
-- `validate_identifier` — Validate an IBAN or BIC
-- `validate_xml_against_schema` — Validate an XML payload against its bundled XSD without writing to disk
-- `generate_message` — Generate a validated XML message and return the string
-- `generate_message_async` — Async variant of `generate_message` for long batches
-- `generate_message_from_file` — Render directly from a CSV path on disk
-- `list_supported_formats` — List the data formats `pain001` can load (CSV, SQLite, JSON, JSONL, Parquet)
-- `parse_camt053` — Parse a `camt.053` bank statement XML into structured data
-- `parse_pain002` — Parse a `pain.002` payment-status report XML into structured data
-- `migrate_records` — Migrate flat records between pain.001 schema versions
-- `sanitize_to_iso20022_charset` — Transliterate text to the ISO 20022 Latin set
-- `convert_mt101` — Convert a legacy SWIFT MT101 (Request for Transfer) into pain.001 records (one per transaction)
-- `list_corpus_files` — List the validated example files pain001 ships: market scenarios per country and rail (with bank variants) and schema coverage sets
-- `get_corpus_file` — Return the XML of one example file by scenario, message type and optional bank overlay
-- `get_corpus_provenance` — Return an example file's sources, evidence confidence, validation ladder result and SHA-256
-- `get_corpus_coverage` — Return the schema coverage verdict of one message type's coverage set
-
-The four corpus tools need `pain001` >= 0.0.67; with an older library they return `{"error": ...}` instead of failing.
-
-Plus one resource and one prompt:
-
-- Resource `pain001://schema/{message_type}` — Read-only access to the bundled XSD for any supported message type
-- Prompt `build_payment_batch` — Guided multi-step prompt that walks an agent through building a valid batch
-
-### First-try ergonomics
-
-The generate path is designed so an agent's first natural call succeeds:
-
-- **Records field guide in the tool schema** — the `records` parameter of
-  `generate_message` / `generate_message_async` carries a field-by-field
-  guide in its `inputSchema` description (key fields, accepted aliases,
-  defaults, computed totals), so an agent can build a correct call
-  without a discovery round-trip.
-- **Message-type aliases** — the bare family names `pain.001` and
-  `pain.008` are accepted wherever a `message_type` is, resolving to
-  `pain.001.001.09` and `pain.008.001.02`; an invalid type error lists
-  every accepted value.
-- **validate/generate key coherence** — `validate_records` canonicalizes
-  alias keys (`amount`, `currency`, lower-case IBAN/BIC spellings)
-  exactly as `generate_message` does, so a record that generates cleanly
-  also validates cleanly. Values keep their JSON types; only key names
-  are rewritten.
-- **Structured, complete error payloads** — generation failures return
-  an `{"error": ...}` payload (never a traceback) that lists every
-  missing or invalid field at once, with row numbers; XSD failures
-  report each violation as element path plus reason (via
-  `pain001 >= 0.0.54`).
-- **Computed totals and defaults** — `nb_of_txs` / `ctrl_sum` are
-  computed from the records and may be omitted; `payment_method`
-  defaults to `TRF` and `charge_bearer` to `SLEV`. IBAN and BIC values
-  are strictly validated and never coerced.
+| Area | Capability | Status |
+| :--- | :--- | :--- |
+| Integration | Payment validation and generation tools | Test-gated; new branch work is unreleased |
 
 ---
 
-## Using the tools
+## Ecosystem comparison
 
-You can invoke the tools in-process — without a transport — straight
-through the FastMCP instance. This mirrors what an agent receives over
-stdio:
+This matrix describes the repository's scope, not an independently benchmarked
+comparison with competitors.
 
-```python
-import asyncio
+| Project | Generate payment XML | Real settlement | Synthetic bank replies |
+| :--- | :---: | :---: | :---: |
+| **pain001-mcp** | Delegates to core | No | Not a bank service |
 
-from pain001_mcp.server import server
-
-# A single flat payment record satisfying pain.001.001.09.
-record = [
-    {
-        "id": "MSG-0001",
-        "date": "2026-01-15T10:30:00",
-        "nb_of_txs": 1,
-        "ctrl_sum": 100.00,
-        "initiator_name": "Acme Embedded Finance Ltd",
-        "payment_information_id": "PMT-INFO-0001",
-        "payment_method": "TRF",
-        "batch_booking": False,
-        "service_level_code": "SEPA",
-        "requested_execution_date": "2026-01-20",
-        "debtor_name": "Acme Embedded Finance Ltd",
-        "debtor_account_IBAN": "DE89370400440532013000",
-        "debtor_agent_BIC": "DEUTDEFFXXX",
-        "charge_bearer": "SLEV",
-        "payment_id": "PAY-0001",
-        "payment_amount": 100.00,
-        "currency": "EUR",
-        "creditor_agent_BIC": "NWBKGB2LXXX",
-        "creditor_name": "National Westminster Bank",
-        "creditor_account_IBAN": "GB29NWBK60161331926819",
-        "remittance_information": "Invoice 0001",
-    }
-]
-
-
-async def main() -> None:
-    async def call(name, args):
-        result = await server.call_tool(name, args)
-        # mcp 2.x returns a CallToolResult (read .content); 1.x
-        # returns the content list, or a (content, meta) tuple.
-        content = getattr(result, "content", None)
-        if content is None:
-            # mcp 2.x returns a CallToolResult (read .content); 1.x
-            # returns the content list, or a (content, meta) tuple.
-            content = getattr(result, "content", None)
-            if content is None:
-                content = result[0] if isinstance(result, tuple) else result
-        return content[0].text if content else ""
-
-    # 1. Validate an identifier.
-    print(await call("validate_identifier",
-                     {"kind": "iban", "value": "DE89370400440532013000"}))
-    # -> {"kind": "iban", "value": "DE89370400440532013000", "valid": true}
-
-    # 2. Sanitise text to the ISO 20022 Latin set.
-    print(await call("sanitize_to_iso20022_charset",
-                     {"value": "Café Müller"}))
-    # -> {"value": "Café Müller", "sanitised": "Cafe Muller",
-    #     "was_valid": false, "changed": true}
-
-    # 3. Generate a validated Customer Credit Transfer Initiation.
-    xml = await call("generate_message",
-                     {"message_type": "pain.001.001.09", "records": record})
-    print(xml[:46])
-    # -> <?xml version="1.0" encoding="UTF-8"?>
-    #    <Document ...
-
-
-asyncio.run(main())
-```
-
-The runnable version of this snippet lives in
-[`examples/01_mcp_tools.py`](examples/01_mcp_tools.py). See the
-[`examples/`](examples/) folder for a validation pipeline
-([`02_validate_pipeline.py`](examples/02_validate_pipeline.py)) and a
-bank-reply parser walkthrough
-([`03_parse_bank_replies.py`](examples/03_parse_bank_replies.py)) and the example-corpus tools ([`04_corpus_tools.py`](examples/04_corpus_tools.py)).
+See [`docs/COMPARISON.md`](docs/COMPARISON.md) for the evidence and complete matrix.
 
 ---
 
-## The pain001 suite
+## Benchmarks
 
-`pain001-mcp` is part of a set of independently installable packages
-built around the [`pain001`](https://github.com/sebastienrousseau/pain001)
-library — pick whichever ones your stack needs:
+CI smoke-runs benchmarks. No hardware-independent throughput or latency promise
+is made; use the generated run report for measurements.
 
-| Package | Role |
-| :--- | :--- |
-| [`pain001`](https://pypi.org/project/pain001/) | Core library + CLI + FastAPI REST API |
-| [`pain001-mcp`](https://pypi.org/project/pain001-mcp/) | **MCP server for AI agents (this package)** |
-| [`pain001-lsp`](https://pypi.org/project/pain001-lsp/) | Language Server Protocol server for editors |
+| Scenario | Result | Environment |
+| :--- | ---: | :--- |
+| Adapter operations | Run-specific | Python, hardware and dependency versions recorded per run |
 
-```mermaid
-flowchart LR
-    A["MCP client<br/>(Claude Desktop, IDE, agent)"] -->|stdio| B["pain001-mcp"]
-    B -->|delegates to| C["pain001"]
-    C -->|render + validate| D["ISO 20022 pain.001 XML"]
-```
+See [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md) for methodology and full results.
+
+---
+
+## Features
+
+The authoritative [tool catalogue](docs/tools.md) is generated from the server.
+It covers validation, identifiers, generation, migration, bank-report parsing,
+corpus access and the unreleased `suggest_record_fix` tool. Suggestions require
+review; financial fields are refused, never guessed. Test unreleased tools with
+the matching core feature branch. In-tree core MCP is a separate smaller surface.
+
+---
+
+## Configuration
+
+Run `pain001-mcp --help` for transport, host and port options. Stdio is default.
+See the [tool catalogue](docs/tools.md) for request shapes rather than a copied
+tool count.
+
+---
+
+## Examples
+
+Run the self-checking scripts under [examples/](https://github.com/sebastienrousseau/pain001-mcp/tree/main/examples). Tests cover valid
+and malformed inputs and integration with the core contract.
 
 ---
 
 ## When not to use pain001-mcp
 
-- **You're not driving an MCP-aware agent.** Use the CLI
-  (`pain001 …`) or the REST API (`pain001 serve`) directly — both expose
-  the same surface with less indirection.
-- **You need editor diagnostics, not agent tools.** Use
-  [`pain001-lsp`](https://pypi.org/project/pain001-lsp/) — it speaks
-  the Language Server Protocol to VS Code, Neovim, Helix, Emacs, etc.
-- **You need to extend the tool surface in-tree.** The companion
-  [`pain001[mcp]`](https://github.com/sebastienrousseau/pain001) extra
-  exposes the same FastMCP instance and is easier to fork inside an
-  organisation's pain001 install.
+Not a bank, settlement engine or autonomous payment approver. Review outputs
+before use. Transport support is not bank certification.
 
 ---
 
 ## Development
 
-`pain001-mcp` uses [Poetry](https://python-poetry.org/) and
-[mise](https://mise.jdx.dev/).
-
 ```bash
-git clone https://github.com/sebastienrousseau/pain001-mcp.git
-cd pain001-mcp
-mise install
 poetry install
+poetry run make check
+poetry run make security
+poetry run python scripts/tool_catalogue.py --check
+poetry run python scripts/render_readme.py --check
 ```
 
-A `Makefile` orchestrates the quality gates (kept in lockstep with CI):
-
-| Target | What it runs |
-| :--- | :--- |
-| `make check` | All gates (REQUIRED before commit) |
-| `make test` | `pytest --cov=pain001_mcp --cov-branch --cov-fail-under=100` |
-| `make lint` | `ruff check` + `black --check` |
-| `make type-check` | `mypy --strict` |
-| `make docs` | `interrogate --fail-under=100` (docstring coverage) |
-
-Every release ships at **100% line + branch coverage** against an
-enforced floor, with the tool handlers mutation-tested (floor 85%, see
-`make mutate`), every result validated against its declared output
-schema, mypy `--strict` clean and interrogate 100%. The counts move with
-every release; the gates do not.
+Coverage is gated at 100% line and branch. See [CONTRIBUTING.md](CONTRIBUTING.md)
+and [DEVELOPMENT.md](DEVELOPMENT.md). README is generated from the canonical
+layout and `docs/readme-values.json`; CI rejects drift.
 
 ---
 
 ## Security
 
-- **No filesystem writes from tools.** `generate_message` and
-  `generate_message_from_file` return the XML as a string; no tool
-  writes to disk.
-- **XML parsing** of `camt.053` and `pain.002` is routed through
-  `defusedxml` (via the core `pain001` library); XXE and entity
-  expansion are rejected.
-- **Validation failures** are returned as structured `{"error": ...}`
-  payloads — never as stack traces — so the agent never sees an
-  internal path leak.
-- **Dependencies** are pinned via `poetry.lock` and audited by
-  `pip-audit` and Bandit in CI.
+Treat requests as untrusted. Protect HTTP listeners and avoid real secrets in
+logs. Tools may read authorized input paths. Corrections never patch IBANs,
+BICs, amounts or currencies.
 
-To report a vulnerability, please use
-[GitHub private vulnerability reporting](https://github.com/sebastienrousseau/pain001-mcp/security)
-rather than a public issue.
+Report vulnerabilities according to [`SECURITY.md`](SECURITY.md).
 
 ---
 
 ## Documentation
 
-- **Runnable examples:** [`examples/`](https://github.com/sebastienrousseau/pain001-mcp/tree/main/examples)
-- **Release history:** [CHANGELOG.md](https://github.com/sebastienrousseau/pain001-mcp/blob/main/CHANGELOG.md)
-- **Core library docs:** [docs.pain001.com](https://docs.pain001.com)
-- **MCP specification:** [modelcontextprotocol.io](https://modelcontextprotocol.io)
+[User manual](docs/index.md) · [API reference](docs/index.md) ·
+[Developer guide](DEVELOPMENT.md) ·
+[Family map](https://github.com/sebastienrousseau/pain001#the-pain001-ecosystem)
 
 ---
 
-## Contributing
+## Stability guarantees
 
-Contributions are welcome — see the
-[contributing instructions](https://github.com/sebastienrousseau/pain001-mcp/blob/main/CONTRIBUTING.md).
-Thanks to all the
-[contributors](https://github.com/sebastienrousseau/pain001-mcp/graphs/contributors)
-who have helped build `pain001-mcp`.
-
----
-
-## Related MCP Servers
-
-Part of the **ISO 20022 MCP Suite** — open-source, Apache-2.0 licensed MCP servers for banking and financial-services AI agents:
-
-| Server | Purpose |
-|---|---|
-| [`pacs008-mcp`](https://github.com/sebastienrousseau/pacs008-mcp) | Generate, validate, parse & scheme-check ISO 20022 pacs.008 FI-to-FI credit transfers + Nov-2026 address linting |
-| [`camt053-mcp`](https://github.com/sebastienrousseau/camt053-mcp) | Parse & reconcile ISO 20022 camt.053 bank-to-customer statements — CBPR+/HVPS+ ready |
-| [`acmt001-mcp`](https://github.com/sebastienrousseau/acmt001-mcp) | Generate & validate ISO 20022 acmt account-management messages |
-| [`bankstatementparser-mcp`](https://github.com/sebastienrousseau/bankstatementparser-mcp) | Parse bank statements (BAI2, MT940/MT942, CAMT.053, OFX, CSV) into structured transactions |
-| [`noyalib-mcp`](https://github.com/sebastienrousseau/noyalib) | Lossless YAML 1.2 parsing, formatting & validation (Rust, 100% spec compliance) |
-
----
-
-## MCP Registry
-
-`mcp-name: io.github.sebastienrousseau/pain001-mcp`
+Versions advance in coordinated `0.0.1` steps with core. The maintainer opens
+releases; this branch does not bump versions. Contract and output changes need
+compatibility review. No stronger platform or stability guarantee is implied.
 
 ---
 
 ## License
 
-Licensed under the [Apache License, Version 2.0](https://opensource.org/license/apache-2-0/).
-Any contribution submitted for inclusion shall be licensed as above,
-without additional terms.
-
----
-
-<p align="center">
-  <a href="https://pain001.com">pain001.com</a> ·
-  <a href="https://pypi.org/project/pain001-mcp/">PyPI</a> ·
-  <a href="https://github.com/sebastienrousseau/pain001-mcp">GitHub</a>
-</p>
+Dual-licensed under [Apache-2.0](LICENSE-APACHE) OR [MIT](LICENSE-MIT), at your
+option. See [LICENSE](LICENSE). Dependencies retain their own licences.
