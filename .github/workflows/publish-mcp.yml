@@ -4,6 +4,11 @@ on:
   push:
     tags: ["v*.*.*"]
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (e.g. 0.0.71). Defaults to version in server.json"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -18,12 +23,26 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - name: Sync version from tag
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Resolve publish version
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            VERSION=$(jq -r '.version' server.json)
+          fi
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
           jq --arg v "$VERSION" '.version = $v | .packages[0].version = $v' \
             server.json > server.tmp && mv server.tmp server.json
+
+      - name: Validate server.json description length
+        run: |
+          DESC_LEN=$(jq -r '.description | length' server.json)
+          if [ "$DESC_LEN" -gt 100 ]; then
+            echo "::error::server.json description length ($DESC_LEN) exceeds 100 characters"
+            exit 1
+          fi
 
       # The MCP Registry validates PyPI ownership by fetching the
       # PyPI JSON API and matching the `mcp-name:` marker in the
@@ -33,9 +52,7 @@ jobs:
       # mcp-publisher; otherwise the first-time publish 404s on
       # ownership verification.
       - name: Wait for PyPI to surface this version
-        if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
           PKG="pain001-mcp"
           for i in $(seq 1 60); do
             if curl -sfo /dev/null "https://pypi.org/pypi/${PKG}/${VERSION}/json"; then
@@ -55,30 +72,6 @@ jobs:
 
       - name: Authenticate to MCP Registry (GitHub OIDC)
         run: ./mcp-publisher login github-oidc
-
-      # The registry validates that the PyPI release exists before it will
-      # accept the server entry, and PyPI's index is not read-your-writes.
-      # v0.0.60 failed here with a 400: "PyPI package 'pain001-mcp' exists,
-      # but version '0.0.60' was not found (status: 404) ... Wait and
-      # retry". The release itself was fine; only this job failed, and a
-      # manual re-run cleared it. Wait for the version to be visible rather
-      # than leaving that to chance on every release.
-      - name: Wait for the release to appear on PyPI
-        run: |
-          set -euo pipefail
-          VERSION="${GITHUB_REF_NAME#v}"
-          for attempt in $(seq 1 30); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' \
-              "https://pypi.org/pypi/pain001-mcp/${VERSION}/json")
-            if [ "$code" = "200" ]; then
-              echo "pain001-mcp ${VERSION} is visible on PyPI (attempt ${attempt})"
-              exit 0
-            fi
-            echo "attempt ${attempt}: PyPI returned ${code}, retrying in 10s"
-            sleep 10
-          done
-          echo "::error::pain001-mcp ${VERSION} did not appear on PyPI within 5 minutes"
-          exit 1
 
       # Retry the publish itself rather than trying to predict when the
       # registry will be able to see the release.
