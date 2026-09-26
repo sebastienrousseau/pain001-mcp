@@ -19,10 +19,12 @@ updates:
       - dependency-type: "direct"
     ignore:
       - dependency-name: "python"
-      # pain001 is hand-bumped in lockstep with the suite; Dependabot
-      # would otherwise propose patch bumps that don't align with our
+      # pain001 and suite members are hand-bumped in lockstep with the suite;
+      # Dependabot would otherwise propose patch bumps that don't align with our
       # version-for-version release policy.
       - dependency-name: "pain001"
+      - dependency-name: "pain001-loader-mt101"
+
 
   - package-ecosystem: "github-actions"
     directory: "/"
