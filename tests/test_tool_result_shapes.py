@@ -144,6 +144,69 @@ class TestSimulatePaymentBatch:
             dup["requested_execution_date"] == rec1["requested_execution_date"]
         )
 
+    def test_distinct_records_not_flagged_as_duplicates(self):
+        rec1 = _valid_record()
+        # Different debtor
+        rec_diff_dbtr = dict(rec1)
+        rec_diff_dbtr["debtor_account_IBAN"] = "DE02120300000000202051"
+        out = server.simulate_payment_batch(MT, [rec1, rec_diff_dbtr])
+        assert out["duplicates"] == []
+
+        # Different creditor
+        rec_diff_cdtr = dict(rec1)
+        rec_diff_cdtr["creditor_account_IBAN"] = "DE89370400440532013000"
+        out = server.simulate_payment_batch(MT, [rec1, rec_diff_cdtr])
+        assert out["duplicates"] == []
+
+        # Different amount
+        rec_diff_amt = dict(rec1)
+        rec_diff_amt["payment_amount"] = 200.0
+        out = server.simulate_payment_batch(MT, [rec1, rec_diff_amt])
+        assert out["duplicates"] == []
+
+        # Different currency
+        rec_diff_curr = dict(rec1)
+        rec_diff_curr["currency"] = "USD"
+        out = server.simulate_payment_batch(MT, [rec1, rec_diff_curr])
+        assert out["duplicates"] == []
+
+        # Different execution date
+        rec_diff_date = dict(rec1)
+        rec_diff_date["requested_execution_date"] = "2026-09-25"
+        out = server.simulate_payment_batch(MT, [rec1, rec_diff_date])
+        assert out["duplicates"] == []
+
+    def test_unique_accounts_and_multi_currency_aggregation(self):
+        rec1 = _valid_record()
+        rec2 = dict(rec1)
+        rec2["id"] = "MSG-2"
+        rec2["payment_id"] = "E2E-2"
+        rec2["creditor_account_IBAN"] = "DE89370400440532013000"
+        rec2["payment_amount"] = 50.0
+        rec3 = dict(rec1)
+        rec3["id"] = "MSG-3"
+        rec3["payment_id"] = "E2E-3"
+        rec3["debtor_account_IBAN"] = "DE02120300000000202051"
+        rec3["currency"] = "USD"
+        rec3["payment_amount"] = 25.5
+        out = server.simulate_payment_batch(MT, [rec1, rec2, rec3])
+        assert out["unique_debtors"] == 2
+        assert out["unique_creditors"] == 2
+        assert out["control_sum_by_currency"] == {
+            "EUR": "150.00",
+            "USD": "25.50",
+        }
+
+    def test_scheme_violations_reported_in_shape(self):
+        bad_sepa = _valid_record()
+        bad_sepa["currency"] = "USD"
+        out = server.simulate_payment_batch(MT, [bad_sepa], scheme="sepa-sct")
+        assert out["valid"] is False
+        assert len(out["scheme_violations"]) > 0
+        v = out["scheme_violations"][0]
+        assert "rule" in v
+        assert "severity" in v
+
     def test_unknown_message_type_is_an_error_payload(self):
         out = server.simulate_payment_batch(
             "pain.999.001.01", [_valid_record()]

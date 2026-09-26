@@ -1148,76 +1148,38 @@ def simulate_payment_batch(
         canonicalize_payment_record(record) for record in records
     ]
 
-    # Calculate control sums grouped by currency
     sums: dict[str, Decimal] = {}
-    for record in canonical_records:
-        curr = (
-            str(record.get("currency") or record.get("payment_currency") or "")
-            .strip()
-            .upper()
-        )
-        amt_raw = (
-            record.get("payment_amount")
-            if record.get("payment_amount") is not None
-            else record.get("amount")
-        )
-        if curr and amt_raw is not None:
-            try:
-                amt = Decimal(str(amt_raw))
-                sums[curr] = sums.get(curr, Decimal(0)) + amt
-            except (InvalidOperation, TypeError):
-                pass
-
-    control_sum_by_currency = {
-        curr: f"{total:.2f}" for curr, total in sorted(sums.items())
-    }
-
-    # Count unique debtor and creditor accounts
-    debtors = {
-        str(r.get("debtor_account_IBAN") or "").strip()
-        for r in canonical_records
-    }
-    debtors.discard("")
-    unique_debtors = len(debtors)
-
-    creditors = {
-        str(r.get("creditor_account_IBAN") or "").strip()
-        for r in canonical_records
-    }
-    creditors.discard("")
-    unique_creditors = len(creditors)
-
-    # Detect intra-batch duplicate transactions
+    debtors: set[str] = set()
+    creditors: set[str] = set()
     duplicates: list[DuplicateTransaction] = []
     seen_txs: dict[tuple[str, str, str, str, str], int] = {}
+
     for row_idx, record in enumerate(canonical_records):
         debtor_iban = (
-            str(record.get("debtor_account_IBAN") or "").strip().upper()
+            str(record.get("debtor_account_IBAN", "")).strip().upper()
         )
+        if debtor_iban:
+            debtors.add(debtor_iban)
+
         creditor_iban = (
-            str(record.get("creditor_account_IBAN") or "").strip().upper()
+            str(record.get("creditor_account_IBAN", "")).strip().upper()
         )
-        curr = (
-            str(record.get("currency") or record.get("payment_currency") or "")
-            .strip()
-            .upper()
-        )
-        amt_raw = (
-            record.get("payment_amount")
-            if record.get("payment_amount") is not None
-            else record.get("amount")
-        )
+        if creditor_iban:
+            creditors.add(creditor_iban)
+
+        curr = str(record.get("currency", "")).strip().upper()
+        date_val = str(record.get("requested_execution_date", "")).strip()
+
+        amt_raw = record.get("payment_amount")
         amt_str = ""
         if amt_raw is not None:
             try:
-                amt_str = f"{Decimal(str(amt_raw)):.2f}"
+                amt_dec = Decimal(str(amt_raw))
+                amt_str = f"{amt_dec:.2f}"
+                if curr:
+                    sums[curr] = sums.get(curr, Decimal(0)) + amt_dec
             except (InvalidOperation, TypeError):
                 amt_str = str(amt_raw).strip()
-        date_val = str(
-            record.get("requested_execution_date")
-            or record.get("execution_date")
-            or ""
-        ).strip()
 
         if debtor_iban and creditor_iban and amt_str and curr:
             tx_key = (debtor_iban, creditor_iban, amt_str, curr, date_val)
@@ -1235,6 +1197,10 @@ def simulate_payment_batch(
                 )
             else:
                 seen_txs[tx_key] = row_idx
+
+    control_sum_by_currency = {
+        curr: f"{total:.2f}" for curr, total in sorted(sums.items())
+    }
 
     schema_errors = validation_report.get("errors", [])
     valid_count = validation_report.get("valid_count", 0)
@@ -1260,8 +1226,8 @@ def simulate_payment_batch(
         "total": total,
         "valid_count": valid_count,
         "control_sum_by_currency": control_sum_by_currency,
-        "unique_debtors": unique_debtors,
-        "unique_creditors": unique_creditors,
+        "unique_debtors": len(debtors),
+        "unique_creditors": len(creditors),
         "duplicates": duplicates,
         "schema_errors": schema_errors,
         "scheme_violations": scheme_violations,

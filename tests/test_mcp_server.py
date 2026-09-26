@@ -930,3 +930,51 @@ def test_simulate_payment_batch_non_numeric_amount():
     assert res["valid"] is False
     assert res["control_sum_by_currency"] == {}
     assert len(res["schema_errors"]) > 0
+
+
+def test_simulate_payment_batch_multiple_duplicates(sample_record):
+    """Multiple matching rows are all tracked against the original row."""
+    rec1 = json_safe_record(sample_record)
+    rec2 = dict(rec1)
+    rec2["id"] = "MSG-2"
+    rec3 = dict(rec1)
+    rec3["id"] = "MSG-3"
+    res = server.simulate_payment_batch("pain.001.001.09", [rec1, rec2, rec3])
+    assert res["valid"] is False
+    assert len(res["duplicates"]) == 2
+    assert res["duplicates"][0]["row"] == 1
+    assert res["duplicates"][0]["matching_row"] == 0
+    assert res["duplicates"][1]["row"] == 2
+    assert res["duplicates"][1]["matching_row"] == 0
+
+
+def test_simulate_payment_batch_missing_accounts_not_duplicates():
+    """Rows with missing accounts are not flagged as duplicates of each other."""
+    rec1 = {"id": "MSG-1", "payment_amount": 10.0, "currency": "EUR"}
+    rec2 = {"id": "MSG-2", "payment_amount": 10.0, "currency": "EUR"}
+    res = server.simulate_payment_batch("pain.001.001.09", [rec1, rec2])
+    assert res["duplicates"] == []
+    assert res["unique_debtors"] == 0
+    assert res["unique_creditors"] == 0
+
+
+def test_simulate_payment_batch_amount_type_error():
+    """An unparseable amount causing TypeError/InvalidOperation is handled."""
+    rec = {
+        "id": "MSG-1",
+        "date": "2026-01-15T10:30:00",
+        "payment_amount": [10.0],
+        "currency": "EUR",
+        "debtor_account_IBAN": "DE89370400440532013000",
+        "creditor_account_IBAN": "GB29NWBK60161331926819",
+    }
+    res = server.simulate_payment_batch("pain.001.001.09", [rec])
+    assert res["control_sum_by_currency"] == {}
+    assert res["duplicates"] == []
+
+
+def test_simulate_payment_batch_missing_currency_does_not_sum():
+    """A record with amount but empty currency is not added to control sums."""
+    rec = {"id": "MSG-1", "payment_amount": 50.0}
+    res = server.simulate_payment_batch("pain.001.001.09", [rec])
+    assert res["control_sum_by_currency"] == {}
