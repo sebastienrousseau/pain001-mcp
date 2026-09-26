@@ -782,7 +782,13 @@ def test_convert_mt101_malformed_payload_returns_error():
 
 def test_server_json_manifest_conforms_to_mcp_registry_schema():
     """Assert server.json description adheres to the MCP Registry 100-character limit."""
-    manifest_path = Path(__file__).resolve().parents[1] / "server.json"
+    root = Path(__file__).resolve().parents[1]
+    if (
+        not (root / "server.json").exists()
+        and (root.parent / "server.json").exists()
+    ):
+        root = root.parent
+    manifest_path = root / "server.json"
     data = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert "description" in data
     assert 1 <= len(data["description"]) <= 100

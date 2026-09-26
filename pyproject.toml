@@ -182,7 +182,7 @@ disable_error_code = ["arg-type", "return-value", "attr-defined", "assignment"]
 source_paths = ["pain001_mcp"]
 # The examples are executed by a test, so they must exist in mutmut's
 # working copy beside the tests.
-also_copy = ["examples"]
+also_copy = ["examples", "server.json"]
 # The SDK-compat shim branches on the installed MCP SDK version; the
 # branches for other versions cannot be reached on one install, so its
 # surviving mutants say nothing about the tests. Handlers only.
