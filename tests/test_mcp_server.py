@@ -797,3 +797,8 @@ def test_server_json_manifest_conforms_to_mcp_registry_schema():
     assert len(data.get("packages", [])) == 1
     assert data["packages"][0]["registryType"] == "pypi"
     assert data["packages"][0]["identifier"] == "pain001-mcp"
+    readme_path = root / "README.md"
+    assert (
+        "mcp-name: io.github.sebastienrousseau/pain001-mcp"
+        in readme_path.read_text(encoding="utf-8")
+    )
