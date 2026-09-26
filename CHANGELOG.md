@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.71] - 2026-09-26
+
+Aligns on pain001 0.0.71: request-local CEL policy rules, review-only
+correction suggestions, explicit SFTP delivery, and release artifact
+inspection.
+
 ### Security
 
 - Require patched AnyIO and regenerate runtime/build locks to address the

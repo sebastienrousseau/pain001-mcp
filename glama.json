@@ -6,7 +6,7 @@
   "title": "pain001-mcp: ISO 20022 pain.001 and pain.008 payment files (SEPA, cross-border, MT101)",
   "display_name": "Pain001 MCP (ISO 20022 pain.001)",
   "description": "ISO 20022 payment initiation for AI agents: generate and validate pain.001 (SEPA credit transfer, cross-border) and pain.008 (SEPA direct debit) files, check IBAN and BIC, validate against the official XSD and the SEPA SCT/SDD/INST/B2B and cross-border rulebooks, convert legacy SWIFT MT101, parse camt.053 statements and pain.002 status reports, migrate records between message editions, and read a validated example corpus of 42 scenarios with provenance. 21 tools, every one with an output schema; errors as data, no stack traces; stdio by default, streamable HTTP and SSE on request; 100% line and branch coverage, mutation-tested handlers, SLSA provenance and signed releases. Ships with the pain001 suite at the suite's version.",
-  "version": "0.0.70",
+  "version": "0.0.71",
   "repository": "https://github.com/sebastienrousseau/pain001-mcp",
   "homepage": "https://pain001.com",
   "license": "Apache-2.0 OR MIT",
@@ -53,6 +53,6 @@
   },
   "installation": {
     "pip": "pip install pain001-mcp",
-    "docker": "docker run --rm -i ghcr.io/sebastienrousseau/pain001-mcp:0.0.70"
+    "docker": "docker run --rm -i ghcr.io/sebastienrousseau/pain001-mcp:0.0.71"
   }
 }
