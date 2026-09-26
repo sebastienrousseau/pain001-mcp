@@ -177,6 +177,13 @@ Report vulnerabilities according to [`SECURITY.md`](SECURITY.md).
 
 ---
 
+## MCP Registry
+
+`mcp-name: io.github.sebastienrousseau/pain001-mcp`
+
+---
+
 ## License
 
 {{LICENSE_CONTENT}}
+
