@@ -45,6 +45,7 @@ EXPECTED_TOOLS = {
     "parse_pain002",
     "inspect_template",
     "validate_payment_scheme",
+    "simulate_payment_batch",
     # New in v0.0.53:
     "migrate_records",
     "validate_xml_against_schema",
@@ -802,3 +803,178 @@ def test_server_json_manifest_conforms_to_mcp_registry_schema():
         "mcp-name: io.github.sebastienrousseau/pain001-mcp"
         in readme_path.read_text(encoding="utf-8")
     )
+
+
+# ---------------------------------------------------------------------------
+# Payment simulation
+# ---------------------------------------------------------------------------
+def test_simulate_payment_batch_valid_record(sample_record):
+    """A valid batch simulates cleanly with control sums and counts."""
+    res = server.simulate_payment_batch(
+        "pain.001.001.09", [json_safe_record(sample_record)]
+    )
+    assert res["valid"] is True
+    assert res["total"] == 1
+    assert res["valid_count"] == 1
+    assert res["control_sum_by_currency"] == {"EUR": "100.00"}
+    assert res["unique_debtors"] == 1
+    assert res["unique_creditors"] == 1
+    assert res["duplicates"] == []
+    assert res["schema_errors"] == []
+    assert res["scheme_violations"] == []
+
+
+def test_simulate_payment_batch_with_scheme_profile(sample_record):
+    """Simulating with a scheme profile runs scheme rulebook validation."""
+    res = server.simulate_payment_batch(
+        "pain.001.001.09",
+        [json_safe_record(sample_record)],
+        scheme="sepa-sct",
+    )
+    assert res["valid"] is True
+    assert res["scheme_violations"] == []
+
+
+def test_simulate_payment_batch_multi_currency(sample_record):
+    """Control sums are aggregated per currency with two decimals."""
+    rec1 = json_safe_record(sample_record)
+    rec2 = dict(rec1)
+    rec2["id"] = "MSG-0002"
+    rec2["payment_id"] = "PAY-0002"
+    rec2["currency"] = "USD"
+    rec2["payment_currency"] = "USD"
+    rec2["payment_amount"] = 50.5
+    res = server.simulate_payment_batch("pain.001.001.09", [rec1, rec2])
+    assert res["control_sum_by_currency"] == {
+        "EUR": "100.00",
+        "USD": "50.50",
+    }
+    assert res["total"] == 2
+
+
+def test_simulate_payment_batch_detects_duplicate_transactions(sample_record):
+    """Intra-batch duplicate transactions are detected and invalidate batch."""
+    rec1 = json_safe_record(sample_record)
+    rec2 = dict(rec1)
+    rec2["id"] = "MSG-0002"
+    rec2["payment_id"] = "PAY-0002"
+    res = server.simulate_payment_batch("pain.001.001.09", [rec1, rec2])
+    assert res["valid"] is False
+    assert len(res["duplicates"]) == 1
+    assert res["duplicates"][0]["row"] == 1
+    assert res["duplicates"][0]["matching_row"] == 0
+    assert res["duplicates"][0]["amount"] == "100.00"
+
+
+def test_simulate_payment_batch_schema_errors():
+    """Schema errors are reported and batch is marked invalid."""
+    res = server.simulate_payment_batch("pain.001.001.09", [{}])
+    assert res["valid"] is False
+    assert res["valid_count"] == 0
+    assert len(res["schema_errors"]) > 0
+
+
+def test_simulate_payment_batch_invalid_scheme_profile(sample_record):
+    """An unsupported scheme profile returns an error dict."""
+    res = server.simulate_payment_batch(
+        "pain.001.001.09",
+        [json_safe_record(sample_record)],
+        scheme="unknown-rail",
+    )
+    assert "error" in res
+
+
+def test_simulate_payment_batch_invalid_message_type(sample_record):
+    """An invalid message type returns an error dict."""
+    res = server.simulate_payment_batch(
+        "pain.999.001.01", [json_safe_record(sample_record)]
+    )
+    assert "error" in res
+
+
+def test_simulate_payment_batch_empty_records():
+    """An empty batch returns zero totals and empty duplicate list."""
+    res = server.simulate_payment_batch("pain.001.001.09", [])
+    assert res["valid"] is True
+    assert res["total"] == 0
+    assert res["valid_count"] == 0
+    assert res["control_sum_by_currency"] == {}
+    assert res["unique_debtors"] == 0
+    assert res["unique_creditors"] == 0
+    assert res["duplicates"] == []
+
+
+def test_simulate_payment_batch_non_numeric_amount():
+    """Non-numeric amount is handled gracefully and flagged by schema."""
+    bad_rec = {
+        "id": "MSG-1",
+        "date": "2026-01-15T10:30:00",
+        "initiator_name": "Acme",
+        "payment_information_id": "PMT-1",
+        "payment_method": "TRF",
+        "batch_booking": False,
+        "requested_execution_date": "2026-01-20",
+        "debtor_name": "Acme",
+        "debtor_account_IBAN": "DE89370400440532013000",
+        "debtor_agent_BIC": "DEUTDEFFXXX",
+        "charge_bearer": "SLEV",
+        "payment_id": "PAY-1",
+        "payment_amount": "invalid-amount",
+        "currency": "EUR",
+        "creditor_name": "NatWest",
+        "creditor_account_IBAN": "GB29NWBK60161331926819",
+        "creditor_agent_BIC": "NWBKGB2LXXX",
+        "remittance_information": "Test",
+    }
+    res = server.simulate_payment_batch("pain.001.001.09", [bad_rec])
+    assert res["valid"] is False
+    assert res["control_sum_by_currency"] == {}
+    assert len(res["schema_errors"]) > 0
+
+
+def test_simulate_payment_batch_multiple_duplicates(sample_record):
+    """Multiple matching rows are all tracked against the original row."""
+    rec1 = json_safe_record(sample_record)
+    rec2 = dict(rec1)
+    rec2["id"] = "MSG-2"
+    rec3 = dict(rec1)
+    rec3["id"] = "MSG-3"
+    res = server.simulate_payment_batch("pain.001.001.09", [rec1, rec2, rec3])
+    assert res["valid"] is False
+    assert len(res["duplicates"]) == 2
+    assert res["duplicates"][0]["row"] == 1
+    assert res["duplicates"][0]["matching_row"] == 0
+    assert res["duplicates"][1]["row"] == 2
+    assert res["duplicates"][1]["matching_row"] == 0
+
+
+def test_simulate_payment_batch_missing_accounts_not_duplicates():
+    """Rows with missing accounts are not flagged as duplicates of each other."""
+    rec1 = {"id": "MSG-1", "payment_amount": 10.0, "currency": "EUR"}
+    rec2 = {"id": "MSG-2", "payment_amount": 10.0, "currency": "EUR"}
+    res = server.simulate_payment_batch("pain.001.001.09", [rec1, rec2])
+    assert res["duplicates"] == []
+    assert res["unique_debtors"] == 0
+    assert res["unique_creditors"] == 0
+
+
+def test_simulate_payment_batch_amount_type_error():
+    """An unparseable amount causing TypeError/InvalidOperation is handled."""
+    rec = {
+        "id": "MSG-1",
+        "date": "2026-01-15T10:30:00",
+        "payment_amount": [10.0],
+        "currency": "EUR",
+        "debtor_account_IBAN": "DE89370400440532013000",
+        "creditor_account_IBAN": "GB29NWBK60161331926819",
+    }
+    res = server.simulate_payment_batch("pain.001.001.09", [rec])
+    assert res["control_sum_by_currency"] == {}
+    assert res["duplicates"] == []
+
+
+def test_simulate_payment_batch_missing_currency_does_not_sum():
+    """A record with amount but empty currency is not added to control sums."""
+    rec = {"id": "MSG-1", "payment_amount": 50.0}
+    res = server.simulate_payment_batch("pain.001.001.09", [rec])
+    assert res["control_sum_by_currency"] == {}

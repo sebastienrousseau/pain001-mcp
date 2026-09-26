@@ -4,7 +4,7 @@ Every tool the server registers, with the description an agent sees and the
 arguments it accepts. Generated from the running server by
 `scripts/tool_catalogue.py`; CI fails if this file drifts from the code.
 
-22 tools. Every one returns JSON; a failure is an `{"error": ...}`
+23 tools. Every one returns JSON; a failure is an `{"error": ...}`
 payload, never an exception.
 
 ## `list_message_types`
@@ -90,6 +90,12 @@ Arguments: `message_type`
 Validate records against a payment-scheme rulebook (e.g. SEPA).
 
 Arguments: `records`, `profile` (optional)
+
+## `simulate_payment_batch`
+
+Simulate and pre-flight a payment batch before XML generation.
+
+Arguments: `message_type`, `records`, `scheme` (optional)
 
 ## `migrate_records`
 

@@ -57,6 +57,7 @@ import importlib
 import io
 import json
 import unicodedata
+from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 from pathlib import Path
 from typing import Annotated, Any, Literal, cast
@@ -226,6 +227,33 @@ class SchemeResult(TypedDict, total=False):
     profile: str
     is_valid: bool
     violations: list[SchemeViolation]
+
+
+class DuplicateTransaction(TypedDict):
+    """An intra-batch duplicate payment transaction."""
+
+    row: int
+    matching_row: int
+    debtor_account_IBAN: str
+    creditor_account_IBAN: str
+    amount: str
+    currency: str
+    requested_execution_date: str
+
+
+class SimulatePaymentBatchResult(TypedDict, total=False):
+    """Simulation and pre-flight verdict over a payment batch."""
+
+    error: str
+    valid: bool
+    total: int
+    valid_count: int
+    control_sum_by_currency: dict[str, str]
+    unique_debtors: int
+    unique_creditors: int
+    duplicates: list[DuplicateTransaction]
+    schema_errors: list[RecordError]
+    scheme_violations: list[SchemeViolation]
 
 
 MigrateResult = TypedDict(
@@ -1071,6 +1099,141 @@ def validate_payment_scheme(
     }
 
 
+def simulate_payment_batch(
+    message_type: _MessageType,
+    records: Annotated[
+        list[dict],
+        Field(
+            description=(
+                "One or more flat payment records to simulate and pre-flight "
+                "before generating XML. " + _RECORDS_FIELD_GUIDE
+            )
+        ),
+    ],
+    scheme: Annotated[
+        str | None,
+        Field(
+            description=(
+                "Optional payment-scheme rulebook profile to enforce (e.g. "
+                "'sepa-sct', 'sepa-sdd', 'sepa-inst', 'xborder-ct'). Omit to "
+                "skip scheme-specific rulebook validation."
+            )
+        ),
+    ] = None,
+) -> SimulatePaymentBatchResult:
+    """Simulate and pre-flight a payment batch before XML generation.
+
+    Performs comprehensive pre-flight verification without generating XML
+    or staging files:
+    1. Validates records against the message type's JSON Schema.
+    2. Validates records against an optional payment-scheme rulebook.
+    3. Computes control sums grouped by currency.
+    4. Calculates unique debtor and creditor account counts.
+    5. Detects intra-batch duplicate transactions (same debtor, creditor,
+       amount, currency, and execution date).
+
+    Returns a structured verdict with totals, sums by currency, duplicate
+    findings, and schema/scheme errors.
+
+    Args:
+        message_type: A supported ISO 20022 pain message type.
+        records: One or more flat payment records to simulate.
+        scheme: Optional payment scheme profile to validate against.
+    """
+    validation_report = validate_records(message_type, records)
+    if "error" in validation_report:
+        return {"error": validation_report["error"]}
+
+    canonical_records = [
+        canonicalize_payment_record(record) for record in records
+    ]
+
+    sums: dict[str, Decimal] = {}
+    debtors: set[str] = set()
+    creditors: set[str] = set()
+    duplicates: list[DuplicateTransaction] = []
+    seen_txs: dict[tuple[str, str, str, str, str], int] = {}
+
+    for row_idx, record in enumerate(canonical_records):
+        debtor_iban = (
+            str(record.get("debtor_account_IBAN", "")).strip().upper()
+        )
+        if debtor_iban:
+            debtors.add(debtor_iban)
+
+        creditor_iban = (
+            str(record.get("creditor_account_IBAN", "")).strip().upper()
+        )
+        if creditor_iban:
+            creditors.add(creditor_iban)
+
+        curr = str(record.get("currency", "")).strip().upper()
+        date_val = str(record.get("requested_execution_date", "")).strip()
+
+        amt_raw = record.get("payment_amount")
+        amt_str = ""
+        if amt_raw is not None:
+            try:
+                amt_dec = Decimal(str(amt_raw))
+                amt_str = f"{amt_dec:.2f}"
+                if curr:
+                    sums[curr] = sums.get(curr, Decimal(0)) + amt_dec
+            except (InvalidOperation, TypeError):
+                amt_str = str(amt_raw).strip()
+
+        if debtor_iban and creditor_iban and amt_str and curr:
+            tx_key = (debtor_iban, creditor_iban, amt_str, curr, date_val)
+            if tx_key in seen_txs:
+                duplicates.append(
+                    {
+                        "row": row_idx,
+                        "matching_row": seen_txs[tx_key],
+                        "debtor_account_IBAN": debtor_iban,
+                        "creditor_account_IBAN": creditor_iban,
+                        "amount": amt_str,
+                        "currency": curr,
+                        "requested_execution_date": date_val,
+                    }
+                )
+            else:
+                seen_txs[tx_key] = row_idx
+
+    control_sum_by_currency = {
+        curr: f"{total:.2f}" for curr, total in sorted(sums.items())
+    }
+
+    schema_errors = validation_report.get("errors", [])
+    valid_count = validation_report.get("valid_count", 0)
+    total = validation_report.get("total", len(records))
+
+    scheme_violations: list[SchemeViolation] = []
+    scheme_valid = True
+    if scheme is not None:
+        scheme_res = validate_payment_scheme(records, profile=scheme)
+        if "error" in scheme_res:
+            return {"error": scheme_res["error"]}
+        scheme_violations = scheme_res.get("violations", [])
+        scheme_valid = scheme_res.get("is_valid", True)
+
+    is_valid = bool(
+        validation_report.get("valid", False)
+        and scheme_valid
+        and len(duplicates) == 0
+    )
+
+    return {
+        "valid": is_valid,
+        "total": total,
+        "valid_count": valid_count,
+        "control_sum_by_currency": control_sum_by_currency,
+        "unique_debtors": len(debtors),
+        "unique_creditors": len(creditors),
+        "duplicates": duplicates,
+        "schema_errors": schema_errors,
+        "scheme_violations": scheme_violations,
+    }
+
+
 def schema_resource(
     message_type: _MessageType,
 ) -> str:
@@ -1621,6 +1784,9 @@ server.tool(title="Inspect CSV template columns", annotations=_PURE_READ)(
 )
 server.tool(title="Validate against scheme rulebook", annotations=_PURE_READ)(
     validate_payment_scheme
+)
+server.tool(title="Simulate payment batch", annotations=_PURE_READ)(
+    simulate_payment_batch
 )
 server.tool(title="Migrate records between versions", annotations=_PURE_READ)(
     migrate_records
