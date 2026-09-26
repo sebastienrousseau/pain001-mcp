@@ -24,6 +24,9 @@ updates:
       # version-for-version release policy.
       - dependency-name: "pain001"
       - dependency-name: "pain001-loader-mt101"
+      # Build tooling / standalone CLI tools not managed as direct pip dependencies
+      - dependency-name: "poetry"
+      - dependency-name: "cyclonedx-bom"
 
 
   - package-ecosystem: "github-actions"
