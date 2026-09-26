@@ -90,6 +90,75 @@ class TestValidateRecords:
         assert "pain.999.001.01" in out["error"]
 
 
+class TestSimulatePaymentBatch:
+    """``simulate_payment_batch`` returns pre-flight analysis with exact keys."""
+
+    def test_valid_batch_payload_shape(self):
+        out = server.simulate_payment_batch(MT, [_valid_record()])
+        assert set(out) == {
+            "valid",
+            "total",
+            "valid_count",
+            "control_sum_by_currency",
+            "unique_debtors",
+            "unique_creditors",
+            "duplicates",
+            "schema_errors",
+            "scheme_violations",
+        }
+        assert out["valid"] is True
+        assert out["total"] == 1
+        assert out["valid_count"] == 1
+        assert out["control_sum_by_currency"] == {"EUR": "100.00"}
+        assert out["unique_debtors"] == 1
+        assert out["unique_creditors"] == 1
+        assert out["duplicates"] == []
+        assert out["schema_errors"] == []
+        assert out["scheme_violations"] == []
+
+    def test_duplicate_transaction_shape(self):
+        rec1 = _valid_record()
+        rec2 = dict(_valid_record())
+        rec2["id"] = "MSG-2"
+        rec2["payment_id"] = "E2E-2"
+        out = server.simulate_payment_batch(MT, [rec1, rec2])
+        assert out["valid"] is False
+        assert len(out["duplicates"]) == 1
+        dup = out["duplicates"][0]
+        assert set(dup) == {
+            "row",
+            "matching_row",
+            "debtor_account_IBAN",
+            "creditor_account_IBAN",
+            "amount",
+            "currency",
+            "requested_execution_date",
+        }
+        assert dup["row"] == 1
+        assert dup["matching_row"] == 0
+        assert dup["debtor_account_IBAN"] == rec1["debtor_account_IBAN"]
+        assert dup["creditor_account_IBAN"] == rec1["creditor_account_IBAN"]
+        assert dup["amount"] == "100.00"
+        assert dup["currency"] == "EUR"
+        assert (
+            dup["requested_execution_date"] == rec1["requested_execution_date"]
+        )
+
+    def test_unknown_message_type_is_an_error_payload(self):
+        out = server.simulate_payment_batch(
+            "pain.999.001.01", [_valid_record()]
+        )
+        assert set(out) == {"error"}
+        assert "pain.999.001.01" in out["error"]
+
+    def test_unknown_scheme_profile_is_an_error_payload(self):
+        out = server.simulate_payment_batch(
+            MT, [_valid_record()], scheme="invalid-scheme"
+        )
+        assert set(out) == {"error"}
+        assert out["error"]
+
+
 class TestValidateIdentifier:
     """``validate_identifier`` returns kind, value and verdict, plus the error."""
 

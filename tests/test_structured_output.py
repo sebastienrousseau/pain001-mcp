@@ -59,6 +59,11 @@ CALLS = {
     "parse_pain002": {"xml_file_path": "tests/fixtures/pain002_sample.xml"},
     "inspect_template": {"message_type": MT},
     "validate_payment_scheme": {"records": [RECORD]},
+    "simulate_payment_batch": {
+        "message_type": MT,
+        "records": [RECORD],
+        "scheme": "sepa-sct",
+    },
     "migrate_records": {
         "from_version": "pain.001.001.03",
         "to_version": MT,
@@ -110,6 +115,10 @@ def test_tool_result_validates_against_its_schema(name: str) -> None:
         ("get_corpus_file", {"scenario_id": "zz.none", "version": MT}),
         ("validate_identifier", {"kind": "lei", "value": "x"}),
         ("inspect_template", {"message_type": "pain.999.001.01"}),
+        (
+            "simulate_payment_batch",
+            {"message_type": "pain.999.001.01", "records": [RECORD]},
+        ),
     ],
 )
 def test_error_payloads_validate_too(name: str, args: dict) -> None:
