@@ -778,3 +778,16 @@ def test_convert_mt101_malformed_payload_returns_error():
     out = server.convert_mt101(":20:REF\n:30:260712\n")
     assert isinstance(out, dict)
     assert "error" in out
+
+
+def test_server_json_manifest_conforms_to_mcp_registry_schema():
+    """Assert server.json description adheres to the MCP Registry 100-character limit."""
+    manifest_path = Path(__file__).resolve().parents[1] / "server.json"
+    data = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert "description" in data
+    assert 1 <= len(data["description"]) <= 100
+    assert data["name"] == "io.github.sebastienrousseau/pain001-mcp"
+    assert data.get("version")
+    assert len(data.get("packages", [])) == 1
+    assert data["packages"][0]["registryType"] == "pypi"
+    assert data["packages"][0]["identifier"] == "pain001-mcp"

@@ -62,6 +62,11 @@ def _server_json_versions() -> tuple[str, str]:
     import json
 
     data = json.loads((ROOT / "server.json").read_text(encoding="utf-8"))
+    desc = data.get("description", "")
+    if len(desc) > 100:
+        raise ValueError(
+            f"server.json description length ({len(desc)}) exceeds the MCP Registry limit of 100 characters"
+        )
     pkgs = data.get("packages") or [{}]
     return str(data.get("version", "")), str(pkgs[0].get("version", ""))
 
