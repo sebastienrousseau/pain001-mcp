@@ -1553,14 +1553,14 @@ upload = ["paramiko (>=5.0,<6)"]
 
 [[package]]
 name = "pain001-loader-mt101"
-version = "0.0.65"
+version = "0.0.70"
 description = "Convert legacy SWIFT MT101 requests for transfer to ISO 20022 pain.001 flat records."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "pain001_loader_mt101-0.0.65-py3-none-any.whl", hash = "sha256:7ebd6abb62fe2e62ea262676a4167f8809b0faeff3a7140c47aa1e9421ec3864"},
-    {file = "pain001_loader_mt101-0.0.65.tar.gz", hash = "sha256:9046c7afa5ee7f1637897f450e307803d2313fb105baab9cda78dbd3cbde9b51"},
+    {file = "pain001_loader_mt101-0.0.70-py3-none-any.whl", hash = "sha256:aa8a886fdca4c57e07bd822d5b03c7bd042bee15a8c5e0f542e6016587eb5488"},
+    {file = "pain001_loader_mt101-0.0.70.tar.gz", hash = "sha256:742f9ad3b9500e1132878e3da304c2a07ba48fd74d0d321a737f04b6804354ff"},
 ]
 
 [package.dependencies]
