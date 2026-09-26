@@ -206,6 +206,12 @@ compatibility review. No stronger platform or stability guarantee is implied.
 
 ---
 
+## MCP Registry
+
+`mcp-name: io.github.sebastienrousseau/pain001-mcp`
+
+---
+
 ## License
 
 Dual-licensed under [Apache-2.0](LICENSE-APACHE) OR [MIT](LICENSE-MIT), at your
