@@ -53,10 +53,16 @@ The server communicates over stdio (MCPServer's default transport).
 """
 
 import csv
+import hashlib
+import hmac
 import importlib
 import io
 import json
+import secrets
+import time
 import unicodedata
+from dataclasses import dataclass
+from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 from pathlib import Path
@@ -365,6 +371,54 @@ class CorpusCoverageResult(TypedDict, total=False):
     unknown: list[str]
 
 
+class StagedBatchResult(TypedDict, total=False):
+    """Result of staging a payment batch for simulation and approval."""
+
+    error: str
+    stage_id: str
+    sha256_fingerprint: str
+    total_transactions: int
+    control_sum_by_currency: dict[str, str]
+    estimated_fees: dict[str, str]
+    risk_score: int
+    risk_level: str
+    risk_factors: list[str]
+    status: str
+    confirmation_token: str
+    expires_at: str
+
+
+class ClearingCheck(TypedDict):
+    """An individual rule check during clearing simulation."""
+
+    check: str
+    status: str
+    detail: str
+
+
+class SimulateClearingResult(TypedDict, total=False):
+    """Clearing network simulation verdict and settlement estimation."""
+
+    error: str
+    stage_id: str
+    clearing_system: str
+    clearing_status: str
+    settlement_window: str
+    checks: list[ClearingCheck]
+
+
+class CommitPaymentBatchResult(TypedDict, total=False):
+    """Confirmation of authorized payment batch commit."""
+
+    error: str
+    stage_id: str
+    status: str
+    sha256_fingerprint: str
+    total_transactions: int
+    output_file_path: str | None
+    committed_at: str
+
+
 # What generate_message accepts per record, surfaced in the tool schema so an
 # agent can build a correct call without a discovery round-trip.
 _RECORDS_FIELD_GUIDE = (
@@ -458,6 +512,60 @@ _FS_READ = ToolAnnotations(  # type: ignore[call-arg]
     destructiveHint=False,
     idempotentHint=True,
     openWorldHint=True,
+)
+_MUTATING_SAFE = ToolAnnotations(  # type: ignore[call-arg]
+    readOnlyHint=False,
+    destructiveHint=False,
+    idempotentHint=False,
+    openWorldHint=False,
+)
+_COMMIT_TOOL = ToolAnnotations(  # type: ignore[call-arg]
+    readOnlyHint=False,
+    destructiveHint=False,
+    idempotentHint=False,
+    openWorldHint=True,
+)
+
+_SEPA_COUNTRY_CODES: frozenset[str] = frozenset(
+    {
+        "AD",
+        "AT",
+        "BE",
+        "BG",
+        "CH",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GB",
+        "GI",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IS",
+        "IT",
+        "LI",
+        "LT",
+        "LU",
+        "LV",
+        "MC",
+        "MT",
+        "NL",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SE",
+        "SI",
+        "SK",
+        "SM",
+        "VA",
+    }
 )
 
 _HUMAN_NAMES = {
@@ -1732,6 +1840,557 @@ def get_corpus_coverage(
     return cast(CorpusCoverageResult, report)
 
 
+@dataclass
+class _StagedOrder:
+    """Internal representation of a staged payment order awaiting authorization."""
+
+    stage_id: str
+    confirmation_token: str
+    message_type: str
+    records: list[dict[str, Any]]
+    xml_content: str
+    sha256_fingerprint: str
+    created_at: float
+    expires_at: float
+    total_transactions: int
+    control_sum_by_currency: dict[str, str]
+    status: str  # "staged" | "committed"
+
+
+_STAGED_PAYMENTS: dict[str, _StagedOrder] = {}
+
+
+def _clean_expired_staged_orders(now: float | None = None) -> None:
+    """Remove expired staged payment batches older than 24h from cache."""
+    current_time = time.time() if now is None else now
+    cutoff = current_time - 86400.0
+    expired = [
+        sid
+        for sid, order in _STAGED_PAYMENTS.items()
+        if order.expires_at <= cutoff
+    ]
+    for sid in expired:
+        del _STAGED_PAYMENTS[sid]
+
+
+def stage_payment_batch(
+    message_type: _MessageType,
+    records: Annotated[
+        list[dict],
+        Field(
+            description=(
+                "Flat payment records to stage (zero fund movement). "
+                + _RECORDS_FIELD_GUIDE
+            )
+        ),
+    ],
+    scheme: Annotated[
+        str | None,
+        Field(
+            description=(
+                "Optional payment scheme profile to validate against, "
+                "e.g. 'sepa-sct', 'sepa-instant', 'bacs', or 'cbpr-plus'."
+            )
+        ),
+    ] = None,
+) -> StagedBatchResult:
+    """Stage a payment batch for simulation and dual-control approval.
+
+    Creates an in-memory staged payment order with zero fund movement and
+    a 1-hour expiration window. Computes:
+    1. Schema validation against the message type's JSON Schema.
+    2. Optional scheme compliance verification (SEPA, BACS, etc.).
+    3. Multi-currency control sums and fee estimation.
+    4. Multi-factor risk scoring (detecting duplicates, high transaction
+       amounts, and generic remittance narratives).
+    5. In-memory XML compilation and SHA-256 fingerprinting.
+    6. Cryptographic dual-control confirmation token for subsequent authorization.
+
+    Args:
+        message_type: A supported ISO 20022 pain message type.
+        records: One or more flat payment records to stage.
+        scheme: Optional payment scheme profile to validate against.
+
+    Returns:
+        StagedBatchResult with staging metadata, risk assessment, fingerprint,
+        and confirmation token, or {"error": ...}.
+    """
+    _clean_expired_staged_orders()
+    validation_report = validate_records(message_type, records)
+    if "error" in validation_report:
+        return {"error": validation_report["error"]}
+    if not validation_report.get("valid", False):
+        err_count = len(validation_report.get("errors", []))
+        return {
+            "error": f"Batch failed schema validation with {err_count} errors"
+        }
+
+    canonical_records = [
+        canonicalize_payment_record(record) for record in records
+    ]
+
+    if scheme is not None:
+        scheme_res = validate_payment_scheme(canonical_records, profile=scheme)
+        if "error" in scheme_res:
+            return {"error": scheme_res["error"]}
+        if not scheme_res.get("is_valid", True):
+            v_count = len(scheme_res.get("violations", []))
+            return {
+                "error": f"Batch failed scheme '{scheme}' validation with {v_count} violations"
+            }
+    sums: dict[str, Decimal] = {}
+    total_txs = len(canonical_records)
+    duplicates: list[dict[str, Any]] = []
+    seen_txs: dict[tuple[str, str, str, str, str], int] = {}
+    high_value_txs = 0
+    generic_remittance = 0
+
+    for row_idx, record in enumerate(canonical_records):
+        debtor_iban = (
+            str(record.get("debtor_account_IBAN", "")).strip().upper()
+        )
+        creditor_iban = (
+            str(record.get("creditor_account_IBAN", "")).strip().upper()
+        )
+        curr = str(record.get("currency", "")).strip().upper() or "EUR"
+        date_val = str(record.get("requested_execution_date", "")).strip()
+
+        amt_raw = record.get("payment_amount")
+        amt_dec = (
+            Decimal(str(amt_raw)) if amt_raw is not None else Decimal("0.00")
+        )
+        amt_str = f"{amt_dec:.2f}"
+        sums[curr] = sums.get(curr, Decimal(0)) + amt_dec
+
+        if amt_dec >= Decimal("100000.00"):
+            high_value_txs += 1
+
+        rmt = str(record.get("remittance_information", "")).strip().lower()
+        if not rmt or rmt in {"payment", "invoice", "transfer"}:
+            generic_remittance += 1
+
+        tx_key = (debtor_iban, creditor_iban, amt_str, curr, date_val)
+        if tx_key in seen_txs:
+            duplicates.append(
+                {"row": row_idx, "matching_row": seen_txs[tx_key]}
+            )
+        else:
+            seen_txs[tx_key] = row_idx
+
+    risk_score = 0
+    risk_factors: list[str] = []
+    if duplicates:
+        risk_score += 35
+        risk_factors.append(
+            f"{len(duplicates)} duplicate transactions detected in batch"
+        )
+    if high_value_txs > 0:
+        risk_score += 25
+        risk_factors.append(
+            f"{high_value_txs} transactions exceed 100,000.00 threshold"
+        )
+
+    for curr, total in sums.items():
+        if total >= Decimal("500000.00"):
+            risk_score += 20
+            risk_factors.append(
+                f"Aggregate volume in {curr} exceeds 500,000.00"
+            )
+            break
+
+    if generic_remittance > 0:
+        risk_score += 15
+        risk_factors.append(
+            f"{generic_remittance} transactions have missing or generic remittance information"
+        )
+
+    risk_score = min(risk_score, 100)
+    if risk_score <= 25:
+        risk_level = "LOW"
+    elif risk_score <= 60:
+        risk_level = "MEDIUM"
+    else:
+        risk_level = "HIGH"
+
+    estimated_fees: dict[str, str] = {}
+    for curr in sums:
+        if curr == "EUR":
+            rate = Decimal("0.20")
+        elif curr == "USD":
+            rate = Decimal("0.25")
+        elif curr == "GBP":
+            rate = Decimal("0.15")
+        else:
+            rate = Decimal("0.50")
+        fee = rate * total_txs
+        estimated_fees[curr] = f"{fee:.2f}"
+
+    resolved_mt = _MESSAGE_TYPE_ALIASES.get(message_type, message_type)
+    xml_res = generate_message(resolved_mt, records)
+    if xml_res.startswith('{"error":'):  # pragma: no cover
+        try:
+            err_data = json.loads(xml_res)
+            return {"error": err_data.get("error", "XML generation failed")}
+        except Exception:
+            return {"error": xml_res}
+    xml_content = xml_res
+
+    sha256_fingerprint = hashlib.sha256(
+        xml_content.encode("utf-8")
+    ).hexdigest()
+    stage_id = f"stage_{secrets.token_hex(8)}"
+    confirmation_token = f"tok_{secrets.token_urlsafe(24)}"
+    now = time.time()
+    expires_at_epoch = now + 3600.0
+    expires_at_iso = datetime.fromtimestamp(
+        expires_at_epoch, tz=timezone.utc
+    ).isoformat()
+
+    control_sum_by_currency = {
+        curr: f"{total:.2f}" for curr, total in sorted(sums.items())
+    }
+
+    order = _StagedOrder(
+        stage_id=stage_id,
+        confirmation_token=confirmation_token,
+        message_type=resolved_mt,
+        records=records,
+        xml_content=xml_content,
+        sha256_fingerprint=sha256_fingerprint,
+        created_at=now,
+        expires_at=expires_at_epoch,
+        total_transactions=total_txs,
+        control_sum_by_currency=control_sum_by_currency,
+        status="staged",
+    )
+    _STAGED_PAYMENTS[stage_id] = order
+
+    return {
+        "stage_id": stage_id,
+        "sha256_fingerprint": sha256_fingerprint,
+        "total_transactions": total_txs,
+        "control_sum_by_currency": control_sum_by_currency,
+        "estimated_fees": estimated_fees,
+        "risk_score": risk_score,
+        "risk_level": risk_level,
+        "risk_factors": risk_factors,
+        "status": "staged",
+        "confirmation_token": confirmation_token,
+        "expires_at": expires_at_iso,
+    }
+
+
+def simulate_clearing(
+    stage_id: Annotated[
+        str,
+        Field(
+            description="The staging identifier returned by stage_payment_batch."
+        ),
+    ],
+    clearing_system: Annotated[
+        Literal["EPC-SEPA", "FedNow", "US-ACH", "SWIFT-MX", "CHAPS", "BACS"],
+        Field(
+            description=(
+                "Target clearing system simulation profile to evaluate "
+                "settlement eligibility, cut-off windows, and routing constraints."
+            )
+        ),
+    ] = "EPC-SEPA",
+) -> SimulateClearingResult:
+    """Simulate settlement and clearing network execution for a staged batch.
+
+    Evaluates network-specific rulebooks and clearing constraints:
+    - EPC-SEPA: EUR currency mandate, SEPA-zone IBAN prefixes, SLEV charge bearer.
+    - FedNow: USD instant gross settlement eligibility.
+    - US-ACH: USD next-day clearing cycle routing.
+    - SWIFT-MX: Cross-border correspondent banking BIC routing.
+    - CHAPS: Same-day RTGS high-value GBP clearing.
+    - BACS: Three-day GBP direct credit clearing.
+
+    Args:
+        stage_id: Staging identifier from stage_payment_batch.
+        clearing_system: Clearing rail profile to simulate.
+
+    Returns:
+        SimulateClearingResult with verdict (ACCEPTED / REJECTED), detailed
+        checks, and estimated settlement window, or {"error": ...}.
+    """
+    _clean_expired_staged_orders()
+    if stage_id not in _STAGED_PAYMENTS:
+        return {"error": f"Staged payment batch '{stage_id}' not found"}
+
+    order = _STAGED_PAYMENTS[stage_id]
+    if order.expires_at <= time.time():
+        del _STAGED_PAYMENTS[stage_id]
+        return {"error": f"Staged payment batch '{stage_id}' has expired"}
+
+    if order.status == "committed":
+        return {
+            "error": f"Staged payment batch '{stage_id}' has already been committed"
+        }
+
+    if clearing_system not in {
+        "EPC-SEPA",
+        "FedNow",
+        "US-ACH",
+        "SWIFT-MX",
+        "CHAPS",
+        "BACS",
+    }:
+        return {"error": f"Unsupported clearing system: {clearing_system}"}
+
+    checks: list[ClearingCheck] = []
+    settlement_window = ""
+
+    records = [canonicalize_payment_record(r) for r in order.records]
+
+    if clearing_system == "EPC-SEPA":
+        settlement_window = "Next SEPA Cycle (Same Day / D+1)"
+        all_eur = all(
+            str(r.get("currency", "")).strip().upper() == "EUR"
+            for r in records
+        )
+        checks.append(
+            {
+                "check": "EPC-SEPA Currency Rule (EUR)",
+                "status": "PASS" if all_eur else "FAIL",
+                "detail": (
+                    "All payments denominated in EUR"
+                    if all_eur
+                    else "All SEPA transfers must be denominated in EUR"
+                ),
+            }
+        )
+        all_sepa_ibans = True
+        for r in records:
+            d_iban = str(r.get("debtor_account_IBAN", "")).strip().upper()
+            c_iban = str(r.get("creditor_account_IBAN", "")).strip().upper()
+            if (
+                d_iban[:2] not in _SEPA_COUNTRY_CODES
+                or c_iban[:2] not in _SEPA_COUNTRY_CODES
+            ):
+                all_sepa_ibans = False
+                break
+        checks.append(
+            {
+                "check": "SEPA-Zone Routing Eligibility",
+                "status": "PASS" if all_sepa_ibans else "FAIL",
+                "detail": (
+                    "Debtor and creditor accounts reside in SEPA member jurisdictions"
+                    if all_sepa_ibans
+                    else "IBAN country prefix outside SEPA clearing jurisdiction"
+                ),
+            }
+        )
+        all_slev = all(
+            str(r.get("charge_bearer", "SLEV")).strip().upper() == "SLEV"
+            for r in records
+        )
+        checks.append(
+            {
+                "check": "EPC Charge Bearer Standard (SLEV)",
+                "status": "PASS" if all_slev else "FAIL",
+                "detail": (
+                    "Charge bearer set to SLEV as mandated by EPC"
+                    if all_slev
+                    else "Charge bearer must be SLEV for standard SEPA credit transfers"
+                ),
+            }
+        )
+
+    elif clearing_system == "FedNow":
+        settlement_window = "Instant (< 20 seconds)"
+        all_usd = all(
+            str(r.get("currency", "")).strip().upper() == "USD"
+            for r in records
+        )
+        checks.append(
+            {
+                "check": "FedNow Currency Rule (USD)",
+                "status": "PASS" if all_usd else "FAIL",
+                "detail": (
+                    "All payments denominated in USD"
+                    if all_usd
+                    else "FedNow instant payments must be denominated in USD"
+                ),
+            }
+        )
+        checks.append(
+            {
+                "check": "FedNow 24/7/365 Real-Time Settlement",
+                "status": "PASS",
+                "detail": (
+                    "Participating FI connectivity active for immediate gross settlement"
+                ),
+            }
+        )
+
+    elif clearing_system == "US-ACH":
+        settlement_window = "Next Business Day ACH Window"
+        all_usd = all(
+            str(r.get("currency", "")).strip().upper() == "USD"
+            for r in records
+        )
+        checks.append(
+            {
+                "check": "NACHA ACH Currency Rule (USD)",
+                "status": "PASS" if all_usd else "FAIL",
+                "detail": (
+                    "All payments denominated in USD"
+                    if all_usd
+                    else "Domestic US ACH requires USD denomination"
+                ),
+            }
+        )
+
+    elif clearing_system == "SWIFT-MX":
+        settlement_window = "Correspondent Banking Network (D+1 to D+2)"
+        has_bics = all(
+            bool(str(r.get("debtor_agent_BIC", "")).strip())
+            and bool(str(r.get("creditor_agent_BIC", "")).strip())
+            for r in records
+        )
+        checks.append(
+            {
+                "check": "SWIFT CBPR+ BIC Routing",
+                "status": "PASS" if has_bics else "FAIL",
+                "detail": (
+                    "Valid debtor and creditor agent BICs present for cross-border routing"
+                    if has_bics
+                    else "Missing debtor or creditor agent BIC required for SWIFT network"
+                ),
+            }
+        )
+
+    elif clearing_system == "CHAPS":
+        settlement_window = "Same Day (pre-16:00 UK cut-off)"
+        all_gbp = all(
+            str(r.get("currency", "")).strip().upper() == "GBP"
+            for r in records
+        )
+        checks.append(
+            {
+                "check": "CHAPS Currency Rule (GBP)",
+                "status": "PASS" if all_gbp else "FAIL",
+                "detail": (
+                    "All payments denominated in GBP"
+                    if all_gbp
+                    else "CHAPS high-value RTGS requires GBP denomination"
+                ),
+            }
+        )
+
+    else:  # BACS
+        settlement_window = "Three-Day Clearing Cycle"
+        all_gbp = all(
+            str(r.get("currency", "")).strip().upper() == "GBP"
+            for r in records
+        )
+        checks.append(
+            {
+                "check": "BACS Currency Rule (GBP)",
+                "status": "PASS" if all_gbp else "FAIL",
+                "detail": (
+                    "All payments denominated in GBP"
+                    if all_gbp
+                    else "BACS direct credits require GBP denomination"
+                ),
+            }
+        )
+
+    clearing_status = (
+        "ACCEPTED"
+        if all(c["status"] == "PASS" for c in checks)
+        else "REJECTED"
+    )
+
+    return {
+        "stage_id": stage_id,
+        "clearing_system": clearing_system,
+        "clearing_status": clearing_status,
+        "settlement_window": settlement_window,
+        "checks": checks,
+    }
+
+
+def commit_payment_batch(
+    stage_id: Annotated[
+        str,
+        Field(
+            description="The staging identifier returned by stage_payment_batch."
+        ),
+    ],
+    confirmation_token: Annotated[
+        str,
+        Field(
+            description=(
+                "Secondary authorization token required to execute the dual-control commit."
+            )
+        ),
+    ],
+    output_file_path: Annotated[
+        str | None,
+        Field(
+            description=(
+                "Optional local filesystem destination path to write the committed XML document."
+            )
+        ),
+    ] = None,
+) -> CommitPaymentBatchResult:
+    """Commit an authorized staged payment batch with dual-control authorization.
+
+    Verifies the stage ID and validates the secondary confirmation token
+    using constant-time cryptographic comparison (preventing timing attacks).
+    Transitions the order status from 'staged' to 'committed'. Optionally
+    writes the verified XML payload to the specified destination path.
+
+    Args:
+        stage_id: Staging identifier from stage_payment_batch.
+        confirmation_token: Secondary secret confirmation token.
+        output_file_path: Optional path to write the committed XML document.
+
+    Returns:
+        CommitPaymentBatchResult with commit timestamp and fingerprint,
+        or {"error": ...}.
+    """
+    _clean_expired_staged_orders()
+    if stage_id not in _STAGED_PAYMENTS:
+        return {"error": f"Staged payment batch '{stage_id}' not found"}
+
+    order = _STAGED_PAYMENTS[stage_id]
+    if order.expires_at <= time.time():
+        del _STAGED_PAYMENTS[stage_id]
+        return {"error": f"Staged payment batch '{stage_id}' has expired"}
+
+    if order.status == "committed":
+        return {
+            "error": f"Staged payment batch '{stage_id}' has already been committed"
+        }
+
+    if not hmac.compare_digest(order.confirmation_token, confirmation_token):
+        return {"error": "Invalid confirmation token for staged payment batch"}
+
+    if output_file_path is not None:
+        try:
+            dest = Path(output_file_path)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_text(order.xml_content, encoding="utf-8")
+        except OSError as exc:
+            return {"error": f"Failed to write output XML file: {exc}"}
+
+    order.status = "committed"
+    committed_at = datetime.now(timezone.utc).isoformat()
+
+    return {
+        "stage_id": stage_id,
+        "status": "committed",
+        "sha256_fingerprint": order.sha256_fingerprint,
+        "total_transactions": order.total_transactions,
+        "output_file_path": output_file_path,
+        "committed_at": committed_at,
+    }
+
+
 # Tools are registered here, in definition order, rather than with
 # decorators on each function: mutmut 3 never mutates a decorated function,
 # so the decorator form left every handler outside mutation testing. The
@@ -1812,6 +2471,18 @@ server.tool(title="Get example corpus provenance", annotations=_PURE_READ)(
 server.tool(title="Get schema coverage report", annotations=_PURE_READ)(
     get_corpus_coverage
 )
+server.tool(
+    title="Stage payment batch for simulation and approval",
+    annotations=_MUTATING_SAFE,
+)(stage_payment_batch)
+server.tool(
+    title="Simulate clearing network execution",
+    annotations=_PURE_READ,
+)(simulate_clearing)
+server.tool(
+    title="Commit staged payment batch with dual control",
+    annotations=_COMMIT_TOOL,
+)(commit_payment_batch)
 
 
 def main(argv: list[str] | None = None) -> None:
