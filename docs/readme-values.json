@@ -51,7 +51,7 @@
   "DEVELOPMENT_COMMANDS": "poetry install\npoetry run make check\npoetry run make security\npoetry run python scripts/tool_catalogue.py --check\npoetry run python scripts/render_readme.py --check",
   "DEVELOPMENT_CONTENT": "Coverage is gated at 100% line and branch. See [CONTRIBUTING.md](CONTRIBUTING.md)\nand [DEVELOPMENT.md](DEVELOPMENT.md). README is generated from the canonical\nlayout and `docs/readme-values.json`; CI rejects drift.",
   "SECURITY_CONTENT": "Treat requests as untrusted. Protect HTTP listeners and avoid real secrets in\nlogs. Tools may read authorized input paths. Corrections never patch IBANs,\nBICs, amounts or currencies.",
-  "DOCUMENTATION_INDEX": "[User manual](docs/index.md) · [API reference](docs/index.md) ·\n[Developer guide](DEVELOPMENT.md) ·\n[Family map](https://github.com/sebastienrousseau/pain001#the-pain001-ecosystem)",
+  "DOCUMENTATION_INDEX": "[What is pain.001?](https://pain001.com/pain-001/) · [User manual](docs/index.md) · [API reference](docs/index.md) ·\n[Developer guide](DEVELOPMENT.md) ·\n[Family map](https://github.com/sebastienrousseau/pain001#the-pain001-ecosystem)",
   "STABILITY_CONTENT": "Versions advance in coordinated `0.0.1` steps with core. The maintainer opens\nreleases; this branch does not bump versions. Contract and output changes need\ncompatibility review. No stronger platform or stability guarantee is implied.",
   "LICENSE_CONTENT": "Dual-licensed under [Apache-2.0](LICENSE-APACHE) OR [MIT](LICENSE-MIT), at your\noption. See [LICENSE](LICENSE). Dependencies retain their own licences."
 }
