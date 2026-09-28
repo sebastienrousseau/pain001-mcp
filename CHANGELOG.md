@@ -9,8 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.0.72] - 2026-09-28
+
+Aligns on pain001 0.0.72: ISO 20022 schemas and Schematron validation rules,
+SLSA Level 3 provenance attestations, and dual-control simulation tools.
+
+### Added
+
+- Dual-control execution tools: `stage_payment_batch`, `simulate_clearing`,
+  and `commit_payment_batch` MCP tools to govern autonomous agent execution
+  with zero upfront fund movement, fee calculations, risk scores, and
+  cryptographic tokens for human-in-the-loop sign-off.
+- Multi-rail clearing simulation covering SEPA, FedNow, US-ACH, SWIFT-MX,
+  CHAPS, and BACS payment rails before final execution.
+- SLSA Level 3 provenance attestations for container images and package distributions.
+
 ### Changed
 
+- Version aligned to `0.0.72` across all `pain001` suite packages.
 - The README and the documentation index link
   [What is pain.001?](https://pain001.com/pain-001/), an explainer of the
   message's structure, versions and a schema-valid example.
