@@ -41,6 +41,9 @@ RECORD = {
     "remittance_information": "Invoice 1",
 }
 
+_staged_for_clearing = server.stage_payment_batch(MT, [RECORD])
+_staged_for_commit = server.stage_payment_batch(MT, [RECORD])
+
 CALLS = {
     "list_message_types": {},
     "get_required_fields": {"message_type": MT},
@@ -75,6 +78,15 @@ CALLS = {
     "get_corpus_file": {"scenario_id": "gb.fps.single", "version": MT},
     "get_corpus_provenance": {"scenario_id": "gb.fps.single", "version": MT},
     "get_corpus_coverage": {"version": MT},
+    "stage_payment_batch": {"message_type": MT, "records": [RECORD]},
+    "simulate_clearing": {
+        "stage_id": _staged_for_clearing["stage_id"],
+        "clearing_system": "EPC-SEPA",
+    },
+    "commit_payment_batch": {
+        "stage_id": _staged_for_commit["stage_id"],
+        "confirmation_token": _staged_for_commit["confirmation_token"],
+    },
 }
 
 
@@ -118,6 +130,18 @@ def test_tool_result_validates_against_its_schema(name: str) -> None:
         (
             "simulate_payment_batch",
             {"message_type": "pain.999.001.01", "records": [RECORD]},
+        ),
+        (
+            "stage_payment_batch",
+            {"message_type": "pain.999.001.01", "records": [RECORD]},
+        ),
+        (
+            "simulate_clearing",
+            {"stage_id": "stage_nonexistent", "clearing_system": "EPC-SEPA"},
+        ),
+        (
+            "commit_payment_batch",
+            {"stage_id": "stage_nonexistent", "confirmation_token": "tok_bad"},
         ),
     ],
 )

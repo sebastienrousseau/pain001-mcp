@@ -4,6 +4,9 @@ Model Context Protocol server exposing the
 [pain001](https://github.com/sebastienrousseau/pain001) ISO 20022 library
 as agent tools.
 
+New to the message format? [What is pain.001?](https://pain001.com/pain-001/)
+explains its structure, versions and a complete, schema-valid example.
+
 ```{toctree}
 :maxdepth: 2
 :caption: Contents

@@ -333,3 +333,90 @@ class TestGetCorpusFile:
         out = server.get_corpus_file("zz.none.none", MT)
         assert set(out) == {"error"}
         assert out["error"]
+
+
+class TestStagePaymentBatch:
+    """``stage_payment_batch`` returns staging metadata and risk assessment."""
+
+    def test_staged_batch_has_exact_payload_shape(self):
+        out = server.stage_payment_batch(MT, [_valid_record()])
+        assert set(out) == {
+            "stage_id",
+            "sha256_fingerprint",
+            "total_transactions",
+            "control_sum_by_currency",
+            "estimated_fees",
+            "risk_score",
+            "risk_level",
+            "risk_factors",
+            "status",
+            "confirmation_token",
+            "expires_at",
+        }
+        assert out["status"] == "staged"
+        assert out["total_transactions"] == 1
+        assert out["control_sum_by_currency"] == {"EUR": "100.00"}
+        assert out["risk_level"] in {"LOW", "MEDIUM", "HIGH"}
+        assert out["stage_id"].startswith("stage_")
+        assert out["confirmation_token"].startswith("tok_")
+
+    def test_unknown_message_type_is_an_error_payload(self):
+        out = server.stage_payment_batch("pain.999.001.01", [_valid_record()])
+        assert set(out) == {"error"}
+        assert "pain.999.001.01" in out["error"]
+
+
+class TestSimulateClearing:
+    """``simulate_clearing`` returns network simulation verdict with exact keys."""
+
+    def test_simulation_payload_shape(self):
+        staged = server.stage_payment_batch(MT, [_valid_record()])
+        out = server.simulate_clearing(staged["stage_id"], "EPC-SEPA")
+        assert set(out) == {
+            "stage_id",
+            "clearing_system",
+            "clearing_status",
+            "settlement_window",
+            "checks",
+        }
+        assert out["stage_id"] == staged["stage_id"]
+        assert out["clearing_system"] == "EPC-SEPA"
+        assert out["clearing_status"] in {"ACCEPTED", "REJECTED"}
+        for chk in out["checks"]:
+            assert set(chk) == {"check", "status", "detail"}
+            assert chk["status"] in {"PASS", "FAIL"}
+
+    def test_missing_stage_id_is_an_error_payload(self):
+        out = server.simulate_clearing("stage_unknown", "EPC-SEPA")
+        assert set(out) == {"error"}
+        assert "stage_unknown" in out["error"]
+
+
+class TestCommitPaymentBatch:
+    """``commit_payment_batch`` returns dual-control commit confirmation."""
+
+    def test_commit_payload_shape(self):
+        staged = server.stage_payment_batch(MT, [_valid_record()])
+        out = server.commit_payment_batch(
+            staged["stage_id"], staged["confirmation_token"]
+        )
+        assert set(out) == {
+            "stage_id",
+            "status",
+            "sha256_fingerprint",
+            "total_transactions",
+            "output_file_path",
+            "committed_at",
+        }
+        assert out["status"] == "committed"
+        assert out["stage_id"] == staged["stage_id"]
+        assert out["sha256_fingerprint"] == staged["sha256_fingerprint"]
+        assert out["output_file_path"] is None
+
+    def test_invalid_confirmation_token_is_an_error_payload(self):
+        staged = server.stage_payment_batch(MT, [_valid_record()])
+        out = server.commit_payment_batch(
+            staged["stage_id"], "invalid_secret_token"
+        )
+        assert set(out) == {"error"}
+        assert "Invalid confirmation token" in out["error"]

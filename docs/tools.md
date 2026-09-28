@@ -4,7 +4,7 @@ Every tool the server registers, with the description an agent sees and the
 arguments it accepts. Generated from the running server by
 `scripts/tool_catalogue.py`; CI fails if this file drifts from the code.
 
-23 tools. Every one returns JSON; a failure is an `{"error": ...}`
+26 tools. Every one returns JSON; a failure is an `{"error": ...}`
 payload, never an exception.
 
 ## `list_message_types`
@@ -144,3 +144,21 @@ Arguments: `scenario_id`, `version`, `variant` (optional)
 Return the schema coverage verdict of one message type's coverage set.
 
 Arguments: `version`
+
+## `stage_payment_batch`
+
+Stage a payment batch for simulation and dual-control approval.
+
+Arguments: `message_type`, `records`, `scheme` (optional)
+
+## `simulate_clearing`
+
+Simulate settlement and clearing network execution for a staged batch.
+
+Arguments: `stage_id`, `clearing_system` (optional)
+
+## `commit_payment_batch`
+
+Commit an authorized staged payment batch with dual-control authorization.
+
+Arguments: `stage_id`, `confirmation_token`, `output_file_path` (optional)
