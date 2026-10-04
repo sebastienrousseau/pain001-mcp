@@ -19,7 +19,12 @@
   <a href="{{REPO_URL}}/blob/main/docs/POLICIES.md"><img src="https://img.shields.io/badge/{{MIN_TOOLCHAIN_BADGE_LABEL}}-93450a.svg?style=for-the-badge&logo={{ECOSYSTEM_LOGO}}" alt="{{MIN_TOOLCHAIN_TEXT}}" /></a>
 </p>
 
+<p align="center">
+  <img src=".github/demo.gif" alt="{{PROJECT_NAME}} Demo" width="100%" />
+</p>
+
 ---
+
 
 ## Contents
 
