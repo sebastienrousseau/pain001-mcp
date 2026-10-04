@@ -1,4 +1,4 @@
-.PHONY: help install dev test lint format type-check security clean examples doc-coverage check
+.PHONY: help install dev test lint format type-check security clean examples doc-coverage check demo
 
 # Mutation score floor for the tool handlers: 75.8% (1200 of 1584) on
 # 2026-09-28 with dual-control simulation tools.
@@ -65,3 +65,8 @@ mutate: ## Mutation testing over the tool handlers (mutmut 3, config in pyprojec
 	$(POETRY) run python scripts/mutation_gate.py --floor $(MUTATION_FLOOR)
 
 check: lint type-check test doc-coverage examples ## Run all gates
+
+demo: ## Render terminal demo GIF using VHS
+	@command -v vhs >/dev/null 2>&1 || { echo "vhs not found. Install from https://github.com/charmbracelet/vhs" >&2; exit 1; }
+	PATH="$(CURDIR)/.venv/bin:$$PATH" vhs .github/demo.tape
+

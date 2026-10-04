@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Nothing yet.
 
+## [0.0.73] - 2026-10-04
+
+### Added
+
+- Added animated terminal demo (`.github/demo.gif`) and `.github/demo.tape` with `make demo` target.
+- Added normalized dual-licensing structure with `LICENSES/Apache-2.0.txt` and `LICENSES/MIT.txt`.
+
+### Changed
+
+- Updated `glama.json` manifest with normalized `Apache-2.0 OR MIT` SPDX license and bumped version to `0.0.73`.
+
 ## [0.0.72] - 2026-09-28
 
 Aligns on pain001 0.0.72: ISO 20022 schemas and Schematron validation rules,
@@ -545,6 +556,8 @@ prompt.
 - Versioning aligned with `pain001` and `pain001-lsp`: the three packages
   in the suite ship under matching release numbers
 
+[0.0.73]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.73
+[0.0.72]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.72
 [0.0.54]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.54
 [0.0.53]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.53
 [0.0.52]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.52

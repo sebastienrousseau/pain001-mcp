@@ -19,6 +19,10 @@
   <a href="https://github.com/sebastienrousseau/pain001-mcp/blob/main/docs/POLICIES.md"><img src="https://img.shields.io/badge/Python-3.10%2B-93450a.svg?style=for-the-badge&logo=python" alt="Python 3.10 or newer" /></a>
 </p>
 
+<p align="center">
+  <img src=".github/demo.gif" alt="pain001-mcp Demo" width="100%" />
+</p>
+
 ---
 
 ## Contents
