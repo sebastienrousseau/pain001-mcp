@@ -21,3 +21,6 @@ mutmut>=3.7.0,<4
 tomli>=2 ; python_version < "3.11"
 packaging>=23
 pip-audit
+# Complexity gate: scripts/check_complexity.py and complexipy.
+radon>=6.0
+complexipy>=8.1

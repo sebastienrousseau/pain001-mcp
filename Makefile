@@ -1,4 +1,4 @@
-.PHONY: help install dev test lint format type-check security clean examples doc-coverage check demo
+.PHONY: help install dev test lint format type-check complexity security clean examples doc-coverage check demo
 
 # Mutation score floor for the tool handlers: 75.8% (1200 of 1584) on
 # 2026-09-28 with dual-control simulation tools.
@@ -33,6 +33,10 @@ format: ## Auto-format code (ruff fix + black)
 type-check: ## Run mypy type checking
 	$(POETRY) run mypy pain001_mcp/
 
+complexity: ## Complexity gate against the committed baselines
+	$(POETRY) run python scripts/check_complexity.py
+	$(POETRY) run complexipy pain001_mcp scripts benches examples fuzz --max-complexity-allowed 15 --quiet
+
 security: ## Run security scan (bandit)
 	$(POETRY) run bandit -r pain001_mcp/ -c pyproject.toml 2>/dev/null || \
 		$(POETRY) run bandit -r pain001_mcp/ -ll
@@ -64,7 +68,7 @@ mutate: ## Mutation testing over the tool handlers (mutmut 3, config in pyprojec
 	$(POETRY) run mutmut export-cicd-stats
 	$(POETRY) run python scripts/mutation_gate.py --floor $(MUTATION_FLOOR)
 
-check: lint type-check test doc-coverage examples ## Run all gates
+check: lint type-check complexity test doc-coverage examples ## Run all gates
 
 demo: ## Render terminal demo GIF using VHS
 	@command -v vhs >/dev/null 2>&1 || { echo "vhs not found. Install from https://github.com/charmbracelet/vhs" >&2; exit 1; }

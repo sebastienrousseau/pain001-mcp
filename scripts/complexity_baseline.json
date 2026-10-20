@@ -1,0 +1,44 @@
+{
+  "pain001_mcp/server.py": {
+    "*file*": {
+      "file_lines": 2501
+    },
+    "simulate_payment_batch": {
+      "cyclomatic": 19,
+      "lines": 133
+    },
+    "stage_payment_batch": {
+      "cyclomatic": 28,
+      "lines": 205
+    },
+    "simulate_clearing": {
+      "cyclomatic": 40,
+      "lines": 231
+    },
+    "validate_records": {
+      "lines": 62
+    },
+    "migrate_records": {
+      "lines": 62
+    },
+    "sanitize_to_iso20022_charset": {
+      "lines": 63
+    },
+    "list_corpus_files": {
+      "lines": 71
+    },
+    "commit_payment_batch": {
+      "lines": 76
+    }
+  },
+  "scripts/tool_catalogue.py": {
+    "render": {
+      "cyclomatic": 11
+    }
+  },
+  "benches/bench_generate.py": {
+    "render": {
+      "lines": 61
+    }
+  }
+}

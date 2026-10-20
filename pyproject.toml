@@ -50,6 +50,9 @@ mutmut = "^3.7.0"
 # backport the conformance gate does not run there at all.
 tomli = { version = ">=2", python = "<3.11" }
 packaging = ">=23"
+# Complexity gate (scripts/check_complexity.py, complexipy).
+radon = ">=6.0"
+complexipy = { version = ">=8.1", python = "<3.16" }
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
