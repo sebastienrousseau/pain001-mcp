@@ -22,8 +22,10 @@ pain001-mcp = "pain001_mcp.server:main"
 python = ">=3.10,<4.0"
 pain001 = {version = ">=0.0.71", extras = ["fast"]}
 pain001-loader-mt101 = ">=0.0.1"
-# mcp < 1.28.1 is affected by a published advisory (Dependabot alert #3).
-mcp = ">=1.28.1,<3"
+# mcp < 1.30.0 and 2.0.x/2.1.x are affected by GHSA-84m7-p3x7-pcfv
+# (streamable HTTP, which this server serves); < 1.28.1 also by
+# Dependabot alert #3.
+mcp = ">=1.30.0,!=2.0.*,!=2.1.*,<3"
 # Security floor for MCP's transitive async runtime (Dependabot #12–#20).
 anyio = ">=4.14.2,<5"
 # Security floors for MCP's transitive HTTP, JWT and crypto stack, so no

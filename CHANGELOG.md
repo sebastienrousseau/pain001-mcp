@@ -31,8 +31,9 @@ fuzzing of the text-taking tools.
 
 ### Security
 
-- Floor the advised runtime dependencies so no affected release can
-  resolve: `mcp >= 1.28.1`, `httpx2 >= 2.12.0`, `httpcore2 >= 2.10.0`,
+- Constrain the advised runtime dependencies so no affected release can
+  resolve: `mcp >= 1.30.0, != 2.0.*, != 2.1.*` (GHSA-84m7-p3x7-pcfv,
+  streamable HTTP), `httpx2 >= 2.12.0`, `httpcore2 >= 2.10.0`,
   `pyjwt[crypto] >= 2.15.0` and `cryptography >= 50.0.0`. The earlier
   fixes (#107-#109) only moved `poetry.lock`.
 - Pin every `pip install` in the workflows and the Dockerfile by hash
