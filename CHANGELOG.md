@@ -23,6 +23,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docstrings of `simulate_payment_batch` and `stage_payment_batch` now render
   their numbered lists in the API reference without docutils errors.
 
+## [0.0.74] - 2026-10-20
+
+Hygiene release: every advised dependency floored in the manifest,
+every CI and container install pinned, a complexity gate, and Atheris
+fuzzing of the text-taking tools.
+
+### Security
+
+- Floor the advised runtime dependencies so no affected release can
+  resolve: `mcp >= 1.28.1`, `httpx2 >= 2.12.0`, `httpcore2 >= 2.10.0`,
+  `pyjwt[crypto] >= 2.15.0` and `cryptography >= 50.0.0`. The earlier
+  fixes (#107-#109) only moved `poetry.lock`.
+- Pin every `pip install` in the workflows and the Dockerfile by hash
+  (`requirements/{runtime,ci,docs,fuzz}.txt`, installed through
+  `scripts/ci-install.sh`) and the `python:3.14-slim` base image by
+  digest (OpenSSF Scorecard Pinned-Dependencies).
+
+### Added
+
+- Atheris fuzzing of the text-taking tools (`fuzz/fuzz_tools.py`,
+  `fuzz.yml`), with a seeded run of the same harness in the test suite.
+- A complexity gate (`scripts/check_complexity.py`, complexipy) against
+  committed baselines that may only shrink; `make complexity`.
+
+### Changed
+
+- Dependencies: mcp 2.3.0, mypy 2.4.0, ruff 0.17.1, black 26.10.1,
+  tomli 2.5.0, types-jsonschema 4.26.0.20261006, virtualenv 21.14.11 in
+  the build set, and the github-actions group (upload-artifact 7.0.2,
+  setup-node 7.1.0, scorecard-action 2.5.0, codeql-action 4.39.0,
+  sbom-action 0.24.3).
+- The Docker build takes the core branch as `PAIN001_REF` instead of a
+  pip spec in `PAIN001_PIP_SPEC`.
+- `CITATION.cff` carries the current version again (it had stayed at
+  0.0.72).
+- README badges follow the canonical layout; the Build badge points at
+  the `ci.yml` workflow and the Docs badge is a valid static badge.
+
+### Fixed
+
+- The suite-consistency check compared this tree with the core's PyPI
+  version and so reported a released tree as never released.
+
 ## [0.0.73] - 2026-10-04
 
 ### Added
@@ -568,6 +611,7 @@ prompt.
 - Versioning aligned with `pain001` and `pain001-lsp`: the three packages
   in the suite ship under matching release numbers
 
+[0.0.74]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.74
 [0.0.73]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.73
 [0.0.72]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.72
 [0.0.54]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.54
