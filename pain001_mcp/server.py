@@ -1233,6 +1233,7 @@ def simulate_payment_batch(
 
     Performs comprehensive pre-flight verification without generating XML
     or staging files:
+
     1. Validates records against the message type's JSON Schema.
     2. Validates records against an optional payment-scheme rulebook.
     3. Computes control sums grouped by currency.
@@ -1898,6 +1899,7 @@ def stage_payment_batch(
 
     Creates an in-memory staged payment order with zero fund movement and
     a 1-hour expiration window. Computes:
+
     1. Schema validation against the message type's JSON Schema.
     2. Optional scheme compliance verification (SEPA, BACS, etc.).
     3. Multi-currency control sums and fee estimation.
