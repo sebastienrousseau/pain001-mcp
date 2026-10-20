@@ -69,4 +69,3 @@ check: lint type-check test doc-coverage examples ## Run all gates
 demo: ## Render terminal demo GIF using VHS
 	@command -v vhs >/dev/null 2>&1 || { echo "vhs not found. Install from https://github.com/charmbracelet/vhs" >&2; exit 1; }
 	PATH="$(CURDIR)/.venv/bin:$$PATH" vhs .github/demo.tape
-

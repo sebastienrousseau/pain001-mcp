@@ -579,20 +579,35 @@ def test_a_scheduled_check_compares_the_tree_to_what_is_published() -> None:
     )
 
 
-def test_a_release_workflow_publishes_on_a_tag() -> None:
-    """`pain001` had none: 96 tests, and releases cut by hand."""
+def test_a_release_is_published_by_a_workflow_not_by_hand() -> None:
+    """`pain001` had none: 96 tests, and releases cut by hand.
+
+    What this is really asserting is that publishing is *automated*, so
+    the tree and the index cannot drift apart through somebody forgetting
+    a step. There is more than one honest way to wire that up: a tag push
+    can trigger the upload directly, or the tag can create a GitHub
+    release which triggers it. `bankstatementparser` uses the second and
+    was failing this check purely on wording -- the earlier version
+    matched the literal `tags:` and nothing else, which made a correctly
+    automated repository look manual.
+    """
     workflows = ROOT / ".github" / "workflows"
     texts = [p.read_text(encoding="utf-8") for p in workflows.glob("*.yml")]
-    assert any("tags:" in t and ("pypi" in t.lower()) for t in texts), (
-        "no workflow publishes to PyPI on a tag; releases are manual and so "
-        "the tree and the index can disagree"
+    triggered_by_tag_or_release = [
+        t for t in texts if "tags:" in t or "release:" in t
+    ]
+    assert any(
+        "pypi" in t.lower() for t in triggered_by_tag_or_release
+    ), (
+        "no workflow publishes to PyPI on a tag or a published release; "
+        "releases are manual and so the tree and the index can disagree"
     )
 
 
 # ---------------------------------------------------------------------------
 # This file
 # ---------------------------------------------------------------------------
-CANONICAL_SHA256 = "387a0c93a502a8e774013b3f0a7bdf63153563c7b081d1f5d201ada9a53061fa"  # fmt: skip # noqa: E501
+CANONICAL_SHA256 = "950a6ea78e17a122ec688f30b79c95fdd29a23e0ed78bb8c46eeb623d6e6e1de"  # fmt: skip # noqa: E501
 
 
 def test_this_file_is_the_canonical_copy() -> None:
