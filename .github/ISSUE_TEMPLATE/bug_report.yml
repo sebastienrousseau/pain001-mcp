@@ -71,7 +71,7 @@ body:
     id: error_output
     attributes:
       label: Error Output
-      description: The {"error": ...} payload or stack trace returned.
+      description: 'The {"error": ...} payload or stack trace returned.'
     validations:
       required: true
   - type: textarea
