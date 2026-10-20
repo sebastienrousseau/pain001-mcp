@@ -79,12 +79,22 @@ def published_version(distribution: str) -> str | None:
         return None
 
 
-def tree_version() -> str:
-    """The version this checkout declares."""
+def _metadata(key: str) -> str:
+    """``key`` from this checkout's Poetry or PEP 621 metadata."""
     with (ROOT / "pyproject.toml").open("rb") as handle:
         data = tomllib.load(handle)
     poetry = data.get("tool", {}).get("poetry", {})
-    return str(poetry.get("version") or data["project"]["version"])
+    return str(poetry.get(key) or data["project"][key])
+
+
+def tree_name() -> str:
+    """The distribution this checkout builds."""
+    return _metadata("name")
+
+
+def tree_version() -> str:
+    """The version this checkout declares."""
+    return _metadata("version")
 
 
 def check() -> tuple[list[str], dict[str, object]]:
@@ -95,12 +105,16 @@ def check() -> tuple[list[str], dict[str, object]]:
 
     core_published = published[MEMBERS[0]]
 
-    # 1. The tree must not disagree with what was released. A bump that
-    #    was never tagged looks exactly like this and nothing else
-    #    notices.
-    if core_published and core_published != tree:
+    # 1. The tree must not disagree with what this package released. A
+    #    bump that was never tagged looks exactly like this and nothing
+    #    else notices. The tree is compared with its own distribution,
+    #    not the core's: in a member repository the core's number says
+    #    nothing about whether this tree was released.
+    name = tree_name()
+    own_published = published.get(name)
+    if own_published and own_published != tree:
         problems.append(
-            f"{MEMBERS[0]}: tree is {tree} but PyPI has {core_published}. "
+            f"{name}: tree is {tree} but PyPI has {own_published}. "
             f"Either the release was never tagged, or the tree is behind."
         )
 
