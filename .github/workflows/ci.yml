@@ -130,13 +130,22 @@ jobs:
         run: scripts/ci-install.sh requirements/ci.txt
 
       - name: Ruff check
-        run: ruff check pain001_mcp/ tests/
+        run: ruff check pain001_mcp/ tests/ benches/ scripts/ fuzz/
 
       - name: Black check
-        run: black --check pain001_mcp/ tests/ benches/
+        run: black --check pain001_mcp/ tests/ benches/ scripts/ fuzz/
 
       - name: Mypy
         run: mypy pain001_mcp/
+
+      # Per function: cyclomatic <= 10, cognitive <= 15, Halstead
+      # difficulty <= 30, <= 60 lines; <= 500 lines per file. Offenders that
+      # predate the gate are baselined (scripts/complexity_baseline.json,
+      # complexipy-snapshot.json); a new or worse one fails.
+      - name: Complexity
+        run: |
+          python scripts/check_complexity.py
+          complexipy pain001_mcp scripts benches examples fuzz --max-complexity-allowed 15 --quiet
 
   examples:
     name: Examples
