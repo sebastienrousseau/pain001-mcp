@@ -1,9 +1,24 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Local hooks mirroring the cheap CI gates. Install once with
+# `poetry run pre-commit install`; CI remains the authority.
+#
+# ruff, black and mypy run from the Poetry environment rather than from
+# pinned hook repositories, so their versions come from poetry.lock and
+# cannot drift from what CI runs. A pinned black older than the locked
+# one reformatted code CI accepts, and pre-commit passes filenames
+# explicitly, which bypasses [tool.black] extend-exclude; together they
+# rewrote the vendored tests/test_suite_conformance.py and broke its
+# checksum, so the formatters exclude it here as well.
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
       - id: trailing-whitespace
+      # README.md is rendered from the shared portfolio template, whose
+      # trailing blank line render_readme.py --check pins; the fixtures
+      # are byte-exact parser inputs.
       - id: end-of-file-fixer
+        exclude: ^(README\.md|docs/readme-template\.md|tests/fixtures/)
       - id: check-yaml
       - id: check-json
       - id: check-toml
@@ -14,23 +29,23 @@ repos:
         args: ['--fix=lf']
       - id: detect-private-key
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.4
+  - repo: local
     hooks:
       - id: ruff
-        args: [--fix]
-      - id: ruff-format
-
-  - repo: https://github.com/psf/black
-    rev: 24.4.2
-    hooks:
+        name: ruff
+        entry: poetry run ruff check --fix --force-exclude
+        language: system
+        types: [python]
+        exclude: ^tests/test_suite_conformance\.py$
       - id: black
-        args: ['--line-length=79']
-
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.0
-    hooks:
+        name: black
+        entry: poetry run black
+        language: system
+        types: [python]
+        exclude: ^tests/test_suite_conformance\.py$
       - id: mypy
-        args: ['--config-file=pyproject.toml']
+        name: mypy
+        entry: poetry run mypy pain001_mcp/
+        language: system
         pass_filenames: false
-        entry: mypy pain001_mcp/
+        types: [python]
