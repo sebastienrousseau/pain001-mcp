@@ -4,42 +4,45 @@
 # The container runs the FastMCP server over stdio so an MCP client can
 # launch it directly with ``docker run -i --rm pain001-mcp``.
 
-FROM python:3.14-slim AS builder
+FROM python:3.14-slim@sha256:a2b82f3c48559aa0a8446d9af49826b6e2b2016f4cd2afabfe6013ec53729170 AS builder
 
 WORKDIR /build
 
 ENV PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# Pin can be overridden at build-time so the GHCR pipeline can install
-# pain001 from a matching feat/* branch before the parent release hits
-# PyPI; the default resolves the published version once available. The
-# git client is needed only when the override spec is a git+ URL; it
-# stays in this build stage and never ships in the final image.
-# Empty by default: `pip install .` resolves the pain001 version this
-# release declares in pyproject.toml, so the image tracks the release
-# without a second pin to forget. Set it to a git+ spec to build against
-# an unreleased core branch.
-ARG PAIN001_PIP_SPEC=""
+# Empty by default: the image installs the pain001 release pinned in
+# requirements/runtime.txt. The GHCR pipeline sets it to a core branch
+# name (main, feat/*, fix/*) to build against an unreleased core branch
+# before that release reaches PyPI. The git client is needed only for
+# that override; it stays in this build stage and never ships in the
+# final image.
+ARG PAIN001_REF=""
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/*
 
 # pyproject.toml carries ``readme = "README.md"``, so README.md must be
-# present at build-time for ``pip install .`` to resolve the package
-# metadata.
+# present at build-time to resolve the package metadata.
+COPY requirements/runtime.txt ./requirements/runtime.txt
 COPY pyproject.toml README.md ./
 COPY pain001_mcp ./pain001_mcp
 
-# Install pain001 from PyPI (or the override spec), then layer this
-# package on top inside a self-contained virtualenv.
+# Every dependency comes hash-pinned from requirements/runtime.txt. The
+# package (and the optional core branch) are built as wheels and
+# installed with --no-deps, so nothing resolves an unpinned version.
 RUN python -m venv /opt/venv \
-    && /opt/venv/bin/pip install --upgrade pip \
-    && if [ -n "$PAIN001_PIP_SPEC" ]; then /opt/venv/bin/pip install "$PAIN001_PIP_SPEC"; fi \
-    && /opt/venv/bin/pip install .
+    && /opt/venv/bin/pip install --require-hashes -r requirements/runtime.txt \
+    && if [ -n "$PAIN001_REF" ]; then \
+         git clone --quiet --depth 1 --branch "$PAIN001_REF" \
+           https://github.com/sebastienrousseau/pain001 /build/pain001-core \
+         && /opt/venv/bin/pip wheel --no-deps -w /build/wheels /build/pain001-core; \
+       fi \
+    && /opt/venv/bin/pip wheel --no-deps -w /build/wheels . \
+    && /opt/venv/bin/pip install --no-deps --force-reinstall /build/wheels/*.whl \
+    && /opt/venv/bin/pip check
 
-
-FROM python:3.14-slim
+FROM python:3.14-slim@sha256:a2b82f3c48559aa0a8446d9af49826b6e2b2016f4cd2afabfe6013ec53729170
 
 LABEL org.opencontainers.image.title="pain001-mcp" \
       org.opencontainers.image.description="Model Context Protocol server for the pain001 ISO 20022 library." \

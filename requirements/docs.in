@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2026 Sebastien Rousseau <sebastian.rousseau@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+# Sphinx toolchain for .github/workflows/docs.yml on top of the runtime
+# set (autodoc imports the package). Hash-pinned in docs.txt.
+# Regenerate:
+#   uv pip compile --generate-hashes --universal --python-version 3.10 \
+#     requirements/docs.in -o requirements/docs.txt
+-r runtime.in
+sphinx
+furo
+myst-parser[linkify]
+sphinx-autodoc-typehints
+sphinx-copybutton
