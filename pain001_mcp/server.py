@@ -1253,9 +1253,7 @@ def simulate_payment_batch(
     if "error" in validation_report:
         return {"error": validation_report["error"]}
 
-    canonical_records = [
-        canonicalize_payment_record(record) for record in records
-    ]
+    canonical = [canonicalize_payment_record(r) for r in records]
 
     sums: dict[str, Decimal] = {}
     debtors: set[str] = set()
@@ -1263,7 +1261,7 @@ def simulate_payment_batch(
     duplicates: list[DuplicateTransaction] = []
     seen_txs: dict[tuple[str, str, str, str, str], int] = {}
 
-    for row_idx, record in enumerate(canonical_records):
+    for row_idx, record in enumerate(canonical):
         debtor_iban = (
             str(record.get("debtor_account_IBAN", "")).strip().upper()
         )
@@ -1927,12 +1925,10 @@ def stage_payment_batch(
             "error": f"Batch failed schema validation with {err_count} errors"
         }
 
-    canonical_records = [
-        canonicalize_payment_record(record) for record in records
-    ]
+    canonical = [canonicalize_payment_record(r) for r in records]
 
     if scheme is not None:
-        scheme_res = validate_payment_scheme(canonical_records, profile=scheme)
+        scheme_res = validate_payment_scheme(canonical, profile=scheme)
         if "error" in scheme_res:
             return {"error": scheme_res["error"]}
         if not scheme_res.get("is_valid", True):
@@ -1941,13 +1937,13 @@ def stage_payment_batch(
                 "error": f"Batch failed scheme '{scheme}' validation with {v_count} violations"
             }
     sums: dict[str, Decimal] = {}
-    total_txs = len(canonical_records)
+    total_txs = len(canonical)
     duplicates: list[dict[str, Any]] = []
     seen_txs: dict[tuple[str, str, str, str, str], int] = {}
     high_value_txs = 0
     generic_remittance = 0
 
-    for row_idx, record in enumerate(canonical_records):
+    for row_idx, record in enumerate(canonical):
         debtor_iban = (
             str(record.get("debtor_account_IBAN", "")).strip().upper()
         )

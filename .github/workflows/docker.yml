@@ -70,7 +70,7 @@ jobs:
             org.opencontainers.image.source=https://github.com/sebastienrousseau/pain001-mcp
             org.opencontainers.image.licenses=Apache-2.0
 
-      - name: Resolve pain001 install spec for build
+      - name: Resolve pain001 core branch for build
         id: pin
         env:
           # Untrusted input (a fork's branch name) passed through the
@@ -80,11 +80,11 @@ jobs:
           if [[ "$REF" == main || "$REF" == feat/* || "$REF" == fix/* ]] && \
              git ls-remote --exit-code --heads \
                https://github.com/sebastienrousseau/pain001 "$REF" >/dev/null 2>&1; then
-            echo "spec=pain001 @ git+https://github.com/sebastienrousseau/pain001@${REF}" >> "$GITHUB_OUTPUT"
+            echo "ref=${REF}" >> "$GITHUB_OUTPUT"
           else
-            # No override: the image installs the pain001 version this
-            # release declares in pyproject.toml.
-            echo "spec=" >> "$GITHUB_OUTPUT"
+            # No override: the image installs the pain001 release pinned
+            # in requirements/runtime.txt.
+            echo "ref=" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Build (and push on non-PR events)
@@ -98,7 +98,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            PAIN001_PIP_SPEC=${{ steps.pin.outputs.spec }}
+            PAIN001_REF=${{ steps.pin.outputs.ref }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: true

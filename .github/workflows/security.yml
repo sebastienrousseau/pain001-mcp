@@ -27,7 +27,7 @@ jobs:
           cache: "pip"
 
       - name: Install bandit
-        run: pip install bandit
+        run: pip install --require-hashes -r requirements/ci.txt
 
       - name: Run bandit
         run: bandit -r pain001_mcp/ -ll
@@ -50,17 +50,7 @@ jobs:
           # Untrusted input (a fork's branch name) passed through the
           # environment, never interpolated into the script.
           REF: ${{ github.head_ref || github.ref_name }}
-        run: |
-          python -m pip install --upgrade pip
-          pip install pip-audit
-          if [[ "$REF" == main || "$REF" == feat/* || "$REF" == fix/* ]] && \
-             git ls-remote --exit-code --heads \
-               https://github.com/sebastienrousseau/pain001 "$REF" >/dev/null 2>&1; then
-            pip install "pain001 @ git+https://github.com/sebastienrousseau/pain001@${REF}"
-          else
-            pip install "pain001>=0.0.54,<0.0.55"
-          fi
-          pip install .
+        run: scripts/ci-install.sh requirements/ci.txt
 
       - name: Audit installed packages
         run: pip-audit

@@ -1,0 +1,20 @@
+[
+  {
+    "path": "pain001_mcp/server.py",
+    "file_name": "server.py",
+    "functions": [
+      {
+        "name": "simulate_payment_batch",
+        "complexity": 27
+      },
+      {
+        "name": "stage_payment_batch",
+        "complexity": 39
+      },
+      {
+        "name": "simulate_clearing",
+        "complexity": 66
+      }
+    ]
+  }
+]

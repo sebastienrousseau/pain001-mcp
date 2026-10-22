@@ -16,6 +16,7 @@ import asyncio
 import pytest
 
 pytest.importorskip("mcp")
+compat = pytest.importorskip("pain001_mcp._mcp_compat")
 
 import pain001_mcp.server as server  # noqa: E402
 
@@ -117,8 +118,9 @@ def test_the_call_table_covers_every_tool_that_runs_in_process() -> None:
 def test_tool_result_validates_against_its_schema(name: str) -> None:
     """A real call through the server succeeds and carries structured content."""
     result = asyncio.run(server.server.call_tool(name, CALLS[name]))
-    assert result.is_error is False, result.content[0].text[:300]
-    assert result.structured_content is not None
+    text = compat.result_content(result)[0].text[:300]
+    assert not compat.result_is_error(result), text
+    assert compat.result_structured(result) is not None
 
 
 @pytest.mark.parametrize(
@@ -148,5 +150,9 @@ def test_tool_result_validates_against_its_schema(name: str) -> None:
 def test_error_payloads_validate_too(name: str, args: dict) -> None:
     """The {"error": ...} answer is part of every declared shape."""
     result = asyncio.run(server.server.call_tool(name, args))
-    assert result.is_error is False
-    assert set(result.structured_content) == {"error"}
+    assert not compat.result_is_error(result)
+    # mcp 1.x serialises the declared shape's other keys as None; 2.x
+    # omits them. Either way the error is the only key with a value.
+    payload = compat.result_structured(result)
+    filled = {key for key, value in payload.items() if value is not None}
+    assert filled == {"error"}
