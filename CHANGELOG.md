@@ -9,19 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-
-- Quoted the error-output description in `.github/ISSUE_TEMPLATE/bug_report.yml`;
-  the unquoted `{"error": ...}` made the file invalid YAML, so GitHub could not
-  load the bug-report form. `tests/test_repository_yaml.py` now parses every
-  shipped YAML file.
-- `.pre-commit-config.yaml` now runs ruff, black and mypy from the Poetry
-  environment, so hook versions follow `poetry.lock`. The old pinned hooks
-  (black 24, ruff 0.4, an isolated mypy without dependencies) failed on a clean
-  tree and rewrote the vendored `tests/test_suite_conformance.py`, the rendered
-  README and the parser fixtures.
-- Docstrings of `simulate_payment_batch` and `stage_payment_batch` now render
-  their numbered lists in the API reference without docutils errors.
+Nothing yet.
 
 ## [0.0.74] - 2026-10-20
 
@@ -74,6 +62,17 @@ fuzzing of the text-taking tools.
 
 - The suite-consistency check compared this tree with the core's PyPI
   version and so reported a released tree as never released.
+- Quoted the error-output description in `.github/ISSUE_TEMPLATE/bug_report.yml`;
+  the unquoted `{"error": ...}` made the file invalid YAML, so GitHub could not
+  load the bug-report form. `tests/test_repository_yaml.py` now parses every
+  shipped YAML file.
+- `.pre-commit-config.yaml` now runs ruff, black and mypy from the Poetry
+  environment, so hook versions follow `poetry.lock`. The old pinned hooks
+  (black 24, ruff 0.4, an isolated mypy without dependencies) failed on a clean
+  tree and rewrote the vendored `tests/test_suite_conformance.py`, the rendered
+  README and the parser fixtures.
+- Docstrings of `simulate_payment_batch` and `stage_payment_batch` now render
+  their numbered lists in the API reference without docutils errors.
 
 ## [0.0.73] - 2026-10-04
 
