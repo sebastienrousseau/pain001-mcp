@@ -8,7 +8,7 @@
 #   uv pip compile --generate-hashes --universal --python-version 3.10 \
 #     requirements/runtime.in -o requirements/runtime.txt
 pain001[fast]>=0.0.74,<1
-pain001-loader-mt101>=0.0.1
+pain001-loader-mt101>=0.0.74,<1
 # mcp < 1.30.0 and 2.0.x/2.1.x are affected by GHSA-84m7-p3x7-pcfv
 # (streamable HTTP, which this server serves); < 1.28.1 also by
 # Dependabot alert #3.
