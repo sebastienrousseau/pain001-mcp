@@ -36,6 +36,9 @@ fuzzing of the text-taking tools.
   streamable HTTP), `httpx2 >= 2.12.0`, `httpcore2 >= 2.10.0`,
   `pyjwt[crypto] >= 2.15.0` and `cryptography >= 50.0.0`. The earlier
   fixes (#107-#109) only moved `poetry.lock`.
+- Floor `certifi >= 2026.10.19` in the release build tooling
+  (`requirements/build.in`, PYSEC-2026-4320); `build.txt` had resolved
+  2026.7.22.
 - Pin every `pip install` in the workflows and the Dockerfile by hash
   (`requirements/{runtime,ci,docs,fuzz}.txt`, installed through
   `scripts/ci-install.sh`) and the `python:3.14-slim` base image by
