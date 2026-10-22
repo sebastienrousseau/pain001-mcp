@@ -1666,14 +1666,14 @@ files = [
 
 [[package]]
 name = "pain001"
-version = "0.0.71"
+version = "0.0.74"
 description = "Pain001 is a Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Data."
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "pain001-0.0.71-py3-none-any.whl", hash = "sha256:fe088017b25de278a9f21ae1ce42d40f85b51a6bebb46dd3d8373c54167d0ef9"},
-    {file = "pain001-0.0.71.tar.gz", hash = "sha256:89af4ac4a472c20f49a1a735dce9dec145ca94b447f3fecbc656ec26adba7498"},
+    {file = "pain001-0.0.74-py3-none-any.whl", hash = "sha256:21db90d2178b6dbb55dd66dbc5b09421450bb4b1fd2063bd0c34c941db193b04"},
+    {file = "pain001-0.0.74.tar.gz", hash = "sha256:927c6a831b74f937906ea1f072ea3177ea9248c9ac847bba7d5a13e593eb56cf"},
 ]
 
 [package.dependencies]
@@ -1687,15 +1687,15 @@ rich = ">=15.0.0,<16"
 xmlschema = ">=4.3.2,<5.0.0"
 
 [package.extras]
-api = ["fastapi (>=0.141.1)", "uvicorn[standard] (>=0.53.0)"]
+api = ["fastapi (>=0.141.1)", "uvicorn[standard] (>=0.54.0)"]
 fast = ["lxml (>=6.1.3,<7)"]
-gpg = ["python-gnupg (>=0.5,<1)"]
+gpg = ["python-gnupg (>=0.5.7,<1)"]
 lsp = ["pygls (>=2.1,<3)"]
-mcp = ["mcp (>=2.1.1,<3)"]
-otel = ["opentelemetry-api (>=1.27,<2)", "opentelemetry-exporter-otlp-proto-http (>=1.27,<2)", "opentelemetry-sdk (>=1.27,<2)"]
+mcp = ["mcp (>=2.3.0,<3)"]
+otel = ["certifi (>=2026.10.19)", "opentelemetry-api (>=1.27,<2)", "opentelemetry-exporter-otlp-proto-http (>=1.27,<2)", "opentelemetry-sdk (>=1.27,<2)"]
 parquet = ["pyarrow (>=25.0.1,<26.0.0)"]
 redis = ["redis (>=8.1.0,<9)"]
-rules = ["cel-python (>=0.5,<0.6)", "holidays (>=0.105,<1)"]
+rules = ["cel-python (>=0.5,<0.6)", "holidays (>=0.106,<1)"]
 upload = ["paramiko (>=5.0,<6)"]
 
 [[package]]
@@ -3015,4 +3015,4 @@ docs = ["jinja2", "sphinx", "sphinx_rtd_theme"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "368911ed1e1bf1d45c048d93a0fd9e4214ccc38393330b885a54ee9a09c90f1a"
+content-hash = "4c6972f69338548b0e78e964c261bb27cc195a34ed00a9cc5342cb1436bdb73f"
