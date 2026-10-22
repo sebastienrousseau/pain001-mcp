@@ -50,6 +50,8 @@ fuzzing of the text-taking tools.
 
 ### Changed
 
+- Require `pain001 >= 0.0.74, < 1`: the family releases 0.0.74 together,
+  the core first. The floor had stayed at 0.0.71.
 - Dependencies: mcp 2.3.0, mypy 2.4.0, ruff 0.17.1, black 26.10.1,
   tomli 2.5.0, types-jsonschema 4.26.0.20261006, virtualenv 21.14.11 in
   the build set, and the github-actions group (upload-artifact 7.0.2,
