@@ -35,6 +35,9 @@ httpx2 = ">=2.12.0"
 httpcore2 = { version = ">=2.10.0", markers = "sys_platform != 'emscripten'" }
 pyjwt = { version = ">=2.15.0", extras = ["crypto"] }
 cryptography = ">=50.0.0"
+# mcp 2.x requires opentelemetry-api; < 1.45.1 parses tracestate
+# without a bound (GHSA-xcq7-p3pf-p88h, OpenSSF Scorecard alert #61).
+opentelemetry-api = ">=1.45.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=9.0.3,<10.0.0"

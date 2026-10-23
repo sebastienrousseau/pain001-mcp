@@ -22,7 +22,8 @@ fuzzing of the text-taking tools.
 - Constrain the advised runtime dependencies so no affected release can
   resolve: `mcp >= 1.30.0, != 2.0.*, != 2.1.*` (GHSA-84m7-p3x7-pcfv,
   streamable HTTP), `httpx2 >= 2.12.0`, `httpcore2 >= 2.10.0`,
-  `pyjwt[crypto] >= 2.15.0` and `cryptography >= 50.0.0`. The earlier
+  `pyjwt[crypto] >= 2.15.0`, `cryptography >= 50.0.0` and
+  `opentelemetry-api >= 1.45.1` (GHSA-xcq7-p3pf-p88h). The earlier
   fixes (#107-#109) only moved `poetry.lock`.
 - Floor `certifi >= 2026.10.19` in the release build tooling
   (`requirements/build.in`, PYSEC-2026-4320); `build.txt` had resolved
