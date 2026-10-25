@@ -9,7 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing yet.
+### Security
+
+- The release build tooling (`requirements/build.txt`) floors
+  `filelock >= 4.2.1` (GHSA-9vhv-jxww-xfm5, GHSA-567q-5qvw-pf92,
+  GHSA-v4x8-3wr5-3wq8; it pinned 4.0.10) and `virtualenv >= 21.14.13`
+  (GHSA-cx6f-vjhg-g3cc; it pinned 21.14.11). filelock 4.2.1 needs
+  Python 3.11, so the tree is compiled for 3.12, the Python of every job
+  that installs it.
+- The CI tree (`requirements/ci.txt`) pinned filelock 4.1.0 on Python
+  3.10, for which no fixed filelock exists. pip-audit, which pulls it in,
+  now installs only on 3.11+ with `filelock >= 4.2.1`; it runs on 3.12.
+- The same tree floors `dulwich >= 1.2.19` (it pinned 1.2.17), in place
+  of Dependabot #130, whose recompile dropped the platform markers.
 
 ## [0.0.74] - 2026-10-20
 
