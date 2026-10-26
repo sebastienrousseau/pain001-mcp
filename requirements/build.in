@@ -5,6 +5,6 @@ twine
 anyio>=4.14.2,<5
 # Security floors for transitive dependencies
 dulwich>=1.2.9
-virtualenv>=21.14.8
+virtualenv>=21.14.13
 urllib3>=2.8.0
 certifi>=2026.10.19
