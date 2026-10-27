@@ -2,7 +2,7 @@
 """Example: progressively validate a payment record with the MCP tools.
 
 Usage:
-    pip install pain001-mcp     # requires Python 3.10+
+    pip install pain001-mcp     # requires Python 3.11+
     python examples/02_validate_pipeline.py
 
 Shows how an agent would chain three tools to give a user fine-grained

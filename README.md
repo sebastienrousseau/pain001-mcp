@@ -16,7 +16,7 @@
   <a href="docs/index.md"><img src="https://img.shields.io/badge/docs-source-blue?style=for-the-badge&labelColor=555555&logo=readthedocs" alt="Docs" height="28" /></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/pain001-mcp"><img src="https://img.shields.io/ossf-scorecard/github.com/sebastienrousseau/pain001-mcp?style=for-the-badge&label=OpenSSF%20Scorecard&logo=openssf" alt="OpenSSF Scorecard" height="28" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT-blue.svg?style=for-the-badge" alt="License: Apache-2.0 OR MIT" height="28" /></a>
-  <a href="https://github.com/sebastienrousseau/pain001-mcp/blob/main/docs/POLICIES.md"><img src="https://img.shields.io/badge/Python-3.10%2B-93450a.svg?style=for-the-badge&logo=python" alt="Python 3.10 or newer" height="28" /></a>
+  <a href="https://github.com/sebastienrousseau/pain001-mcp/blob/main/docs/POLICIES.md"><img src="https://img.shields.io/badge/Python-3.11%2B-93450a.svg?style=for-the-badge&logo=python" alt="Python 3.11 or newer" height="28" /></a>
 </p>
 
 <p align="center">
@@ -74,7 +74,7 @@ branch. No PyPI release or version bump is part of this work.
 
 ## Requirements
 
-Python 3.10 or newer. CI tests 3.10–3.14 on Linux. See
+Python 3.11 or newer. CI tests 3.11–3.14 on Linux. See
 [toolchain policy](docs/POLICIES.md); no distro-system-Python claim is made.
 
 ---

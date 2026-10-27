@@ -5,7 +5,7 @@
 # `pip install` in .github/workflows is pinned (OpenSSF Scorecard
 # Pinned-Dependencies); scripts/ci-install.sh installs it.
 # Regenerate:
-#   uv pip compile --generate-hashes --universal --python-version 3.10 \
+#   uv pip compile --generate-hashes --universal --python-version 3.11 \
 #     requirements/ci.in -o requirements/ci.txt
 -r runtime.in
 pytest>=9.0.3,<10.0.0
@@ -18,13 +18,12 @@ types-jsonschema>=4,<5
 bandit>=1.7.0,<2
 interrogate>=1.7.0,<2
 mutmut>=3.7.0,<4
-tomli>=2 ; python_version < "3.11"
 packaging>=23
 # pip-audit pulls in filelock (through cachecontrol). filelock <= 4.2.0 has
-# GHSA-9vhv-jxww-xfm5, GHSA-567q-5qvw-pf92 and GHSA-v4x8-3wr5-3wq8, and 4.2.1
-# needs Python 3.11, so pip-audit installs only there; it runs on 3.12.
-pip-audit ; python_version >= "3.11"
-filelock>=4.2.1 ; python_version >= "3.11"
+# GHSA-9vhv-jxww-xfm5, GHSA-567q-5qvw-pf92 and GHSA-v4x8-3wr5-3wq8; the
+# floor keeps every affected release from resolving.
+pip-audit
+filelock>=4.2.1
 # Complexity gate: scripts/check_complexity.py and complexipy.
 radon>=6.0
 complexipy>=8.1

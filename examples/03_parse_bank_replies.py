@@ -2,7 +2,7 @@
 """Example: parse a camt.053 statement and a pain.002 status report.
 
 Usage:
-    pip install pain001-mcp     # requires Python 3.10+
+    pip install pain001-mcp     # requires Python 3.11+
     python examples/03_parse_bank_replies.py \\
         path/to/camt053.xml path/to/pain002.xml
 
