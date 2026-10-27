@@ -38,6 +38,12 @@ the first on Python 3.11 or newer.
 - The MCP Inspector conformance job pins `@modelcontextprotocol/inspector`
   to 2.10.1, so a new npm publish cannot change what CI runs.
 
+### Fixed
+
+- The GitHub release that `release.yml` creates is titled
+  `pain001-mcp X.Y.Z`, as the suite's release invariants require. It was
+  titled with the bare tag (`v0.0.74`) and corrected by hand afterwards.
+
 ### Removed
 
 - Python 3.10 support. The floor is 3.11 (`python = ">=3.11,<4.0"`),
