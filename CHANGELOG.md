@@ -37,6 +37,9 @@ the first on Python 3.11 or newer.
   the venv's interpreter explicitly.
 - The MCP Inspector conformance job pins `@modelcontextprotocol/inspector`
   to 2.10.1, so a new npm publish cannot change what CI runs.
+- The MCP Registry publish job installs `mcp-publisher` v1.8.1 and
+  checks its SHA-256 before running it; it fetched whatever
+  `releases/latest` pointed at and piped it straight into `tar`.
 
 ### Fixed
 
