@@ -67,7 +67,7 @@ python -m pip install pain001-mcp
 ```
 
 Published packages and development branches are distinct. Test unreleased
-changes on this companion's `feat/v0.0.71` branch against the matching core
+changes on this companion's `feat/v<next-version>` branch against the matching core
 branch. No PyPI release or version bump is part of this work.
 
 ---

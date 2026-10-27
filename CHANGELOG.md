@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.0.75] - 2026-10-27
+
+The pain001 family's 0.0.75 release, on the pain001 0.0.75 floor, and
+the first on Python 3.11 or newer.
+
 ### Security
 
 - The release build tooling (`requirements/build.txt`) floors
@@ -651,6 +658,7 @@ prompt.
 - Versioning aligned with `pain001` and `pain001-lsp`: the three packages
   in the suite ship under matching release numbers
 
+[0.0.75]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.75
 [0.0.74]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.74
 [0.0.73]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.73
 [0.0.72]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.72
