@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pain001-mcp"
-version = "0.0.74"
+version = "0.0.75"
 description = "Model Context Protocol (MCP) server exposing the pain001 ISO 20022 Customer Credit Transfer Initiation library as agent tools."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
 license = "Apache-2.0 OR MIT"
@@ -19,9 +19,9 @@ packages = [
 pain001-mcp = "pain001_mcp.server:main"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<4.0"
-pain001 = {version = ">=0.0.74,<1", extras = ["fast"]}
-pain001-loader-mt101 = ">=0.0.74,<1"
+python = ">=3.11,<4.0"
+pain001 = {version = ">=0.0.75,<1", extras = ["fast"]}
+pain001-loader-mt101 = ">=0.0.75,<1"
 # mcp < 1.30.0 and 2.0.x/2.1.x are affected by GHSA-84m7-p3x7-pcfv
 # (streamable HTTP, which this server serves); < 1.28.1 also by
 # Dependabot alert #3.
@@ -50,10 +50,6 @@ types-jsonschema = ">=4,<5"
 bandit = "^1.7.0"
 interrogate = "^1.7.0"
 mutmut = "^3.7.0"
-# tests/test_suite_conformance.py parses pyproject.toml. tomllib is
-# stdlib only from 3.11 and the suite floor is 3.10, so without the
-# backport the conformance gate does not run there at all.
-tomli = { version = ">=2", python = "<3.11" }
 packaging = ">=23"
 # Complexity gate (scripts/check_complexity.py, complexipy).
 radon = ">=6.0"
@@ -70,7 +66,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.black]
 extend-exclude = "tests/test_suite_conformance\\.py"
 line-length = 79
-target-version = ['py310']
+target-version = ['py311']
 
 [tool.pytest.ini_options]
 markers = [
@@ -114,7 +110,7 @@ exclude = ["tests", "examples"]
 
 [tool.ruff]
 line-length = 79
-target-version = "py310"
+target-version = "py311"
 extend-exclude = ["*.md", "tmp_env", ".venv", ".eggs"]
 
 [tool.ruff.lint]
@@ -128,6 +124,9 @@ ignore = ["E501"]
 "benches/*.py" = ["E402"]
 "__init__.py" = ["F401"]
 "tests/conftest.py" = ["E402"]
+# Vendored and byte-pinned (see [tool.black]): its 3.10 tomli fallback
+# is fixed in the canonical copy, not here.
+"tests/test_suite_conformance.py" = ["UP036"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -135,7 +134,7 @@ indent-style = "space"
 skip-magic-trailing-comma = false
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 strict = true
 warn_return_any = true
 warn_unused_configs = true

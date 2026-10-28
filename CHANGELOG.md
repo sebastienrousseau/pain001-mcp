@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.0.75] - 2026-10-27
+
+The pain001 family's 0.0.75 release, on the pain001 0.0.75 floor, and
+the first on Python 3.11 or newer.
+
 ### Security
 
 - The release build tooling (`requirements/build.txt`) floors
@@ -18,8 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Python 3.11, so the tree is compiled for 3.12, the Python of every job
   that installs it.
 - The CI tree (`requirements/ci.txt`) pinned filelock 4.1.0 on Python
-  3.10, for which no fixed filelock exists. pip-audit, which pulls it in,
-  now installs only on 3.11+ with `filelock >= 4.2.1`; it runs on 3.12.
+  3.10, for which no fixed filelock exists. With the 3.11 floor (below)
+  pip-audit, which pulls it in, installs on every supported Python with
+  `filelock >= 4.2.1`.
 - The same tree floors `dulwich >= 1.2.19` (it pinned 1.2.17), in place
   of Dependabot #130, whose recompile dropped the platform markers.
 - The release SBOMs (CycloneDX and the pip-licenses manifest) describe
@@ -29,6 +37,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the venv's interpreter explicitly.
 - The MCP Inspector conformance job pins `@modelcontextprotocol/inspector`
   to 2.10.1, so a new npm publish cannot change what CI runs.
+- The MCP Registry publish job installs `mcp-publisher` v1.8.1 and
+  checks its SHA-256 before running it; it fetched whatever
+  `releases/latest` pointed at and piped it straight into `tar`.
+
+### Fixed
+
+- The GitHub release that `release.yml` creates is titled
+  `pain001-mcp X.Y.Z`, as the suite's release invariants require. It was
+  titled with the bare tag (`v0.0.74`) and corrected by hand afterwards.
+
+### Removed
+
+- Python 3.10 support. The floor is 3.11 (`python = ">=3.11,<4.0"`),
+  the pain001 suite's decision for 0.0.75: 3.10 reaches end of life in
+  October 2026, and current hypothesis releases need 3.11, which broke
+  Dependabot's resolver for siblings on a 3.10 floor. CI tests 3.11 to
+  3.14; ruff, black and mypy target 3.11; the `tomli` backport and the
+  3.10 branch in `scripts/check_suite_consistency.py` are gone, and
+  `poetry.lock` and the 3.11 requirement sets are re-locked (only the
+  packages for 3.10 leave). pip keeps 3.10 users on pain001-mcp 0.0.74.
 
 ## [0.0.74] - 2026-10-20
 
@@ -639,6 +667,7 @@ prompt.
 - Versioning aligned with `pain001` and `pain001-lsp`: the three packages
   in the suite ship under matching release numbers
 
+[0.0.75]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.75
 [0.0.74]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.74
 [0.0.73]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.73
 [0.0.72]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.72

@@ -62,7 +62,7 @@ import secrets
 import time
 import unicodedata
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 from pathlib import Path
@@ -89,7 +89,7 @@ from pain001.xml.validate_via_xsd import validate_xml_string_via_xsd
 from pain001_loader_mt101.loader import parse_mt101
 from pydantic import Field
 
-# pydantic resolves nested TypedDicts on Python 3.10 and 3.11 only for the
+# pydantic resolves nested TypedDicts on Python 3.11 only for the
 # typing_extensions class; typing.TypedDict there yields no output schema.
 from typing_extensions import TypedDict
 
@@ -2041,7 +2041,7 @@ def stage_payment_batch(
     now = time.time()
     expires_at_epoch = now + 3600.0
     expires_at_iso = datetime.fromtimestamp(
-        expires_at_epoch, tz=timezone.utc
+        expires_at_epoch, tz=UTC
     ).isoformat()
 
     control_sum_by_currency = {
@@ -2377,7 +2377,7 @@ def commit_payment_batch(
             return {"error": f"Failed to write output XML file: {exc}"}
 
     order.status = "committed"
-    committed_at = datetime.now(timezone.utc).isoformat()
+    committed_at = datetime.now(UTC).isoformat()
 
     return {
         "stage_id": stage_id,
