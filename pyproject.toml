@@ -20,8 +20,8 @@ pain001-mcp = "pain001_mcp.server:main"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<4.0"
-pain001 = {version = ">=0.0.74,<1", extras = ["fast"]}
-pain001-loader-mt101 = ">=0.0.74,<1"
+pain001 = {version = ">=0.0.75,<1", extras = ["fast"]}
+pain001-loader-mt101 = ">=0.0.75,<1"
 # mcp < 1.30.0 and 2.0.x/2.1.x are affected by GHSA-84m7-p3x7-pcfv
 # (streamable HTTP, which this server serves); < 1.28.1 also by
 # Dependabot alert #3.
