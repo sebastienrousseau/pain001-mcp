@@ -10,7 +10,7 @@ anyio>=4.14.2,<5
 dulwich>=1.2.19
 # virtualenv 21.14.9 to 21.14.12: GHSA-cx6f-vjhg-g3cc (the bash activator
 # leaves --prompt unescaped in PS1), fixed in 21.14.13.
-virtualenv>=21.14.13
+virtualenv>=21.15.1
 urllib3>=2.8.0
 certifi>=2026.10.23
 # filelock <= 4.2.0: GHSA-9vhv-jxww-xfm5, GHSA-567q-5qvw-pf92 and
