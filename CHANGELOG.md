@@ -11,6 +11,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Nothing yet.
 
+## [0.0.76] - 2026-11-05
+
+The pain001 family's 0.0.76 release, on the pain001 0.0.76 floor.
+
+### Security
+
+- The build tree takes dulwich 1.2.20 and virtualenv 21.15.1.
+
+### Changed
+
+- Requires `pain001[fast] >= 0.0.76, < 1` and
+  `pain001-loader-mt101 >= 0.0.76, < 1` (`pyproject.toml` and
+  `requirements/runtime.in`).
+- opentelemetry-api 1.45.2 and certifi 2026.10.23; development tools
+  ruff 0.17.3, pytest 9.2.0, mypy 2.4.1, complexipy 8.3.0 and
+  mutmut 3.8.1. Every requirement file is regenerated with the command
+  in its header.
+- CI: one stable required check per versioned matrix.
+
 ## [0.0.75] - 2026-10-27
 
 The pain001 family's 0.0.75 release, on the pain001 0.0.75 floor, and
@@ -667,6 +686,7 @@ prompt.
 - Versioning aligned with `pain001` and `pain001-lsp`: the three packages
   in the suite ship under matching release numbers
 
+[0.0.76]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.76
 [0.0.75]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.75
 [0.0.74]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.74
 [0.0.73]: https://github.com/sebastienrousseau/pain001-mcp/releases/tag/v0.0.73
