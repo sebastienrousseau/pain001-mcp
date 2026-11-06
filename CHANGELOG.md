@@ -11,6 +11,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Nothing yet.
 
+## [0.0.77] - 2026-11-06
+
+The pain001 family's 0.0.77 release, on the pain001 0.0.77 floor.
+0.0.76 was prepared on 2026-11-05 (#148) but never merged, tagged or
+published, so its changes ship here.
+
+### Security
+
+- The build tree takes dulwich 1.2.20 and virtualenv 21.15.1.
+
+### Changed
+
+- Requires `pain001[fast] >= 0.0.77, < 1` and
+  `pain001-loader-mt101 >= 0.0.77, < 1` (`pyproject.toml` and
+  `requirements/runtime.in`).
+- opentelemetry-api 1.45.2 and certifi 2026.10.23; development tools
+  ruff 0.17.3, pytest 9.2.0, pytest-benchmark 5.3.1, mypy 2.4.1,
+  complexipy 8.3.0 and mutmut 3.8.1. Every requirement file is
+  regenerated with the command in its header.
+- CI: one stable required check per versioned matrix.
+
+### Fixed
+
+- `glama.json` described 21 tools and a corpus of 42 scenarios; the
+  server registers 26 tools and the corpus holds 43 scenarios.
+
 ## [0.0.75] - 2026-10-27
 
 The pain001 family's 0.0.75 release, on the pain001 0.0.75 floor, and
