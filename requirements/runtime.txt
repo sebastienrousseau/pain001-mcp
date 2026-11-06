@@ -593,15 +593,15 @@ opentelemetry-api==1.45.1 \
     # via
     #   -r requirements/runtime.in
     #   mcp
-pain001==0.0.75 \
-    --hash=sha256:39059f0a7e39dfb0d0a3d4167c874881da7818060f4e5f5fede0ede4aea9625a \
-    --hash=sha256:d8fe7b8905fb950dec15c70af3b48e710d7164ef06ecd0c5144c191a36de27d9
+pain001==0.0.77 \
+    --hash=sha256:a5bda90f36b45f495366735c0244409047fd5874b03073833541fdd3adad79ea \
+    --hash=sha256:df66eda2ff8493378a2cefb41f6ec1207d4e63292146aeac18ac6fdc4c25ba5d
     # via
     #   -r requirements/runtime.in
     #   pain001-loader-mt101
-pain001-loader-mt101==0.0.75 \
-    --hash=sha256:a7f206c758580334a19f9b4482373ddd6cf90d1ef6f7860be3655404d32e8248 \
-    --hash=sha256:a8d2c9e0dd3dd5b15e7d71898e8ae6c19e640a6b8b8b5233acc4b66f2a994500
+pain001-loader-mt101==0.0.77 \
+    --hash=sha256:432124a1ac324b045d9c4d99a5a3a91ad4092002e83f1238889b911e2cbd075f \
+    --hash=sha256:a8a8d8bc1d0132c2a01fc6ae2a6b2bda1bd20612c1cdd7338160e1f40b9d2368
     # via -r requirements/runtime.in
 pycparser==3.11 ; implementation_name != 'PyPy' and platform_python_implementation != 'PyPy' \
     --hash=sha256:51d5a8ba2be0bbe440b99d2112604c95bbbc3c2748a64260186c541e1729cd80 \
