@@ -45,7 +45,7 @@
   "BENCHMARK_SCENARIO": "Adapter operations",
   "BENCHMARK_RESULT": "Run-specific",
   "BENCHMARK_ENVIRONMENT": "Python, hardware and dependency versions recorded per run",
-  "FEATURES_CONTENT": "The authoritative [tool catalogue](docs/tools.md) is generated from the server.\nIt covers validation, identifiers, generation, migration, bank-report parsing,\ncorpus access and review-only record fixes (`suggest_record_fix`). Suggestions\nrequire review; financial fields are refused, never guessed. Test unreleased\ntools with the matching core feature branch. In-tree core MCP is a separate smaller surface.",
+  "FEATURES_CONTENT": "The authoritative [tool catalogue](docs/tools.md) is generated from the server.\nIt covers validation, identifiers, generation, migration, bank-report parsing,\ncorpus access, review-only record fixes (`suggest_record_fix`) and the unreleased\nfaces (`list_faces`, `project_face`). Suggestions require review; financial\nfields are refused, never guessed. Test unreleased tools with the matching core\nfeature branch. In-tree core MCP is a separate smaller surface.",
   "CONFIGURATION_CONTENT": "Run `pain001-mcp --help` for transport, host and port options. Stdio is default.\nSee the [tool catalogue](docs/tools.md) for request shapes rather than a copied\ntool count.",
   "EXAMPLES_CONTENT": "Run the self-checking scripts under [examples/](https://github.com/sebastienrousseau/pain001-mcp/tree/main/examples). Tests cover valid\nand malformed inputs and integration with the core contract.",
   "LIMITATIONS_CONTENT": "Not a bank, settlement engine or autonomous payment approver. Review outputs\nbefore use. Transport support is not bank certification.",

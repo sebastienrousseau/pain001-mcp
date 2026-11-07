@@ -21,3 +21,4 @@ pip install pain001-mcp   # Python 3.11+
 ```
 
 - `04_corpus_tools.py` — the four example-corpus tools (`list_corpus_files`, `get_corpus_file`, `get_corpus_provenance`, `get_corpus_coverage`), including the error payload an older pain001 returns
+- `05_faces_tools.py` - the two faces tools (`list_faces`, `project_face`): a corpus file projected into the Berlin Group shape with its loss report, and a refusal returned as data

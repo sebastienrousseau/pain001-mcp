@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.78] - Unreleased
 
+### Added
+
+- Faces (pain001 >= 0.0.78): `list_faces` names each face, its target
+  and the binding keys it accepts; `project_face` takes a pain.001
+  document as XML text and returns the payload for UK Open Banking
+  v4.0.1, Berlin Group NextGenPSD2 v1.3.16 or ISO 20022 element names,
+  with a loss report of every source element not carried. A refusal
+  (an element the target requires is missing, a binding the face does
+  not accept, a file path instead of XML, an entity declaration) is an
+  `{"error": ...}` payload. With an older pain001 both tools say which
+  version they need. The server registers 28 tools.
+- `examples/05_faces_tools.py`, run by `make examples`.
+
 ### Fixed
 
 - The README called `suggest_record_fix` unreleased; it shipped in

@@ -4,7 +4,7 @@ Every tool the server registers, with the description an agent sees and the
 arguments it accepts. Generated from the running server by
 `scripts/tool_catalogue.py`; CI fails if this file drifts from the code.
 
-26 tools. Every one returns JSON; a failure is an `{"error": ...}`
+28 tools. Every one returns JSON; a failure is an `{"error": ...}`
 payload, never an exception.
 
 ## `list_message_types`
@@ -144,6 +144,18 @@ Arguments: `scenario_id`, `version`, `variant` (optional)
 Return the schema coverage verdict of one message type's coverage set.
 
 Arguments: `version`
+
+## `list_faces`
+
+List the faces: the standards a pain.001 document can be projected into.
+
+Arguments: none
+
+## `project_face`
+
+Project a pain.001 document into another standard's JSON shape.
+
+Arguments: `xml_content`, `face`, `version` (optional), `bindings` (optional)
 
 ## `stage_payment_batch`
 
