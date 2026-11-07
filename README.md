@@ -225,6 +225,6 @@ compatibility review. No stronger platform or stability guarantee is implied.
 
 ## License
 
-Dual-licensed under [Apache-2.0](LICENSE-APACHE) OR [MIT](LICENSE-MIT), at your
+Dual-licensed under [Apache-2.0](LICENSES/Apache-2.0.txt) OR [MIT](LICENSES/MIT.txt), at your
 option. See [LICENSE](LICENSE). Dependencies retain their own licences.
 

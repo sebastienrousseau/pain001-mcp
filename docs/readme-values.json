@@ -54,5 +54,5 @@
   "SECURITY_CONTENT": "Treat requests as untrusted. Protect HTTP listeners and avoid real secrets in\nlogs. Tools may read authorized input paths. Corrections never patch IBANs,\nBICs, amounts or currencies.",
   "DOCUMENTATION_INDEX": "[What is pain.001?](https://pain001.com/pain-001/) · [User manual](docs/index.md) · [API reference](docs/index.md) ·\n[Developer guide](DEVELOPMENT.md) ·\n[Family map](https://github.com/sebastienrousseau/pain001#the-pain001-ecosystem)",
   "STABILITY_CONTENT": "Versions advance in coordinated `0.0.1` steps with core. The maintainer opens\nreleases; this branch does not bump versions. Contract and output changes need\ncompatibility review. No stronger platform or stability guarantee is implied.",
-  "LICENSE_CONTENT": "Dual-licensed under [Apache-2.0](LICENSE-APACHE) OR [MIT](LICENSE-MIT), at your\noption. See [LICENSE](LICENSE). Dependencies retain their own licences."
+  "LICENSE_CONTENT": "Dual-licensed under [Apache-2.0](LICENSES/Apache-2.0.txt) OR [MIT](LICENSES/MIT.txt), at your\noption. See [LICENSE](LICENSE). Dependencies retain their own licences."
 }
