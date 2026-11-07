@@ -28,14 +28,37 @@ from pathlib import Path
 import pytest
 
 import pain001_mcp.server as server
-from tests.test_dual_control_simulation import _sample_record
 
 MT = "pain.001.001.03"
 
 
 def _record() -> dict[str, object]:
-    """The synthetic record the dual-control tests already stage."""
-    return dict(_sample_record())
+    """A synthetic record that stages cleanly (valid IBANs and BICs).
+
+    Defined here rather than imported from another test module: when the
+    core is installed editable (as CI does on main), its regular
+    ``tests`` package shadows this repository's, and the import fails.
+    """
+    return {
+        "id": "MSG-TEST-1",
+        "date": "2026-09-18T09:00:00",
+        "initiator_name": "Acme GmbH",
+        "payment_information_id": "PMT-TEST-1",
+        "payment_method": "TRF",
+        "batch_booking": False,
+        "requested_execution_date": "2026-09-19",
+        "debtor_name": "Acme GmbH",
+        "debtor_account_IBAN": "DE89370400440532013000",
+        "debtor_agent_BIC": "COBADEFFXXX",
+        "charge_bearer": "SLEV",
+        "payment_id": "E2E-TEST-1",
+        "payment_amount": 100.0,
+        "currency": "EUR",
+        "creditor_agent_BIC": "DEUTDEFFXXX",
+        "creditor_name": "Beta AG",
+        "creditor_account_IBAN": "DE02120300000000202051",
+        "remittance_information": "Invoice 12345 Consulting Services",
+    }
 
 
 def _commit(path: str) -> dict[str, object]:
