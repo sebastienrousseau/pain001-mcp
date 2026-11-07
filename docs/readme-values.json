@@ -22,7 +22,7 @@
   "ECOSYSTEM_NAME": "Python",
   "ECOSYSTEM_MANIFEST_LANG": "bash",
   "INSTALL_LIBRARY_SNIPPET": "python -m pip install pain001-mcp",
-  "ADDITIONAL_INSTALL_METHODS": "> **Latest release: v0.0.78**: the family's 0.0.78 release on the\n> pain001 0.0.78 floor. Two new tools, `list_faces` and `project_face`,\n> project a pain.001 document into UK Open Banking, Berlin Group or\n> ISO 20022 element names.\n\nPublished packages and development branches are distinct. Test unreleased\nchanges on this companion's `feat/v<next-version>` branch against the matching core\nbranch.",
+  "ADDITIONAL_INSTALL_METHODS": "> **Latest release: v0.0.79**: the family's 0.0.79 release on the\n> pain001 0.0.79 floor. Tool descriptions name only scheme profiles the\n> core ships, and `parse_camt053` returns every statement in a file.\n\nPublished packages and development branches are distinct. Test unreleased\nchanges on this companion's `feat/v<next-version>` branch against the matching core\nbranch.",
   "REQUIREMENTS_CONTENT": "Python 3.11 or newer. CI tests 3.11–3.14 on Linux. See\n[toolchain policy](docs/POLICIES.md); no distro-system-Python claim is made.",
   "QUICK_START_LANG": "bash",
   "QUICK_START_SNIPPET": "pain001-mcp --help\npain001-mcp",

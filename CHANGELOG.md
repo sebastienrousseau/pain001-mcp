@@ -7,10 +7,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.0.79] - Unreleased
+## [0.0.79] - 2026-11-07
+
+The pain001 family's 0.0.79 release, on the pain001 0.0.79 floor.
 
 ### Changed
 
+- Requires `pain001[fast] >= 0.0.79, < 1` and
+  `pain001-loader-mt101 >= 0.0.79, < 1` (`pyproject.toml` and
+  `requirements/runtime.in`). pain001 0.0.79 returns every transaction
+  from `parse_pain002` and every statement from `parse_camt053`, and
+  reads the camt.053.001.08 entry status.
+- The `profile` and `scheme` parameters of `validate_payment_scheme`,
+  `simulate_payment_batch` and `stage_payment_batch` list every scheme
+  profile the installed pain001 ships, built from
+  `pain001.validation.schemes.PROFILES` at import, and say that several
+  can be joined by commas. `validate_payment_scheme` listed 4 of the
+  core's 29.
 - The release page is written by the release workflow in the suite's
   shape. A last `release-notes` job, once the SBOMs are attached, runs
   `scripts/release_notes.py publish`: the title is `pain001-mcp X.Y.Z`,
@@ -28,6 +41,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `stage_payment_batch` suggested the scheme profiles `sepa-instant`,
+  `bacs` and `cbpr-plus`, which do not exist; an agent that copied one
+  got "Unknown scheme profile". The real names are `sepa-inst`,
+  `uk-bacs` and `cbpr-cross-border`. A test now fails when a tool
+  description or schema quotes a profile the core does not have.
+- `list_message_types` returned the raw type as the name of
+  `pain.001.001.13` and `pain.008.001.08`; both now have their human
+  names, and a test fails when a core message type has none.
+- `parse_camt053` declared no `statements` field, so the structured
+  result dropped every statement after the first that pain001 0.0.79
+  returns.
+- The README linked the licence texts to `LICENSE-APACHE` and
+  `LICENSE-MIT`, which do not exist; it now links `LICENSES/`.
+  ROADMAP.md still called 0.0.52 the current release, and the Glama
+  description named only the SEPA and cross-border rulebooks.
 - The README still called the faces tools unreleased and said no PyPI
   release was part of the work; both shipped in 0.0.78.
 - RELEASING.md said the GitHub release body came from the CHANGELOG;

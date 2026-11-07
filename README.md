@@ -66,10 +66,9 @@
 python -m pip install pain001-mcp
 ```
 
-> **Latest release: v0.0.78**: the family's 0.0.78 release on the
-> pain001 0.0.78 floor. Two new tools, `list_faces` and `project_face`,
-> project a pain.001 document into UK Open Banking, Berlin Group or
-> ISO 20022 element names.
+> **Latest release: v0.0.79**: the family's 0.0.79 release on the
+> pain001 0.0.79 floor. Tool descriptions name only scheme profiles the
+> core ships, and `parse_camt053` returns every statement in a file.
 
 Published packages and development branches are distinct. Test unreleased
 changes on this companion's `feat/v<next-version>` branch against the matching core
