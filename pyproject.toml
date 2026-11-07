@@ -218,4 +218,5 @@ pytest_add_cli_args_test_selection = [
     "tests/test_structured_output.py",
     "tests/test_transports.py",
     "tests/test_record_corrections.py",
+    "tests/test_tool_vocabulary.py",
 ]
