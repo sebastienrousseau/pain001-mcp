@@ -7,6 +7,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.80] - 2026-11-07
+
+### Security
+
+- `commit_payment_batch` writes only inside its output directory
+  (GHSA-hqw7-q8v2-pq3m). It used to write the XML to any path the caller
+  named, creating parent directories and replacing existing files, so an
+  agent driven by untrusted content, or any client reaching the HTTP or
+  SSE transports, could create or overwrite files anywhere the server's
+  user can write. Writes now go to `PAIN001_MCP_OUTPUT_DIR`, else the
+  server's working directory: a path outside it (symlinks resolved) is
+  refused, only `.xml` files are written, and an existing file is never
+  replaced. `output_file_path` in the result is the resolved path.
+  Affected: 0.0.72 to 0.0.79.
+- The staging and commit tools no longer call themselves dual control:
+  the confirmation token goes back to whoever staged the batch, so it
+  prevents a commit by accident, not by the same caller.
+
+### Changed
+
+- Requires pain001 and pain001-loader-mt101 0.0.80, in lockstep.
+
 ## [0.0.79] - 2026-11-07
 
 The pain001 family's 0.0.79 release, on the pain001 0.0.79 floor.
