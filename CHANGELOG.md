@@ -7,7 +7,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.0.78] - Unreleased
+## [0.0.78] - 2026-11-07
+
+The pain001 family's 0.0.78 release, on the pain001 0.0.78 floor,
+which adds faces.
 
 ### Added
 
@@ -21,6 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `{"error": ...}` payload. With an older pain001 both tools say which
   version they need. The server registers 28 tools.
 - `examples/05_faces_tools.py`, run by `make examples`.
+
+### Changed
+
+- Requires `pain001[fast] >= 0.0.78, < 1` and
+  `pain001-loader-mt101 >= 0.0.78, < 1` (`pyproject.toml` and
+  `requirements/runtime.in`).
 
 ### Fixed
 
