@@ -159,7 +159,7 @@ Arguments: `xml_content`, `face`, `version` (optional), `bindings` (optional)
 
 ## `stage_payment_batch`
 
-Stage a payment batch for simulation and dual-control approval.
+Stage a payment batch for simulation and a confirmed commit.
 
 Arguments: `message_type`, `records`, `scheme` (optional)
 
@@ -171,6 +171,6 @@ Arguments: `stage_id`, `clearing_system` (optional)
 
 ## `commit_payment_batch`
 
-Commit an authorized staged payment batch with dual-control authorization.
+Commit a staged payment batch with its confirmation token.
 
 Arguments: `stage_id`, `confirmation_token`, `output_file_path` (optional)
