@@ -5,11 +5,11 @@
     },
     "simulate_payment_batch": {
       "cyclomatic": 19,
-      "lines": 132
+      "lines": 123
     },
     "stage_payment_batch": {
       "cyclomatic": 28,
-      "lines": 204
+      "lines": 196
     },
     "simulate_clearing": {
       "cyclomatic": 40,

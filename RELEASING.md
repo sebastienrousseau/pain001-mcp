@@ -33,7 +33,10 @@ A release is ready only when **all** of the following hold on `main`:
 3. Every Dependabot / CodeQL / bandit / pip-audit alert is resolved or
    has a documented, expiring suppression.
 4. `CHANGELOG.md` has a dated section for the new version describing the
-   change set (this is the single source of truth for the release).
+   change set (this is the single source of truth for the release), and
+   `releases/vX.Y.Z.md` has a `## Highlights` section of two to four
+   bullets for the release page (`tests/test_release_notes.py` fails
+   without it once the CHANGELOG dates the version).
 5. The version is identical in `pyproject.toml`, `pain001_mcp/__init__.py`,
    `glama.json` (including its Docker tag) and `server.json` (enforced by
    `scripts/verify_versions.py`, which CI runs). The Glama directory and
@@ -42,8 +45,11 @@ A release is ready only when **all** of the following hold on `main`:
 
 ## Cutting the release
 
-1. Bump the version in `pyproject.toml` and `pain001_mcp/__init__.py`
-   and add the `CHANGELOG.md` section in a single PR.
+1. Bump the version in `pyproject.toml`, `pain001_mcp/__init__.py`,
+   `CITATION.cff`, `glama.json`, `server.json` and the README's
+   latest-release line (`docs/readme-values.json`, then
+   `scripts/render_readme.py`), and add the `CHANGELOG.md` section and
+   `releases/vX.Y.Z.md` in a single PR.
 2. Merge the PR to `main` once CI is green.
 3. Push a signed tag:
 
@@ -54,8 +60,13 @@ A release is ready only when **all** of the following hold on `main`:
 
 4. The tag triggers the `publish` job in `release.yml`, which fails fast
    if the tag does not match the package version, then builds, runs
-   `twine check`, creates the GitHub release from the `CHANGELOG.md`
-   section, and publishes to PyPI via OIDC trusted publishing.
+   `twine check`, creates the GitHub release and publishes to PyPI via
+   OIDC trusted publishing. Its last job, `release-notes`, runs after the
+   SBOMs are attached: it sets the title to `pain001-mcp X.Y.Z` and
+   rewrites the body with `scripts/release_notes.py publish` (the note's
+   Highlights, the pull requests merged since the previous release, the
+   SHA-256 of every attached asset and the Full Changelog link). Preview
+   it with `--dry-run`.
 
 ## After releasing
 

@@ -1,11 +1,14 @@
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
+
 # pain001-mcp Roadmap
 
 This roadmap tracks the next set of capabilities for the MCP companion of
 the [pain001](https://github.com/sebastienrousseau/pain001) library. The
 versions are **target** windows; releases ship when the gates pass, not
-on a calendar.
+on a calendar. The [tool catalogue](docs/tools.md), generated from the
+server, lists what the current release registers.
 
-## v0.0.52 - Initial release (current)
+## v0.0.52 - Initial release (shipped)
 
 - Nine MCP tools mirroring the pain001 public API (schema discovery,
   identifier validation, XML generation, bank-reply parsing).
@@ -13,7 +16,10 @@ on a calendar.
   conventional commits.
 - Three runnable examples and bundled `camt.053` / `pain.002` fixtures.
 
-## v0.0.53 - Streaming and async surface
+## v0.0.53 - Streaming and async surface (partly shipped)
+
+`generate_message_async` and `generate_message_from_file` shipped;
+`validate_records_async` and `get_metrics` have not.
 
 - `generate_message_async` and `validate_records_async` tools backed by
   `pain001.async_adapter`.
@@ -29,7 +35,8 @@ on a calendar.
   `parse_pain002`, file-driven generation) so deployments can scope what
   an agent may open.
 - Structured-output tool variants (each tool returns a typed payload
-  schema MCP clients can introspect).
+  schema MCP clients can introspect). Shipped: every tool declares an
+  output schema.
 - Streaming responses for large batches.
 
 ## Out of scope (handled elsewhere)

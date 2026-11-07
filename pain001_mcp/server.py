@@ -85,6 +85,7 @@ from pain001.exceptions import Pain001Error
 from pain001.migration import VersionMapper
 from pain001.validation import validate_bic, validate_iban
 from pain001.validation.charset import ISO20022_ALLOWED_CHARACTERS
+from pain001.validation.schemes import PROFILES
 from pain001.xml.validate_via_xsd import validate_xml_string_via_xsd
 from pain001_loader_mt101.loader import parse_mt101
 from pydantic import Field
@@ -126,6 +127,19 @@ _MessageType = Annotated[
             "'pain.001.001.09' and 'pain.008.001.02'."
         ),
         json_schema_extra={"enum": _PAIN_MESSAGE_TYPES},
+    ),
+]
+
+# Every scheme profile pain001 ships, so no description names a fake one.
+_SCHEME_PROFILE_LIST = ", ".join(f"'{name}'" for name in sorted(PROFILES))
+_OptionalSchemeProfile = Annotated[
+    str | None,
+    Field(
+        description=(
+            "Optional payment-scheme rulebook profile to enforce, or several "
+            f"joined by commas. One of {_SCHEME_PROFILE_LIST}. Omit to skip "
+            "scheme-specific rulebook validation."
+        )
     ),
 ]
 
@@ -186,7 +200,7 @@ class ValidateIdentifierResult(TypedDict, total=False):
 
 
 class Camt053Result(TypedDict, total=False):
-    """A parsed camt.053 statement, as the core library reports it."""
+    """A parsed camt.053: the first statement's fields, and every one."""
 
     error: str
     statement_id: str
@@ -194,6 +208,7 @@ class Camt053Result(TypedDict, total=False):
     iban: str
     currency: str
     entries: list[dict[str, Any]]
+    statements: list[dict[str, Any]]
 
 
 class Pain002Result(TypedDict, total=False):
@@ -580,7 +595,9 @@ _HUMAN_NAMES = {
     "pain.001.001.10": "Customer Credit Transfer Initiation V10",
     "pain.001.001.11": "Customer Credit Transfer Initiation V11",
     "pain.001.001.12": "Customer Credit Transfer Initiation V12",
+    "pain.001.001.13": "Customer Credit Transfer Initiation V13",
     "pain.008.001.02": "Customer Direct Debit Initiation V02",
+    "pain.008.001.08": "Customer Direct Debit Initiation V08",
 }
 
 # Data formats the underlying ``pain001`` library can load. Surfaces what an
@@ -1056,8 +1073,8 @@ def parse_camt053(
             validation.
 
     Returns:
-        A compact dict with the statement header and entry list, or an
-        ``{"error": ...}`` payload on failure.
+        The first statement's header and entries, every statement under
+        ``statements``, or an ``{"error": ...}`` payload on failure.
     """
     try:
         return cast(
@@ -1162,9 +1179,9 @@ def validate_payment_scheme(
         str,
         Field(
             description=(
-                "The payment-scheme rulebook profile to enforce. One of "
-                "'sepa-sct', 'sepa-sdd', 'sepa-inst', or 'xborder-ct'. "
-                "Defaults to 'sepa-sct'."
+                "The payment-scheme rulebook profile to enforce, or several "
+                "joined by commas (e.g. 'sepa-sct,anti-duplicate'). One of "
+                f"{_SCHEME_PROFILE_LIST}. Defaults to 'sepa-sct'."
             )
         ),
     ] = "sepa-sct",
@@ -1176,8 +1193,8 @@ def validate_payment_scheme(
     that JSON-Schema validation alone does not cover. ``validate_records``
     checks structural shape; this checks rulebook compliance for one profile.
 
-    Delegates to :func:`pain001.validate_scheme`. Supported profiles:
-    ``sepa-sct``, ``sepa-sdd``, ``sepa-inst``, ``xborder-ct``.
+    Delegates to :func:`pain001.validate_scheme`. The ``profile``
+    parameter lists every profile the installed pain001 ships.
 
     Args:
         records: Payment records as a list of flat dicts.
@@ -1213,16 +1230,7 @@ def simulate_payment_batch(
             )
         ),
     ],
-    scheme: Annotated[
-        str | None,
-        Field(
-            description=(
-                "Optional payment-scheme rulebook profile to enforce (e.g. "
-                "'sepa-sct', 'sepa-sdd', 'sepa-inst', 'xborder-ct'). Omit to "
-                "skip scheme-specific rulebook validation."
-            )
-        ),
-    ] = None,
+    scheme: _OptionalSchemeProfile = None,
 ) -> SimulatePaymentBatchResult:
     """Simulate and pre-flight a payment batch before XML generation.
 
@@ -1876,15 +1884,7 @@ def stage_payment_batch(
             )
         ),
     ],
-    scheme: Annotated[
-        str | None,
-        Field(
-            description=(
-                "Optional payment scheme profile to validate against, "
-                "e.g. 'sepa-sct', 'sepa-instant', 'bacs', or 'cbpr-plus'."
-            )
-        ),
-    ] = None,
+    scheme: _OptionalSchemeProfile = None,
 ) -> StagedBatchResult:
     """Stage a payment batch for simulation and dual-control approval.
 

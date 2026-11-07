@@ -181,3 +181,32 @@ jobs:
             pain001-mcp-*.spdx.json
             pain001-mcp-*.licenses.json
           if-no-files-found: warn
+
+  # Runs last, once every asset is attached (dist, signatures, PEP 740
+  # attestations, SBOMs, licences), and rewrites the release body from
+  # the live release in the suite's shape: Highlights from
+  # releases/v<version>.md, the pull requests merged since the previous
+  # release, the SHA-256 of every asset and the Full Changelog link. The
+  # publish job's --generate-notes body had none of the checksums.
+  # scripts/release_notes.py is vendored byte-identical from pain001.
+  release-notes:
+    name: Release notes
+    runs-on: ubuntu-latest
+    needs: [publish, sbom]
+    permissions:
+      contents: write       # edit the release title and body
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          persist-credentials: false
+
+      - name: Compose and publish the release body
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 scripts/release_notes.py publish --repo "$REPO" \
+            --tag "$RELEASE_TAG" --project pain001-mcp
