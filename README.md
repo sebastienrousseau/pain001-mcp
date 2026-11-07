@@ -66,9 +66,9 @@
 python -m pip install pain001-mcp
 ```
 
-> **Latest release: v0.0.79**: the family's 0.0.79 release on the
-> pain001 0.0.79 floor. Tool descriptions name only scheme profiles the
-> core ships, and `parse_camt053` returns every statement in a file.
+> **Latest release: v0.0.80**: a security release on the pain001 0.0.80
+> floor. `commit_payment_batch` writes only new `.xml` files inside its output
+> directory (GHSA-hqw7-q8v2-pq3m).
 
 Published packages and development branches are distinct. Test unreleased
 changes on this companion's `feat/v<next-version>` branch against the matching core

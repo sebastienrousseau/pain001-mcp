@@ -1,7 +1,7 @@
 {
   "pain001_mcp/server.py": {
     "*file*": {
-      "file_lines": 2496
+      "file_lines": 2494
     },
     "simulate_payment_batch": {
       "cyclomatic": 19,
@@ -28,7 +28,7 @@
       "lines": 71
     },
     "commit_payment_batch": {
-      "lines": 76
+      "lines": 73
     }
   },
   "scripts/tool_catalogue.py": {

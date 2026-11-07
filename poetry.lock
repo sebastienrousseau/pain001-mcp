@@ -1648,14 +1648,14 @@ files = [
 
 [[package]]
 name = "pain001"
-version = "0.0.79"
+version = "0.0.80"
 description = "Pain001 is a Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Data."
 optional = false
 python-versions = "<4.0,>=3.11"
 groups = ["main"]
 files = [
-    {file = "pain001-0.0.79-py3-none-any.whl", hash = "sha256:ffdef143eb185f2be0809b1f96ba9b7d5a14ed10edb140232fd32433add0c3fa"},
-    {file = "pain001-0.0.79.tar.gz", hash = "sha256:3390cb7c25b18794f618165a38e9b23b1c6057cc52937e0c6ac3e6256ee0097c"},
+    {file = "pain001-0.0.80-py3-none-any.whl", hash = "sha256:590379161222940531bb963207333115cad1624de4aac888b032e4aa0bfbec8a"},
+    {file = "pain001-0.0.80.tar.gz", hash = "sha256:1ba75712fbb05df5aba850d829e48eabf0c9247dca7021313459adb22c118ad9"},
 ]
 
 [package.dependencies]
@@ -1683,18 +1683,18 @@ upload = ["paramiko (>=5.1.0,<6)"]
 
 [[package]]
 name = "pain001-loader-mt101"
-version = "0.0.79"
+version = "0.0.80"
 description = "Convert legacy SWIFT MT101 requests for transfer to ISO 20022 pain.001 flat records."
 optional = false
 python-versions = ">=3.11"
 groups = ["main"]
 files = [
-    {file = "pain001_loader_mt101-0.0.79-py3-none-any.whl", hash = "sha256:8e485093415465804e31ac4c1015665d23f8fd771c958ebdd823841301fc4137"},
-    {file = "pain001_loader_mt101-0.0.79.tar.gz", hash = "sha256:98bcd95de5a52822ec7c5a29da7fb2761812411903d6d76cc94136b1319143e5"},
+    {file = "pain001_loader_mt101-0.0.80-py3-none-any.whl", hash = "sha256:8864fcb75ee4551dc83604d05bee837996ee58bce7068c79d80f411034351212"},
+    {file = "pain001_loader_mt101-0.0.80.tar.gz", hash = "sha256:11fc0d06db7cc45fbe032eba8e97824dc88fd40e5c36ecc7f7a83c221681f7b0"},
 ]
 
 [package.dependencies]
-pain001 = ">=0.0.79,<1"
+pain001 = ">=0.0.80,<1"
 
 [package.extras]
 dev = ["complexipy (>=8.1.0)", "interrogate (>=1.7)", "mypy (>=1.11)", "pytest (>=8)", "pytest-benchmark (>=5)", "pytest-cov (>=5)", "radon (>=6.0.1)", "ruff (>=0.6)"]
@@ -2778,4 +2778,4 @@ docs = ["jinja2", "sphinx", "sphinx_rtd_theme"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "c627ca155e307b7a3c8ed747f2d78a2f32383266732adad85ca70a97deb3378a"
+content-hash = "18ce3b797bbf2b58e5a464acf759fa5d04fb5c29e9624c9672889dd47b57fc22"

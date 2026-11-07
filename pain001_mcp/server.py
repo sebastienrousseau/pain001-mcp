@@ -97,6 +97,7 @@ from typing_extensions import TypedDict
 from pain001_mcp import __version__, _cli
 from pain001_mcp._faces import list_faces, project_face
 from pain001_mcp._mcp_compat import build_server
+from pain001_mcp._output import save_committed
 
 # Bare family names accepted as ergonomic aliases for a concrete version:
 # agents routinely say "pain.001" (the catalogue name) rather than a full
@@ -1886,7 +1887,7 @@ def stage_payment_batch(
     ],
     scheme: _OptionalSchemeProfile = None,
 ) -> StagedBatchResult:
-    """Stage a payment batch for simulation and dual-control approval.
+    """Stage a payment batch for simulation and a confirmed commit.
 
     Creates an in-memory staged payment order with zero fund movement and
     a 1-hour expiration window. Computes:
@@ -1897,7 +1898,7 @@ def stage_payment_batch(
     4. Multi-factor risk scoring (detecting duplicates, high transaction
        amounts, and generic remittance narratives).
     5. In-memory XML compilation and SHA-256 fingerprinting.
-    6. Cryptographic dual-control confirmation token for subsequent authorization.
+    6. A confirmation token that commit_payment_batch requires.
 
     Args:
         message_type: A supported ISO 20022 pain message type.
@@ -2315,7 +2316,7 @@ def commit_payment_batch(
         str,
         Field(
             description=(
-                "Secondary authorization token required to execute the dual-control commit."
+                "The confirmation token stage_payment_batch returned for this batch."
             )
         ),
     ],
@@ -2323,22 +2324,23 @@ def commit_payment_batch(
         str | None,
         Field(
             description=(
-                "Optional local filesystem destination path to write the committed XML document."
+                "Optional new .xml file inside the output directory (PAIN001_MCP_OUTPUT_DIR, else the working directory)."
             )
         ),
     ] = None,
 ) -> CommitPaymentBatchResult:
-    """Commit an authorized staged payment batch with dual-control authorization.
+    """Commit a staged payment batch with its confirmation token.
 
     Verifies the stage ID and validates the secondary confirmation token
     using constant-time cryptographic comparison (preventing timing attacks).
     Transitions the order status from 'staged' to 'committed'. Optionally
-    writes the verified XML payload to the specified destination path.
+    writes a new ``.xml`` file inside the output directory (see
+    ``_output.py``). The token guards against an accidental commit only.
 
     Args:
         stage_id: Staging identifier from stage_payment_batch.
         confirmation_token: Secondary secret confirmation token.
-        output_file_path: Optional path to write the committed XML document.
+        output_file_path: Optional new XML file in the output directory.
 
     Returns:
         CommitPaymentBatchResult with commit timestamp and fingerprint,
@@ -2361,13 +2363,9 @@ def commit_payment_batch(
     if not hmac.compare_digest(order.confirmation_token, confirmation_token):
         return {"error": "Invalid confirmation token for staged payment batch"}
 
-    if output_file_path is not None:
-        try:
-            dest = Path(output_file_path)
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            dest.write_text(order.xml_content, encoding="utf-8")
-        except OSError as exc:
-            return {"error": f"Failed to write output XML file: {exc}"}
+    written, problem = save_committed(output_file_path, order.xml_content)
+    if problem is not None:
+        return {"error": problem}
 
     order.status = "committed"
     committed_at = datetime.now(UTC).isoformat()
@@ -2377,7 +2375,7 @@ def commit_payment_batch(
         "status": "committed",
         "sha256_fingerprint": order.sha256_fingerprint,
         "total_transactions": order.total_transactions,
-        "output_file_path": output_file_path,
+        "output_file_path": written,
         "committed_at": committed_at,
     }
 
@@ -2475,7 +2473,7 @@ server.tool(
     annotations=_PURE_READ,
 )(simulate_clearing)
 server.tool(
-    title="Commit staged payment batch with dual control",
+    title="Commit staged payment batch",
     annotations=_COMMIT_TOOL,
 )(commit_payment_batch)
 

@@ -342,9 +342,10 @@ class TestSimulateClearing:
 class TestCommitPaymentBatch:
     """Tests for commit_payment_batch execution and dual-control tokens."""
 
-    def test_commit_payment_batch_success(self, tmp_path: Path):
+    def test_commit_payment_batch_success(self, tmp_path: Path, monkeypatch):
+        monkeypatch.setenv("PAIN001_MCP_OUTPUT_DIR", str(tmp_path))
         staged = server.stage_payment_batch(MT, [_sample_record()])
-        target_file = tmp_path / "out" / "committed.xml"
+        target_file = tmp_path.resolve() / "out" / "committed.xml"
 
         res = server.commit_payment_batch(
             staged["stage_id"],
@@ -410,11 +411,11 @@ class TestCommitPaymentBatch:
         def _bad_write(*args, **kwargs):
             raise OSError("Disk full")
 
-        monkeypatch.setattr(Path, "write_text", _bad_write)
+        monkeypatch.setattr("pain001_mcp._output.write_new", _bad_write)
         res = server.commit_payment_batch(
             staged["stage_id"],
             staged["confirmation_token"],
-            output_file_path="/tmp/test_err.xml",
+            output_file_path="test_err.xml",
         )
         assert "error" in res
         assert "Failed to write output XML file" in res["error"]
