@@ -94,6 +94,7 @@ from pydantic import Field
 from typing_extensions import TypedDict
 
 from pain001_mcp import __version__, _cli
+from pain001_mcp._faces import list_faces, project_face
 from pain001_mcp._mcp_compat import build_server
 
 # Bare family names accepted as ergonomic aliases for a concrete version:
@@ -678,9 +679,7 @@ def list_message_types() -> list[dict]:
     ]
 
 
-def get_required_fields(
-    message_type: _MessageType,
-) -> list[str]:
+def get_required_fields(message_type: _MessageType) -> list[str]:
     """List only the required input field names for a pain message type.
 
     Use this for a quick checklist of the mandatory columns before building
@@ -698,9 +697,7 @@ def get_required_fields(
         return [f"error: {exc}"]
 
 
-def get_input_schema(
-    message_type: _MessageType,
-) -> SchemaResult:
+def get_input_schema(message_type: _MessageType) -> SchemaResult:
     """Return the full JSON Schema for a message type's flat input record.
 
     Use this to learn every field, its type, and its constraints before
@@ -1121,9 +1118,7 @@ def parse_pain002(
         return {"error": str(exc)}
 
 
-def inspect_template(
-    message_type: _MessageType,
-) -> TemplateResult:
+def inspect_template(message_type: _MessageType) -> TemplateResult:
     """Return the CSV column headers the message type's bundled template uses.
 
     Use this to see the exact column order for hand-building a CSV before
@@ -1341,9 +1336,7 @@ def simulate_payment_batch(
     }
 
 
-def schema_resource(
-    message_type: _MessageType,
-) -> str:
+def schema_resource(message_type: _MessageType) -> str:
     """Expose the official XSD schema text for a message type as a resource.
 
     MCP clients can subscribe to or fetch ``pain001://schema/{type}`` to
@@ -2468,6 +2461,10 @@ server.tool(title="Get example corpus provenance", annotations=_PURE_READ)(
 )
 server.tool(title="Get schema coverage report", annotations=_PURE_READ)(
     get_corpus_coverage
+)
+server.tool(title="List faces", annotations=_PURE_READ)(list_faces)
+server.tool(title="Project pain.001 into a face", annotations=_PURE_READ)(
+    project_face
 )
 server.tool(
     title="Stage payment batch for simulation and approval",

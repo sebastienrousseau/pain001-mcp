@@ -14,6 +14,7 @@ from __future__ import annotations
 import asyncio
 
 import pytest
+from pain001.corpus import get_file
 
 pytest.importorskip("mcp")
 compat = pytest.importorskip("pain001_mcp._mcp_compat")
@@ -79,6 +80,11 @@ CALLS = {
     "get_corpus_file": {"scenario_id": "gb.fps.single", "version": MT},
     "get_corpus_provenance": {"scenario_id": "gb.fps.single", "version": MT},
     "get_corpus_coverage": {"version": MT},
+    "list_faces": {},
+    "project_face": {
+        "xml_content": get_file("de.sepa.sct-salary", MT),
+        "face": "berlin_group",
+    },
     "stage_payment_batch": {"message_type": MT, "records": [RECORD]},
     "simulate_clearing": {
         "stage_id": _staged_for_clearing["stage_id"],
@@ -127,6 +133,7 @@ def test_tool_result_validates_against_its_schema(name: str) -> None:
     ("name", "args"),
     [
         ("get_corpus_file", {"scenario_id": "zz.none", "version": MT}),
+        ("project_face", {"xml_content": "<x/>", "face": "iso_2018"}),
         ("validate_identifier", {"kind": "lei", "value": "x"}),
         ("inspect_template", {"message_type": "pain.999.001.01"}),
         (

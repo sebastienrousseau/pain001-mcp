@@ -57,6 +57,9 @@ EXPECTED_TOOLS = {
     "get_corpus_file",
     "get_corpus_provenance",
     "get_corpus_coverage",
+    # New in v0.0.78 (faces):
+    "list_faces",
+    "project_face",
     # New in v0.0.72 (dual-control simulation):
     "stage_payment_batch",
     "simulate_clearing",

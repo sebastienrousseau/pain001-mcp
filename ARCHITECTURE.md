@@ -34,6 +34,7 @@ public API of that library, exposed in a way an MCP client can call.
 | Area | Module | Responsibility |
 | :--- | :--- | :--- |
 | **Server** | `pain001_mcp/server.py` | The FastMCP server, all tool / resource / prompt registrations |
+| **Faces** | `pain001_mcp/_faces.py` | `list_faces` and `project_face` over `pain001.faces` (pain001 >= 0.0.78), registered in `server.py` with the other tools |
 | **Entry point** | `pain001_mcp.server:main` (console script: `pain001-mcp`) | Launches the server over stdio, or over streamable HTTP / SSE with `--transport` (`_cli.py` + `_transports.py`, ADR 0004) |
 | **Version** | `pain001_mcp/__init__.py` | Single source of truth (`__version__`); the LSP reads it for the protocol handshake |
 | **Tests** | `tests/test_mcp_server.py`, `tests/test_stdio_e2e.py` | In-process + end-to-end-via-subprocess regressions |
@@ -54,7 +55,8 @@ The current MCP surface:
   `validate_xml_against_schema`, `sanitize_to_iso20022_charset`,
   `convert_mt101`, and the example-corpus four `list_corpus_files`,
   `get_corpus_file`, `get_corpus_provenance`, `get_corpus_coverage`
-  (pain001 >= 0.0.67, else a clear error payload).
+  (pain001 >= 0.0.67, else a clear error payload), and the faces two
+  `list_faces`, `project_face` (pain001 >= 0.0.78, likewise).
 - **Resources** - `pain001://schema/{message_type}` (returns the bundled
   XSD text).
 - **Prompts** - `build_payment_batch(message_type=...)` (guided
