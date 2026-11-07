@@ -66,9 +66,14 @@
 python -m pip install pain001-mcp
 ```
 
+> **Latest release: v0.0.78**: the family's 0.0.78 release on the
+> pain001 0.0.78 floor. Two new tools, `list_faces` and `project_face`,
+> project a pain.001 document into UK Open Banking, Berlin Group or
+> ISO 20022 element names.
+
 Published packages and development branches are distinct. Test unreleased
 changes on this companion's `feat/v<next-version>` branch against the matching core
-branch. No PyPI release or version bump is part of this work.
+branch.
 
 ---
 
@@ -107,7 +112,7 @@ Coordinated versioning does not imply branch changes have been released.
 
 | Area | Capability | Status |
 | :--- | :--- | :--- |
-| Integration | Payment validation and generation tools | Test-gated; new branch work is unreleased |
+| Integration | Payment validation and generation tools | Released; branch work is test-gated until it ships |
 
 ---
 
@@ -141,8 +146,8 @@ See [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md) for methodology and full results.
 
 The authoritative [tool catalogue](docs/tools.md) is generated from the server.
 It covers validation, identifiers, generation, migration, bank-report parsing,
-corpus access, review-only record fixes (`suggest_record_fix`) and the unreleased
-faces (`list_faces`, `project_face`). Suggestions require review; financial
+corpus access, review-only record fixes (`suggest_record_fix`) and the faces
+(`list_faces`, `project_face`). Suggestions require review; financial
 fields are refused, never guessed. Test unreleased tools with the matching core
 feature branch. In-tree core MCP is a separate smaller surface.
 
