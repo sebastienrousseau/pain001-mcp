@@ -12,6 +12,7 @@ agent's first call.
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
 
 import pytest
 from pain001.corpus import get_file
@@ -163,3 +164,20 @@ def test_error_payloads_validate_too(name: str, args: dict) -> None:
     payload = compat.result_structured(result)
     filled = {key for key, value in payload.items() if value is not None}
     assert filled == {"error"}
+
+
+def test_parse_camt053_reports_every_statement(tmp_path) -> None:
+    """A two-statement camt.053 keeps both statements in structured content."""
+    sample = Path("tests/fixtures/camt053_sample.xml").read_text()
+    start, end = sample.index("<Stmt>"), sample.index("</Stmt>") + 7
+    statement = sample[start:end]
+    second = statement.replace("<Id>", "<Id>SECOND-", 1)
+    path = tmp_path / "two.xml"
+    path.write_text(sample[:end] + second + sample[end:])
+    result = asyncio.run(
+        server.server.call_tool("parse_camt053", {"xml_file_path": str(path)})
+    )
+    structured = compat.result_structured(result)
+    ids = [s["statement_id"] for s in structured["statements"]]
+    assert len(ids) == 2
+    assert ids[1].startswith("SECOND-")

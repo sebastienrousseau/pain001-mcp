@@ -200,7 +200,7 @@ class ValidateIdentifierResult(TypedDict, total=False):
 
 
 class Camt053Result(TypedDict, total=False):
-    """A parsed camt.053 statement, as the core library reports it."""
+    """A parsed camt.053: the first statement's fields, and every one."""
 
     error: str
     statement_id: str
@@ -208,6 +208,7 @@ class Camt053Result(TypedDict, total=False):
     iban: str
     currency: str
     entries: list[dict[str, Any]]
+    statements: list[dict[str, Any]]
 
 
 class Pain002Result(TypedDict, total=False):
@@ -1072,8 +1073,8 @@ def parse_camt053(
             validation.
 
     Returns:
-        A compact dict with the statement header and entry list, or an
-        ``{"error": ...}`` payload on failure.
+        The first statement's header and entries, every statement under
+        ``statements``, or an ``{"error": ...}`` payload on failure.
     """
     try:
         return cast(
