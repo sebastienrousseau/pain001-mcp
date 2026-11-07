@@ -828,9 +828,9 @@ packaging==26.3 \
     --hash=sha256:94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79 \
     --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
     # via sphinx
-pain001==0.0.78 \
-    --hash=sha256:079342a08b36c9020d66e16d1d7470de9f8f59cdab624e5d403c6254cd452e35 \
-    --hash=sha256:84a9042b971dfc49fcd7edc3279781fc10ab1d8e4e79d23c754bb8401753f8f3
+pain001==0.0.79 \
+    --hash=sha256:3390cb7c25b18794f618165a38e9b23b1c6057cc52937e0c6ac3e6256ee0097c \
+    --hash=sha256:ffdef143eb185f2be0809b1f96ba9b7d5a14ed10edb140232fd32433add0c3fa
     # via
     #   -r requirements/runtime.in
     #   pain001-loader-mt101

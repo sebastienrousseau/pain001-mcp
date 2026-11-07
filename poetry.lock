@@ -1648,14 +1648,14 @@ files = [
 
 [[package]]
 name = "pain001"
-version = "0.0.78"
+version = "0.0.79"
 description = "Pain001 is a Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Data."
 optional = false
 python-versions = "<4.0,>=3.11"
 groups = ["main"]
 files = [
-    {file = "pain001-0.0.78-py3-none-any.whl", hash = "sha256:079342a08b36c9020d66e16d1d7470de9f8f59cdab624e5d403c6254cd452e35"},
-    {file = "pain001-0.0.78.tar.gz", hash = "sha256:84a9042b971dfc49fcd7edc3279781fc10ab1d8e4e79d23c754bb8401753f8f3"},
+    {file = "pain001-0.0.79-py3-none-any.whl", hash = "sha256:ffdef143eb185f2be0809b1f96ba9b7d5a14ed10edb140232fd32433add0c3fa"},
+    {file = "pain001-0.0.79.tar.gz", hash = "sha256:3390cb7c25b18794f618165a38e9b23b1c6057cc52937e0c6ac3e6256ee0097c"},
 ]
 
 [package.dependencies]
@@ -1678,6 +1678,7 @@ otel = ["certifi (>=2026.10.19)", "opentelemetry-api (>=1.27,<2)", "opentelemetr
 parquet = ["pyarrow (>=25.0.1,<26.0.0)"]
 redis = ["redis (>=8.1.0,<9)"]
 rules = ["cel-python (>=0.5,<0.6)", "holidays (>=0.106,<1)"]
+sign = ["cryptography (>=50.0.0,<51)"]
 upload = ["paramiko (>=5.1.0,<6)"]
 
 [[package]]
@@ -2777,4 +2778,4 @@ docs = ["jinja2", "sphinx", "sphinx_rtd_theme"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "60077f838ae1724512d95879f86b9c63e3f18bee57a375abc382b194752c0419"
+content-hash = "032b76a3edd9b08c0262f7e3e7ff8cbe1bee862104077e04ec53e6a02cc73101"
