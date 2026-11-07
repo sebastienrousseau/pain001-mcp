@@ -141,9 +141,9 @@ See [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md) for methodology and full results.
 
 The authoritative [tool catalogue](docs/tools.md) is generated from the server.
 It covers validation, identifiers, generation, migration, bank-report parsing,
-corpus access and the unreleased `suggest_record_fix` tool. Suggestions require
-review; financial fields are refused, never guessed. Test unreleased tools with
-the matching core feature branch. In-tree core MCP is a separate smaller surface.
+corpus access and review-only record fixes (`suggest_record_fix`). Suggestions
+require review; financial fields are refused, never guessed. Test unreleased
+tools with the matching core feature branch. In-tree core MCP is a separate smaller surface.
 
 ---
 

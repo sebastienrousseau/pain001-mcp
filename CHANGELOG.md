@@ -9,7 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.78] - Unreleased
 
-Nothing yet.
+### Fixed
+
+- The README called `suggest_record_fix` unreleased; it shipped in
+  0.0.77.
 
 ## [0.0.77] - 2026-11-06
 
