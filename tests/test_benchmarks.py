@@ -42,7 +42,7 @@ import time
 
 import pytest
 
-from pain001_mcp import server
+from pain001_mcp import _common, server
 
 MESSAGE_TYPE = "pain.001.001.03"
 
@@ -226,16 +226,16 @@ class TestReadOnlyTools:
         notice the cache being removed. The property that matters is
         that repeated calls do not go back to disk.
         """
-        server._load_schema.cache_clear()
+        _common._load_schema.cache_clear()
 
         server.get_required_fields(MESSAGE_TYPE)
-        first = server._load_schema.cache_info()
+        first = _common._load_schema.cache_info()
 
         for _ in range(50):
             server.get_required_fields(MESSAGE_TYPE)
             server.get_input_schema(MESSAGE_TYPE)
 
-        later = server._load_schema.cache_info()
+        later = _common._load_schema.cache_info()
 
         assert later.misses == first.misses, (
             f"_load_schema went to disk {later.misses - first.misses} extra "

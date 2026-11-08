@@ -27,6 +27,7 @@ import pytest
 pytest.importorskip("mcp")
 
 import pain001_mcp.server as server  # noqa: E402
+from pain001_mcp import _catalogue  # noqa: E402
 
 MT = "pain.001.001.09"
 
@@ -300,7 +301,7 @@ class TestListMessageTypes:
         for row in rows:
             assert set(row) == {"message_type", "name"}
         by_type = {row["message_type"]: row["name"] for row in rows}
-        assert by_type[MT] == server._HUMAN_NAMES[MT]
+        assert by_type[MT] == _catalogue._HUMAN_NAMES[MT]
         assert (
             by_type[MT] != MT
         ), "a known type carries its human name, not its code"

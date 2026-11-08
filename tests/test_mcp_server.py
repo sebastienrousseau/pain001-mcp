@@ -24,6 +24,7 @@ import pytest
 pytest.importorskip("mcp")
 
 import pain001_mcp.server as server  # noqa: E402
+from pain001_mcp import _common  # noqa: E402
 from pain001_mcp._mcp_compat import (
     MCPServer,  # noqa: E402
     result_content,
@@ -323,14 +324,14 @@ def test_call_tool_list_supported_formats_through_fastmcp():
 # Note: pain001 >=0.0.51 ships JSON Schemas for every entry in
 # ``valid_xml_types``, so the ``_load_schema`` "no schema bundled" branch
 # and the ``validate_records`` error-payload branch it backs are defensive
-# only. They are marked ``# pragma: no cover`` in ``pain001_mcp/server.py``.
+# only. They are marked ``# pragma: no cover`` in ``pain001_mcp/_common.py``.
 
 
 def test_generate_message_template_missing_returns_error(
     sample_record, monkeypatch, tmp_path
 ):
     """``generate_message`` reports an error when bundled templates vanish."""
-    monkeypatch.setattr(server, "TEMPLATES_DIR", tmp_path)
+    monkeypatch.setattr(_common, "TEMPLATES_DIR", tmp_path)
     out = server.generate_message("pain.001.001.09", [sample_record])
     payload = json.loads(out)
     assert "error" in payload
@@ -346,7 +347,7 @@ def test_generate_message_template_xml_missing(
     # Provide the XSD but not the template.xml so the ``or not is_file()``
     # right-hand operand is the trigger.
     (md / "pain.001.001.09.xsd").write_text("<schema/>")
-    monkeypatch.setattr(server, "TEMPLATES_DIR", tmp_path)
+    monkeypatch.setattr(_common, "TEMPLATES_DIR", tmp_path)
     out = server.generate_message("pain.001.001.09", [sample_record])
     assert "No template bundled" in json.loads(out)["error"]
 
@@ -386,7 +387,7 @@ def test_generate_message_async_template_missing_returns_error(
     sample_record, monkeypatch, tmp_path
 ):
     """``generate_message_async`` mirrors the template-missing defensive path."""
-    monkeypatch.setattr(server, "TEMPLATES_DIR", tmp_path)
+    monkeypatch.setattr(_common, "TEMPLATES_DIR", tmp_path)
     out = asyncio.run(
         server.generate_message_async("pain.001.001.09", [sample_record])
     )
@@ -478,7 +479,7 @@ def test_inspect_template_unknown_type_returns_error():
 
 def test_inspect_template_missing_file_returns_error(monkeypatch, tmp_path):
     """Missing bundled CSV template surfaces a defensive error."""
-    monkeypatch.setattr(server, "TEMPLATES_DIR", tmp_path)
+    monkeypatch.setattr(_common, "TEMPLATES_DIR", tmp_path)
     out = server.inspect_template("pain.001.001.09")
     assert "No bundled CSV template" in out["error"]
 

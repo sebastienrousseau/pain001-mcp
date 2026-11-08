@@ -31,7 +31,7 @@ import pytest
 from pain001.constants import valid_xml_types
 from pain001.validation.schemes import PROFILES
 
-from pain001_mcp import server
+from pain001_mcp import _catalogue, server
 
 # Parameters whose value is a scheme profile name (or a comma-separated
 # list of them).
@@ -123,7 +123,7 @@ def test_every_profile_shaped_name_in_a_description_exists():
 
 def test_every_core_message_type_has_a_human_name():
     """``list_message_types`` names every type the core supports."""
-    missing = sorted(set(valid_xml_types) - set(server._HUMAN_NAMES))
+    missing = sorted(set(valid_xml_types) - set(_catalogue._HUMAN_NAMES))
     assert not missing, f"no human name for {missing}"
 
 
@@ -133,7 +133,7 @@ def test_human_names_carry_the_message_version():
         "pain.001": "Customer Credit Transfer Initiation",
         "pain.008": "Customer Direct Debit Initiation",
     }
-    for message_type, name in server._HUMAN_NAMES.items():
+    for message_type, name in _catalogue._HUMAN_NAMES.items():
         family, version = message_type.rsplit(".", 1)
         family = family.rsplit(".", 1)[0]
         assert name == f"{families[family]} V{version}", message_type
