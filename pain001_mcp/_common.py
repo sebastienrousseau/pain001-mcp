@@ -36,6 +36,29 @@ from pain001.validation.schemes import PROFILES
 from pain001.xml.batch_consistency import require_one_batch as _one_batch
 from pydantic import Field
 
+# What the tool modules import from here. The names keep their leading
+# underscore because the package's public API is server.py's; listing
+# them says they are shared across modules, not private to this one.
+__all__ = [
+    "_COMMIT_TOOL",
+    "_FS_READ",
+    "_IdentifierChecks",
+    "_MESSAGE_TYPE_ALIASES",
+    "_MUTATING_SAFE",
+    "_MessageType",
+    "_OptionalSchemeProfile",
+    "_PURE_READ",
+    "_RECORDS_FIELD_GUIDE",
+    "_SchemeProfile",
+    "_check_message_type",
+    "_identifier_findings",
+    "_load_schema",
+    "_refuse_bad_identifiers",
+    "_refuse_mixed_batch",
+    "_template_bundle",
+    "_template_dir",
+]
+
 # Bare family names accepted as ergonomic aliases for a concrete version:
 # agents routinely say "pain.001" (the catalogue name) rather than a full
 # versioned message type, and previously received an unhelpful
