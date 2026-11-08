@@ -24,6 +24,7 @@ import io
 from typing import cast
 
 from pain001.constants import valid_xml_types
+from pain001.templates import DEFAULT_TEMPLATE_REGISTRY
 
 from pain001_mcp._common import (
     _check_message_type,
@@ -32,22 +33,6 @@ from pain001_mcp._common import (
     _template_dir,
 )
 from pain001_mcp._shapes import SchemaResult, TemplateResult
-
-_HUMAN_NAMES = {
-    "pain.001.001.03": "Customer Credit Transfer Initiation V03",
-    "pain.001.001.04": "Customer Credit Transfer Initiation V04",
-    "pain.001.001.05": "Customer Credit Transfer Initiation V05",
-    "pain.001.001.06": "Customer Credit Transfer Initiation V06",
-    "pain.001.001.07": "Customer Credit Transfer Initiation V07",
-    "pain.001.001.08": "Customer Credit Transfer Initiation V08",
-    "pain.001.001.09": "Customer Credit Transfer Initiation V09",
-    "pain.001.001.10": "Customer Credit Transfer Initiation V10",
-    "pain.001.001.11": "Customer Credit Transfer Initiation V11",
-    "pain.001.001.12": "Customer Credit Transfer Initiation V12",
-    "pain.001.001.13": "Customer Credit Transfer Initiation V13",
-    "pain.008.001.02": "Customer Direct Debit Initiation V02",
-    "pain.008.001.08": "Customer Direct Debit Initiation V08",
-}
 
 # Data formats the underlying ``pain001`` library can load. Surfaces what an
 # agent can offer the user without poking the filesystem.
@@ -68,6 +53,22 @@ _SUPPORTED_FORMATS = [
 ]
 
 
+def _display_name(message_type: str) -> str:
+    """Return the core's ISO 20022 name for a type, else the type itself.
+
+    The name is ``TemplateMetadata.display_name`` (pain001 >= 0.0.81),
+    such as ``Customer Credit Transfer Initiation V09``, so this server
+    never restates the names. A type the registry does not describe keeps
+    its code rather than failing the whole listing.
+    """
+    try:
+        return str(
+            DEFAULT_TEMPLATE_REGISTRY.get_template(message_type).display_name
+        )
+    except KeyError:
+        return message_type
+
+
 def list_message_types() -> list[dict]:
     """List every supported ISO 20022 pain message type and its human name.
 
@@ -80,10 +81,7 @@ def list_message_types() -> list[dict]:
     one per supported message type (e.g. ``pain.001.001.09``).
     """
     return [
-        {
-            "message_type": mt,
-            "name": _HUMAN_NAMES.get(mt, mt),
-        }
+        {"message_type": mt, "name": _display_name(mt)}
         for mt in valid_xml_types
     ]
 

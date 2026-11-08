@@ -14,6 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Requires pain001 and pain001-loader-mt101 0.0.81, in lockstep
   (`pyproject.toml` and `requirements/runtime.in`). `poetry.lock` and
   the hash-pinned requirements follow once both are on PyPI.
+- `list_message_types` takes each name from the core's
+  `TemplateMetadata.display_name` (for example "Customer Credit Transfer
+  Initiation V09"); the name table restated in this server is gone.
+- `server.py` is split into one module per tool family (`_catalogue`,
+  `_records`, `_generate`, `_replies`, `_schemes`, `_corpus`, `_staging`,
+  `_clearing`, with `_common` and `_shapes`); `server.py` registers and
+  re-exports every tool. Tool names, schemas and results are unchanged,
+  and every function is now within the complexity ceilings, so the
+  complexity baseline no longer lists any of them.
 
 ## [0.0.80] - 2026-11-07
 
