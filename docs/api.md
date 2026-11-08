@@ -6,6 +6,7 @@ examples and any agent that wraps the FastMCP instance directly).
 ```{eval-rst}
 .. automodule:: pain001_mcp
    :members:
+   :exclude-members: Field
    :undoc-members:
 ```
 
@@ -26,6 +27,7 @@ server, registers every tool and re-exports them.
 ```{eval-rst}
 .. automodule:: pain001_mcp._catalogue
    :members:
+   :exclude-members: Field
    :undoc-members:
    :show-inheritance:
 ```
@@ -35,6 +37,7 @@ server, registers every tool and re-exports them.
 ```{eval-rst}
 .. automodule:: pain001_mcp._records
    :members:
+   :exclude-members: Field
    :undoc-members:
    :show-inheritance:
 ```
@@ -44,6 +47,7 @@ server, registers every tool and re-exports them.
 ```{eval-rst}
 .. automodule:: pain001_mcp._generate
    :members:
+   :exclude-members: Field
    :undoc-members:
    :show-inheritance:
 ```
@@ -53,6 +57,7 @@ server, registers every tool and re-exports them.
 ```{eval-rst}
 .. automodule:: pain001_mcp._replies
    :members:
+   :exclude-members: Field
    :undoc-members:
    :show-inheritance:
 ```
@@ -62,6 +67,7 @@ server, registers every tool and re-exports them.
 ```{eval-rst}
 .. automodule:: pain001_mcp._schemes
    :members:
+   :exclude-members: Field
    :undoc-members:
    :show-inheritance:
 ```
@@ -71,6 +77,7 @@ server, registers every tool and re-exports them.
 ```{eval-rst}
 .. automodule:: pain001_mcp._corpus
    :members:
+   :exclude-members: Field
    :undoc-members:
    :show-inheritance:
 ```
@@ -80,6 +87,7 @@ server, registers every tool and re-exports them.
 ```{eval-rst}
 .. automodule:: pain001_mcp._faces
    :members:
+   :exclude-members: Field
    :undoc-members:
    :show-inheritance:
 ```
@@ -89,6 +97,7 @@ server, registers every tool and re-exports them.
 ```{eval-rst}
 .. automodule:: pain001_mcp._staging
    :members:
+   :exclude-members: Field
    :undoc-members:
    :show-inheritance:
 ```
@@ -98,6 +107,7 @@ server, registers every tool and re-exports them.
 ```{eval-rst}
 .. automodule:: pain001_mcp._clearing
    :members:
+   :exclude-members: Field
    :undoc-members:
    :show-inheritance:
 ```
@@ -107,6 +117,7 @@ server, registers every tool and re-exports them.
 ```{eval-rst}
 .. automodule:: pain001_mcp._shapes
    :members:
+   :exclude-members: Field
    :undoc-members:
    :show-inheritance:
 ```
