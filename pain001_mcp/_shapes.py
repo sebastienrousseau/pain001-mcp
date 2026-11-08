@@ -310,3 +310,26 @@ class CommitPaymentBatchResult(TypedDict, total=False):
     total_transactions: int
     output_file_path: str | None
     committed_at: str
+
+
+class SchemeProfileEntry(TypedDict):
+    """One scheme profile: its name, what it checks, and where from.
+
+    ``rule_prefix`` begins every rule id a rail profile reports (``UK-FPS``
+    for ``UK-FPS-AMT``); it is null for the other profiles, whose rule ids
+    the core does not group under one prefix. ``sources`` are the public
+    documents a rail or purpose mandate was built from, empty otherwise.
+    """
+
+    name: str
+    description: str
+    rule_prefix: str | None
+    sources: list[str]
+
+
+class SchemeProfilesResult(TypedDict, total=False):
+    """Every scheme profile the core ships, in name order."""
+
+    error: str
+    count: int
+    profiles: list[SchemeProfileEntry]

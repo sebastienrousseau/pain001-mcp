@@ -65,6 +65,7 @@ CALLS = {
     "parse_pain002": {"xml_file_path": "tests/fixtures/pain002_sample.xml"},
     "inspect_template": {"message_type": MT},
     "validate_payment_scheme": {"records": [RECORD]},
+    "list_scheme_profiles": {},
     "simulate_payment_batch": {
         "message_type": MT,
         "records": [RECORD],

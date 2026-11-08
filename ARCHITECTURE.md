@@ -40,7 +40,7 @@ public API of that library, exposed in a way an MCP client can call.
 | **Records** | `pain001_mcp/_records.py` | `validate_records`, `suggest_record_fix`, `validate_identifier`, `migrate_records`, `validate_xml_against_schema`, `sanitize_to_iso20022_charset`, `convert_mt101` |
 | **Generation** | `pain001_mcp/_generate.py` | `generate_message`, `generate_message_async`, `generate_message_from_file` |
 | **Bank replies** | `pain001_mcp/_replies.py` | `parse_camt053`, `parse_pain002` |
-| **Schemes** | `pain001_mcp/_schemes.py` | `validate_payment_scheme`, `simulate_payment_batch` |
+| **Schemes** | `pain001_mcp/_schemes.py` | `validate_payment_scheme`, `list_scheme_profiles`, `simulate_payment_batch` |
 | **Corpus** | `pain001_mcp/_corpus.py` | The four example-corpus tools over `pain001.corpus` (pain001 >= 0.0.67) |
 | **Faces** | `pain001_mcp/_faces.py` | `list_faces` and `project_face` over `pain001.faces` (pain001 >= 0.0.78) |
 | **Staging** | `pain001_mcp/_staging.py`, `pain001_mcp/_clearing.py`, `pain001_mcp/_output.py` | `stage_payment_batch`, `commit_payment_batch` and the in-memory store; `simulate_clearing`, one table row per clearing system; the confined commit write |
@@ -56,16 +56,19 @@ public API of that library, exposed in a way an MCP client can call.
 The current MCP surface:
 
 - **Tools** - `list_message_types`, `get_required_fields`,
-  `get_input_schema`, `validate_records`, `validate_identifier`,
-  `generate_message`, `generate_message_async`,
+  `get_input_schema`, `validate_records`, `suggest_record_fix`,
+  `validate_identifier`, `generate_message`, `generate_message_async`,
   `generate_message_from_file`, `list_supported_formats`,
   `parse_camt053`, `parse_pain002`, `inspect_template`,
-  `validate_payment_scheme`, `migrate_records`,
+  `validate_payment_scheme`, `list_scheme_profiles`,
+  `simulate_payment_batch`, `migrate_records`,
   `validate_xml_against_schema`, `sanitize_to_iso20022_charset`,
   `convert_mt101`, and the example-corpus four `list_corpus_files`,
   `get_corpus_file`, `get_corpus_provenance`, `get_corpus_coverage`
   (pain001 >= 0.0.67, else a clear error payload), and the faces two
-  `list_faces`, `project_face` (pain001 >= 0.0.78, likewise).
+  `list_faces`, `project_face` (pain001 >= 0.0.78, likewise), and the
+  staging three `stage_payment_batch`, `simulate_clearing`,
+  `commit_payment_batch`.
 - **Resources** - `pain001://schema/{message_type}` (returns the bundled
   XSD text).
 - **Prompts** - `build_payment_batch(message_type=...)` (guided

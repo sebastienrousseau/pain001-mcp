@@ -100,6 +100,7 @@ from pain001_mcp._records import (
 )
 from pain001_mcp._replies import parse_camt053, parse_pain002
 from pain001_mcp._schemes import (
+    list_scheme_profiles,
     simulate_payment_batch,
     validate_payment_scheme,
 )
@@ -121,6 +122,7 @@ __all__ = [
     "list_corpus_files",
     "list_faces",
     "list_message_types",
+    "list_scheme_profiles",
     "list_supported_formats",
     "main",
     "migrate_records",
@@ -194,6 +196,9 @@ server.tool(title="Inspect CSV template columns", annotations=_PURE_READ)(
 )
 server.tool(title="Validate against scheme rulebook", annotations=_PURE_READ)(
     validate_payment_scheme
+)
+server.tool(title="List scheme profiles", annotations=_PURE_READ)(
+    list_scheme_profiles
 )
 server.tool(title="Simulate payment batch", annotations=_PURE_READ)(
     simulate_payment_batch

@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.81] - Unreleased
 
+### Added
+
+- `list_scheme_profiles` lists every scheme profile the core ships, in
+  name order, so an agent can choose one before calling
+  `validate_payment_scheme`: its name, the description `pain001 plugins
+  list` shows, the prefix of the rule ids a rail profile reports, and the
+  public documents a rail or purpose mandate was built from. All of it
+  comes from the installed pain001. 29 tools.
+
 ### Changed
 
 - Requires pain001 and pain001-loader-mt101 0.0.81, in lockstep

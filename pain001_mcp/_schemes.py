@@ -19,6 +19,9 @@ from decimal import Decimal, InvalidOperation
 from typing import Annotated, Any, cast
 
 from pain001 import canonicalize_payment_record, validate_scheme
+from pain001.plugins import registry as scheme_registry
+from pain001.validation.rails import rail
+from pain001.validation.schemes import PROFILES
 from pydantic import Field
 
 from pain001_mcp._common import (
@@ -30,6 +33,8 @@ from pain001_mcp._common import (
 from pain001_mcp._records import validate_records
 from pain001_mcp._shapes import (
     DuplicateTransaction,
+    SchemeProfileEntry,
+    SchemeProfilesResult,
     SchemeResult,
     SchemeViolation,
     SimulatePaymentBatchResult,
@@ -226,3 +231,44 @@ def simulate_payment_batch(
         "schema_errors": report.get("errors", []),
         "scheme_violations": scheme_violations,
     }
+
+
+def _profile_entry(name: str) -> SchemeProfileEntry:
+    """Describe one profile from the core's own data.
+
+    The description is the scheme plugin's (what ``pain001 plugins
+    list`` shows); a rail gives its rule-id prefix and sources, a purpose
+    mandate its sources.
+    """
+    plugin = scheme_registry.get_scheme(name)
+    try:
+        backing: Any = rail(name)
+        prefix: str | None = backing.prefix
+    except KeyError:
+        backing, prefix = PROFILES[name], None
+    return {
+        "name": name,
+        "description": plugin.meta.description if plugin else "",
+        "rule_prefix": prefix,
+        "sources": list(getattr(backing, "sources", ())),
+    }
+
+
+def list_scheme_profiles() -> SchemeProfilesResult:
+    """List every payment-scheme rulebook profile the core ships.
+
+    Use this to choose the ``profile`` for ``validate_payment_scheme`` (or
+    the ``scheme`` of ``simulate_payment_batch`` and
+    ``stage_payment_batch``) before calling it. Each entry gives the
+    profile name, a one-line description, the prefix of the rule ids a
+    rail profile reports (null for the SEPA, cross-border, duplicate and
+    purpose-mandate profiles), and the public documents it was built
+    from. Everything comes from the installed pain001; nothing is
+    restated here.
+
+    Returns:
+        ``{"count": int, "profiles": [{"name", "description",
+        "rule_prefix", "sources"}, ...]}`` in name order.
+    """
+    profiles = [_profile_entry(name) for name in sorted(PROFILES)]
+    return {"count": len(profiles), "profiles": profiles}

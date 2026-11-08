@@ -65,6 +65,8 @@ EXPECTED_TOOLS = {
     "stage_payment_batch",
     "simulate_clearing",
     "commit_payment_batch",
+    # New in v0.0.81:
+    "list_scheme_profiles",
 }
 
 
