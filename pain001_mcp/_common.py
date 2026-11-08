@@ -28,18 +28,12 @@ from typing import Annotated, Any
 from mcp.types import ToolAnnotations
 from pain001.constants import SCHEMAS_DIR, TEMPLATES_DIR, valid_xml_types
 
-# The checks the core's loaders run on every load (pain001 >= 0.0.81).
-# The core keeps them in private modules and has no public name for
-# either; they are imported here only, so a public export replaces two
-# lines.
-from pain001.validation._identifiers import (
-    check_identifiers as _check_identifiers,
-)
-from pain001.validation._identifiers import (
-    identifier_errors as _identifier_errors,
-)
-from pain001.validation._one_batch import require_one_batch as _one_batch
+# The checks the core's loaders run on every load (pain001 >= 0.0.81),
+# through their public names.
+from pain001.validation import check_identifiers as _check_identifiers
+from pain001.validation import identifier_errors as _identifier_errors
 from pain001.validation.schemes import PROFILES
+from pain001.xml.batch_consistency import require_one_batch as _one_batch
 from pydantic import Field
 
 # Bare family names accepted as ergonomic aliases for a concrete version:
