@@ -777,11 +777,27 @@ def test_convert_mt101_records_are_schema_valid():
     ``validate_records`` tool — the exact hand-off an agent performs.
     """
     records = server.convert_mt101(_MULTI_MT101)
+    for record in records:
+        report = server.validate_records("pain.001.001.09", [record])
+        assert report["valid"] is True
+        assert report["total"] == 1
+        assert report["valid_count"] == 1
+        assert report["errors"] == []
+
+
+def test_mt101_transfers_with_different_charges_need_two_files():
+    """The two transfers carry SHA and OUR charges: two PmtInf blocks.
+
+    One pain.001 file carries one PmtInf, so validation refuses the pair
+    as generation does (pain001 >= 0.0.81) instead of passing a batch the
+    generator would reject.
+    """
+    records = server.convert_mt101(_MULTI_MT101)
     report = server.validate_records("pain.001.001.09", records)
-    assert report["valid"] is True
-    assert report["total"] == 2
-    assert report["valid_count"] == 2
-    assert report["errors"] == []
+    assert set(report) == {"error"}
+    assert "charge_bearer (row 1 vs row 2)" in report["error"]
+    generated = json.loads(server.generate_message("pain.001.001.09", records))
+    assert generated["error"] == report["error"]
 
 
 def test_convert_mt101_malformed_payload_returns_error():

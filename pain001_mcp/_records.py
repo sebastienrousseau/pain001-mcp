@@ -24,18 +24,20 @@ from typing import Annotated, Any, Literal
 
 from jsonschema import Draft7Validator
 from pain001 import canonicalize_payment_record, sanitize_to_charset
+from pain001.exceptions import PaymentValidationError
 from pain001.migration import VersionMapper
 from pain001.validation import validate_bic, validate_iban
 from pain001.validation.charset import ISO20022_ALLOWED_CHARACTERS
-from pain001.xml.validate_via_xsd import validate_xml_string_via_xsd
 from pain001_loader_mt101.loader import parse_mt101
 from pydantic import Field
 
 from pain001_mcp._common import (
     _check_message_type,
+    _identifier_findings,
+    _IdentifierChecks,
     _load_schema,
     _MessageType,
-    _template_dir,
+    _refuse_mixed_batch,
 )
 from pain001_mcp._shapes import (
     MigrateResult,
@@ -43,7 +45,6 @@ from pain001_mcp._shapes import (
     SanitiseResult,
     ValidateIdentifierResult,
     ValidateRecordsResult,
-    XsdResult,
 )
 
 # SWIFT extended ("Z") character set. The pain001 library only implements the
@@ -117,27 +118,40 @@ def _record_errors(
     ]
 
 
+def _identifier_record_errors(records: list[dict]) -> list[RecordError]:
+    """Return one row error per invalid IBAN or BIC column."""
+    return [
+        {"row": row, "path": column, "message": reason}
+        for row, column, reason in _identifier_findings(records)
+    ]
+
+
 def validate_records(
     message_type: _MessageType,
     records: _RecordsToValidate,
+    identifier_checks: _IdentifierChecks = True,
 ) -> ValidateRecordsResult:
     """Validate flat records against a message type's input JSON Schema.
 
     Use this before ``generate_message`` to catch structural/type errors
-    per record and get a row-by-row error report. This checks JSON-Schema
-    shape only; for payment-scheme rulebook checks (SEPA field lengths,
+    per record and get a row-by-row error report. Like the pain001 CLI,
+    it also checks every IBAN and BIC (unless ``identifier_checks`` is
+    false) and refuses rows that would not share one payment information
+    block. For payment-scheme rulebook checks (SEPA field lengths,
     charset, etc.) also run ``validate_payment_scheme``.
 
     Returns a report ``{"valid": bool, "total": int, "valid_count": int,
-    "errors": [...]}``.
+    "errors": [...]}``, or ``{"error": ...}`` for a mixed batch.
 
     Args:
         message_type: A supported ISO 20022 pain message type.
         records: One or more flat payment records to validate.
+        identifier_checks: If false, skip the IBAN and BIC checks.
     """
     try:
         schema = _load_schema(message_type)
-    except ValueError as exc:
+        _refuse_mixed_batch(records, _check_message_type(message_type))
+    except (ValueError, PaymentValidationError) as exc:
         return {"error": str(exc)}
 
     # Map alias keys ('amount', 'currency', lower-case IBAN/BIC spellings)
@@ -147,16 +161,19 @@ def validate_records(
     records = [canonicalize_payment_record(record) for record in records]
 
     validator = Draft7Validator(schema)
-    errors: list[RecordError] = []
-    valid_count = 0
-    for row, record in enumerate(records):
-        record_errors = _record_errors(validator, row, record)
-        valid_count += not record_errors
-        errors.extend(record_errors)
+    errors = [
+        error
+        for row, record in enumerate(records)
+        for error in _record_errors(validator, row, record)
+    ]
+    if identifier_checks:
+        errors += _identifier_record_errors(records)
+        errors.sort(key=lambda error: error["row"])
+    invalid_rows = {error["row"] for error in errors}
     return {
         "valid": not errors,
         "total": len(records),
-        "valid_count": valid_count,
+        "valid_count": len(records) - len(invalid_rows),
         "errors": errors,
     }
 
@@ -322,55 +339,6 @@ def migrate_records(
             "to": to_version,
         }
     except Exception as exc:  # noqa: BLE001 - DataSourceError + others
-        return {"error": str(exc)}
-
-
-def validate_xml_against_schema(
-    xml_content: Annotated[
-        str,
-        Field(
-            description=(
-                "The full pain.001 / pain.008 XML document as a string, "
-                "validated against the message type's official XSD."
-            )
-        ),
-    ],
-    message_type: _MessageType,
-) -> XsdResult:
-    """Validate a raw pain.001 / pain.008 XML string against its official XSD.
-
-    Use this to check XML you already have as a string (e.g. received from
-    another system) without touching the filesystem. To validate records
-    *before* they become XML, use ``validate_records``; to parse a statement
-    or status-report file, use ``parse_camt053`` / ``parse_pain002``.
-
-    Wraps :func:`pain001.xml.validate_via_xsd.validate_xml_string_via_xsd`.
-
-    Args:
-        xml_content: The XML document as a string.
-        message_type: A supported ISO 20022 pain message type.
-
-    Returns:
-        ``{"valid": bool, "message_type": str, "error": str?}`` -
-        ``error`` is present only when ``valid`` is ``False``.
-    """
-    try:
-        message_type = _check_message_type(message_type)
-        xsd = _template_dir(message_type) / f"{message_type}.xsd"
-        if not xsd.is_file():  # pragma: no cover - all valid types ship XSD
-            return {"error": f"No XSD bundled for {message_type}"}
-        try:
-            ok = validate_xml_string_via_xsd(xml_content, str(xsd))
-        except (
-            Exception
-        ) as exc:  # pragma: no cover - underlying API returns False, not raises
-            return {
-                "valid": False,
-                "message_type": message_type,
-                "error": str(exc),
-            }
-        return {"valid": bool(ok), "message_type": message_type}
-    except ValueError as exc:
         return {"error": str(exc)}
 
 

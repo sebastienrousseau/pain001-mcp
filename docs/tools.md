@@ -29,7 +29,7 @@ Arguments: `message_type`
 
 Validate flat records against a message type's input JSON Schema.
 
-Arguments: `message_type`, `records`
+Arguments: `message_type`, `records`, `identifier_checks` (optional)
 
 ## `suggest_record_fix`
 
@@ -47,7 +47,7 @@ Arguments: `kind`, `value`
 
 Generate a validated ISO 20022 pain XML message from in-memory records.
 
-Arguments: `message_type`, `records`
+Arguments: `message_type`, `records`, `identifier_checks` (optional)
 
 ## `list_supported_formats`
 
@@ -59,7 +59,7 @@ Arguments: none
 
 Generate validated pain XML off the event loop, for large batches.
 
-Arguments: `message_type`, `records`
+Arguments: `message_type`, `records`, `identifier_checks` (optional)
 
 ## `generate_message_from_file`
 

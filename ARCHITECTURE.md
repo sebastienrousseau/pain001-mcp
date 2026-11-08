@@ -37,8 +37,8 @@ public API of that library, exposed in a way an MCP client can call.
 | **Server** | `pain001_mcp/server.py` | The FastMCP server, all tool / resource / prompt registrations, and a re-export of every tool |
 | **Shared** | `pain001_mcp/_common.py`, `pain001_mcp/_shapes.py` | Parameter types derived from the core (message types, scheme profiles), tool annotations, schema loading; the result TypedDicts every output schema comes from |
 | **Discovery** | `pain001_mcp/_catalogue.py` | `list_message_types`, `get_required_fields`, `get_input_schema`, `inspect_template`, `list_supported_formats`, the schema resource and the `build_payment_batch` prompt |
-| **Records** | `pain001_mcp/_records.py` | `validate_records`, `suggest_record_fix`, `validate_identifier`, `migrate_records`, `validate_xml_against_schema`, `sanitize_to_iso20022_charset`, `convert_mt101` |
-| **Generation** | `pain001_mcp/_generate.py` | `generate_message`, `generate_message_async`, `generate_message_from_file` |
+| **Records** | `pain001_mcp/_records.py` | `validate_records`, `suggest_record_fix`, `validate_identifier`, `migrate_records`, `sanitize_to_iso20022_charset`, `convert_mt101` |
+| **Generation** | `pain001_mcp/_generate.py` | `generate_message`, `generate_message_async`, `generate_message_from_file`, `validate_xml_against_schema` |
 | **Bank replies** | `pain001_mcp/_replies.py` | `parse_camt053`, `parse_pain002` |
 | **Schemes** | `pain001_mcp/_schemes.py` | `validate_payment_scheme`, `list_scheme_profiles`, `simulate_payment_batch` |
 | **Corpus** | `pain001_mcp/_corpus.py` | The four example-corpus tools over `pain001.corpus` (pain001 >= 0.0.67) |

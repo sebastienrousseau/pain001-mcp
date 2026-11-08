@@ -128,7 +128,7 @@ class TestStagePaymentBatch:
         chf_rec = _sample_record(
             currency="CHF",
             debtor_iban="CH9300762011623852957",
-            creditor_iban="CH9300762011623852958",
+            creditor_iban="CH5604835012345678009",
         )
 
         res_usd = server.stage_payment_batch(MT, [usd_rec])

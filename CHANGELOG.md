@@ -17,6 +17,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   list` shows, the prefix of the rule ids a rail profile reports, and the
   public documents a rail or purpose mandate was built from. All of it
   comes from the installed pain001. 29 tools.
+- `validate_records`, `generate_message` and `generate_message_async`
+  take `identifier_checks` (default true), the CLI's
+  `--no-identifier-checks`.
+
+### Fixed
+
+- The tools that take inline rows give the CLI's answer. pain001 0.0.81
+  checks every IBAN (mod-97) and BIC (ISO 9362) column and refuses rows
+  that would not share one PmtInf, but only on its loaders, which these
+  tools never call: an IBAN with a broken check digit validated and
+  generated here while the CLI refused it, and a batch that generation
+  refuses passed `validate_records`. Now `validate_records` reports each
+  bad identifier as a row error naming the column (never the value) and
+  refuses a mixed batch with the generator's message, and
+  `generate_message`, `generate_message_async` and
+  `generate_message_from_file` refuse a bad identifier with the core's
+  message. `simulate_payment_batch` and `stage_payment_batch` inherit
+  both checks, so a batch with more than one debtor, execution date or
+  charge bearer is refused there too.
 
 ### Changed
 

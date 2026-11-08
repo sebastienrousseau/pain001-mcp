@@ -27,6 +27,18 @@ from typing import Annotated, Any
 
 from mcp.types import ToolAnnotations
 from pain001.constants import SCHEMAS_DIR, TEMPLATES_DIR, valid_xml_types
+
+# The checks the core's loaders run on every load (pain001 >= 0.0.81).
+# The core keeps them in private modules and has no public name for
+# either; they are imported here only, so a public export replaces two
+# lines.
+from pain001.validation._identifiers import (
+    check_identifiers as _check_identifiers,
+)
+from pain001.validation._identifiers import (
+    identifier_errors as _identifier_errors,
+)
+from pain001.validation._one_batch import require_one_batch as _one_batch
 from pain001.validation.schemes import PROFILES
 from pydantic import Field
 
@@ -116,6 +128,44 @@ _SchemeProfile = Annotated[
         json_schema_extra=_profile_schema,
     ),
 ]
+
+_IdentifierChecks = Annotated[
+    bool,
+    Field(
+        description=(
+            "Check every IBAN (mod-97) and BIC (ISO 9362) column, as the "
+            "pain001 CLI and file loaders do (default true). Set false only "
+            "for identifiers you have verified another way, the CLI's "
+            "--no-identifier-checks."
+        )
+    ),
+]
+
+
+def _identifier_findings(records: list[dict]) -> list[tuple[int, str, str]]:
+    """Return ``(row, column, reason)`` per invalid IBAN or BIC.
+
+    The core's own check (what its loaders run): the reason never repeats
+    the identifier, which is personal data.
+    """
+    findings: list[tuple[int, str, str]] = _identifier_errors(records)
+    return findings
+
+
+def _refuse_bad_identifiers(records: list[dict]) -> None:
+    """Raise the core's ``PaymentValidationError`` for a bad IBAN or BIC."""
+    _check_identifiers(records)
+
+
+def _refuse_mixed_batch(records: list[dict], message_type: str) -> None:
+    """Raise the core's ``PaymentValidationError`` for a mixed batch.
+
+    Rows that would not share one PmtInf are refused as the CLI and the
+    generator refuse them. An empty batch is left to the other checks.
+    """
+    if records:
+        _one_batch(records, message_type)
+
 
 # What generate_message accepts per record, surfaced in the tool schema so an
 # agent can build a correct call without a discovery round-trip.

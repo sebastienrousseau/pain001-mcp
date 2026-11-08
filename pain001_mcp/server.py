@@ -87,6 +87,7 @@ from pain001_mcp._generate import (
     generate_message,
     generate_message_async,
     generate_message_from_file,
+    validate_xml_against_schema,
 )
 from pain001_mcp._mcp_compat import build_server
 from pain001_mcp._records import (
@@ -96,7 +97,6 @@ from pain001_mcp._records import (
     suggest_record_fix,
     validate_identifier,
     validate_records,
-    validate_xml_against_schema,
 )
 from pain001_mcp._replies import parse_camt053, parse_pain002
 from pain001_mcp._schemes import (
