@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.82] - Unreleased
 
+### Added
+
+- `check_payment_file` checks an existing pain.001 or pain.008 file, sent
+  as XML text, with the core's `check_document` (pain001 >= 0.0.82): the
+  XSD of the message type its namespace names, the message definition's
+  cross-element rules, and the scheme profiles and Schematron preset
+  asked for, every finding at once. A Schematron rulebook is named by
+  preset only, never a path. 30 tools.
+
 ## [0.0.81] - 2026-11-08
 
 ### Added

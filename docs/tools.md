@@ -4,7 +4,7 @@ Every tool the server registers, with the description an agent sees and the
 arguments it accepts. Generated from the running server by
 `scripts/tool_catalogue.py`; CI fails if this file drifts from the code.
 
-29 tools. Every one returns JSON; a failure is an `{"error": ...}`
+30 tools. Every one returns JSON; a failure is an `{"error": ...}`
 payload, never an exception.
 
 ## `list_message_types`
@@ -162,6 +162,12 @@ Arguments: none
 Project a pain.001 document into another standard's JSON shape.
 
 Arguments: `xml_content`, `face`, `version` (optional), `bindings` (optional)
+
+## `check_payment_file`
+
+Check an existing pain.001 or pain.008 file, as ``pain001 check`` does.
+
+Arguments: `xml_content`, `scheme` (optional), `schematron` (optional)
 
 ## `stage_payment_batch`
 

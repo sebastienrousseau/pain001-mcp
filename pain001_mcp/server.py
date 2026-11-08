@@ -69,6 +69,7 @@ from pain001_mcp._catalogue import (
     list_supported_formats,
     schema_resource,
 )
+from pain001_mcp._check import check_payment_file
 from pain001_mcp._clearing import simulate_clearing
 from pain001_mcp._common import (
     _COMMIT_TOOL,
@@ -108,6 +109,7 @@ from pain001_mcp._staging import commit_payment_batch, stage_payment_batch
 
 __all__ = [
     "build_payment_batch",
+    "check_payment_file",
     "commit_payment_batch",
     "convert_mt101",
     "generate_message",
@@ -230,6 +232,9 @@ server.tool(title="Get schema coverage report", annotations=_PURE_READ)(
 server.tool(title="List faces", annotations=_PURE_READ)(list_faces)
 server.tool(title="Project pain.001 into a face", annotations=_PURE_READ)(
     project_face
+)
+server.tool(title="Check an existing payment file", annotations=_PURE_READ)(
+    check_payment_file
 )
 server.tool(
     title="Stage payment batch for simulation and approval",
