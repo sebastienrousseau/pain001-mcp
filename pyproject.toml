@@ -211,6 +211,7 @@ pytest_add_cli_args_test_selection = [
     "tests/test_mcp_server.py",
     "tests/test_corpus_tools.py",
     "tests/test_faces_tools.py",
+    "tests/test_check_tool.py",
     "tests/test_dual_control_simulation.py",
     "tests/test_llm_ergonomics.py",
     "tests/test_mcp_sdk_compat.py",
