@@ -7,6 +7,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.81] - 2026-11-08
+
+### Added
+
+- `list_scheme_profiles` lists every scheme profile the core ships, in
+  name order, so an agent can choose one before calling
+  `validate_payment_scheme`: its name, the description `pain001 plugins
+  list` shows, the prefix of the rule ids a rail profile reports, and the
+  public documents a rail or purpose mandate was built from. All of it
+  comes from the installed pain001. 29 tools.
+- `validate_records`, `generate_message` and `generate_message_async`
+  take `identifier_checks` (default true), the CLI's
+  `--no-identifier-checks`.
+
+### Fixed
+
+- The tools that take inline rows give the CLI's answer. pain001 0.0.81
+  checks every IBAN (mod-97) and BIC (ISO 9362) column and refuses rows
+  that would not share one PmtInf, but only on its loaders, which these
+  tools never call: an IBAN with a broken check digit validated and
+  generated here while the CLI refused it, and a batch that generation
+  refuses passed `validate_records`. Now `validate_records` reports each
+  bad identifier as a row error naming the column (never the value) and
+  refuses a mixed batch with the generator's message, and
+  `generate_message`, `generate_message_async` and
+  `generate_message_from_file` refuse a bad identifier with the core's
+  message. `simulate_payment_batch` and `stage_payment_batch` inherit
+  both checks, so a batch with more than one debtor, execution date or
+  charge bearer is refused there too.
+
+### Changed
+
+- Requires pain001 and pain001-loader-mt101 0.0.81, in lockstep
+  (`pyproject.toml` and `requirements/runtime.in`). `poetry.lock` and
+  the hash-pinned requirements pin both at 0.0.81.
+- The scheme parameters (`validate_payment_scheme.profile`, and
+  `scheme` on `simulate_payment_batch` and `stage_payment_batch`) carry
+  the core's `PROFILES` as a JSON Schema `enum`, beside a `pattern` for a
+  comma-separated list of them, so a client sees the valid names without
+  reading the description. The schema accepts exactly the specs the
+  core's `validate_scheme` accepts; the core still checks the value.
+- `list_message_types` takes each name from the core's
+  `TemplateMetadata.display_name` (for example "Customer Credit Transfer
+  Initiation V09"); the name table restated in this server is gone.
+- `server.py` is split into one module per tool family (`_catalogue`,
+  `_records`, `_generate`, `_replies`, `_schemes`, `_corpus`, `_staging`,
+  `_clearing`, with `_common` and `_shapes`); `server.py` registers and
+  re-exports every tool. Tool names, schemas and results are unchanged,
+  and every function is now within the complexity ceilings, so the
+  complexity baseline no longer lists any of them.
+
 ## [0.0.80] - 2026-11-07
 
 ### Security

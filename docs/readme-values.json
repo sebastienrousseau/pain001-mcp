@@ -22,7 +22,7 @@
   "ECOSYSTEM_NAME": "Python",
   "ECOSYSTEM_MANIFEST_LANG": "bash",
   "INSTALL_LIBRARY_SNIPPET": "python -m pip install pain001-mcp",
-  "ADDITIONAL_INSTALL_METHODS": "> **Latest release: v0.0.80**: a security release on the pain001 0.0.80\n> floor. `commit_payment_batch` writes only new `.xml` files inside its output\n> directory (GHSA-hqw7-q8v2-pq3m).\n\nPublished packages and development branches are distinct. Test unreleased\nchanges on this companion's `feat/v<next-version>` branch against the matching core\nbranch.",
+  "ADDITIONAL_INSTALL_METHODS": "> **Latest release: v0.0.81**: on the pain001 0.0.81 floor. Tools that\n> take inline rows check every IBAN and BIC and refuse mixed batches, as\n> the CLI does; `list_scheme_profiles` lists the scheme profiles.\n\nPublished packages and development branches are distinct. Test unreleased\nchanges on this companion's `feat/v<next-version>` branch against the matching core\nbranch.",
   "REQUIREMENTS_CONTENT": "Python 3.11 or newer. CI tests 3.11–3.14 on Linux. See\n[toolchain policy](docs/POLICIES.md); no distro-system-Python claim is made.",
   "QUICK_START_LANG": "bash",
   "QUICK_START_SNIPPET": "pain001-mcp --help\npain001-mcp",

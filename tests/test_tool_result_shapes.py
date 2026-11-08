@@ -146,11 +146,18 @@ class TestSimulatePaymentBatch:
 
     def test_distinct_records_not_flagged_as_duplicates(self):
         rec1 = _valid_record()
-        # Different debtor
-        rec_diff_dbtr = dict(rec1)
-        rec_diff_dbtr["debtor_account_IBAN"] = "DE02120300000000202051"
-        out = server.simulate_payment_batch(MT, [rec1, rec_diff_dbtr])
-        assert out["duplicates"] == []
+        # A different debtor or execution date is another PmtInf, which
+        # one file cannot carry (pain001 >= 0.0.81): refused, as the
+        # generator refuses it.
+        for column, value in (
+            ("debtor_account_IBAN", "DE02120300000000202051"),
+            ("requested_execution_date", "2026-09-25"),
+        ):
+            other = dict(rec1)
+            other[column] = value
+            out = server.simulate_payment_batch(MT, [rec1, other])
+            assert set(out) == {"error"}, column
+            assert column in out["error"]
 
         # Different creditor
         rec_diff_cdtr = dict(rec1)
@@ -170,12 +177,6 @@ class TestSimulatePaymentBatch:
         out = server.simulate_payment_batch(MT, [rec1, rec_diff_curr])
         assert out["duplicates"] == []
 
-        # Different execution date
-        rec_diff_date = dict(rec1)
-        rec_diff_date["requested_execution_date"] = "2026-09-25"
-        out = server.simulate_payment_batch(MT, [rec1, rec_diff_date])
-        assert out["duplicates"] == []
-
     def test_unique_accounts_and_multi_currency_aggregation(self):
         rec1 = _valid_record()
         rec2 = dict(rec1)
@@ -186,11 +187,11 @@ class TestSimulatePaymentBatch:
         rec3 = dict(rec1)
         rec3["id"] = "MSG-3"
         rec3["payment_id"] = "E2E-3"
-        rec3["debtor_account_IBAN"] = "DE02120300000000202051"
         rec3["currency"] = "USD"
         rec3["payment_amount"] = 25.5
         out = server.simulate_payment_batch(MT, [rec1, rec2, rec3])
-        assert out["unique_debtors"] == 2
+        # One file carries one debtor (one PmtInf); creditors may differ.
+        assert out["unique_debtors"] == 1
         assert out["unique_creditors"] == 2
         assert out["control_sum_by_currency"] == {
             "EUR": "150.00",
@@ -300,7 +301,7 @@ class TestListMessageTypes:
         for row in rows:
             assert set(row) == {"message_type", "name"}
         by_type = {row["message_type"]: row["name"] for row in rows}
-        assert by_type[MT] == server._HUMAN_NAMES[MT]
+        assert by_type[MT] == "Customer Credit Transfer Initiation V09"
         assert (
             by_type[MT] != MT
         ), "a known type carries its human name, not its code"

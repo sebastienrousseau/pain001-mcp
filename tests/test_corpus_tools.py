@@ -19,6 +19,7 @@ from types import SimpleNamespace
 import pytest
 
 import pain001_mcp.server as server
+from pain001_mcp import _corpus
 
 
 @dataclass
@@ -114,7 +115,7 @@ def stub(monkeypatch):
             return fake
         return real(name, package)
 
-    monkeypatch.setattr(server.importlib, "import_module", fake_import)
+    monkeypatch.setattr(_corpus.importlib, "import_module", fake_import)
     return fake
 
 
@@ -128,7 +129,7 @@ def absent(monkeypatch):
             raise ImportError("No module named 'pain001.corpus'")
         return real(name, package)
 
-    monkeypatch.setattr(server.importlib, "import_module", fake_import)
+    monkeypatch.setattr(_corpus.importlib, "import_module", fake_import)
 
 
 def test_list_corpus_files_returns_every_kind(stub):
@@ -198,17 +199,17 @@ def test_get_corpus_coverage_returns_report(stub):
 
 def test_corpus_tools_report_missing_library(absent):
     """With a pain001 that predates the corpus every tool says so."""
-    expected = {"error": server._CORPUS_MISSING}
+    expected = {"error": _corpus._CORPUS_MISSING}
     assert server.list_corpus_files() == expected
     assert server.get_corpus_file("x", "pain.001.001.09") == expected
     assert server.get_corpus_provenance("x", "pain.001.001.09") == expected
     assert server.get_corpus_coverage("pain.001.001.09") == expected
-    assert "0.0.67" in server._CORPUS_MISSING
+    assert "0.0.67" in _corpus._CORPUS_MISSING
 
 
 def test_real_corpus_when_available():
     """Against a pain001 that ships the corpus, the tools return real data."""
-    if server._corpus_api() is None:
+    if _corpus._corpus_api() is None:
         pytest.skip("installed pain001 has no example corpus")
     files = server.list_corpus_files(kind="market", country="GB")
     assert files["count"] > 0

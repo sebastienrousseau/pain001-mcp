@@ -27,6 +27,7 @@ import time
 from pathlib import Path
 
 import pain001_mcp.server as server
+from pain001_mcp import _staging
 
 MT = "pain.001.001.09"
 
@@ -127,7 +128,7 @@ class TestStagePaymentBatch:
         chf_rec = _sample_record(
             currency="CHF",
             debtor_iban="CH9300762011623852957",
-            creditor_iban="CH9300762011623852958",
+            creditor_iban="CH5604835012345678009",
         )
 
         res_usd = server.stage_payment_batch(MT, [usd_rec])
@@ -207,7 +208,7 @@ class TestSimulateClearing:
         )
         # Direct insert to simulate invalid IBAN passing staging or non-SEPA IBAN
         staged = server.stage_payment_batch(MT, [_sample_record()])
-        server._STAGED_PAYMENTS[staged["stage_id"]].records = [rec]
+        _staging._STAGED_PAYMENTS[staged["stage_id"]].records = [rec]
         res = server.simulate_clearing(staged["stage_id"], "EPC-SEPA")
         assert res["clearing_status"] == "REJECTED"
         assert any(
@@ -219,7 +220,7 @@ class TestSimulateClearing:
     def test_simulate_clearing_sepa_rejected_charge_bearer(self):
         rec = _sample_record(currency="EUR")
         staged = server.stage_payment_batch(MT, [rec])
-        server._STAGED_PAYMENTS[staged["stage_id"]].records = [
+        _staging._STAGED_PAYMENTS[staged["stage_id"]].records = [
             _sample_record(charge_bearer="SHAR")
         ]
         res = server.simulate_clearing(staged["stage_id"], "EPC-SEPA")
@@ -268,7 +269,7 @@ class TestSimulateClearing:
 
         # Missing creditor BIC
         staged_noburo = server.stage_payment_batch(MT, [rec_bic])
-        server._STAGED_PAYMENTS[staged_noburo["stage_id"]].records = [
+        _staging._STAGED_PAYMENTS[staged_noburo["stage_id"]].records = [
             _sample_record(creditor_bic="")
         ]
         res_noburo = server.simulate_clearing(
@@ -316,7 +317,7 @@ class TestSimulateClearing:
 
         # Expired stage
         staged = server.stage_payment_batch(MT, [_sample_record()])
-        server._STAGED_PAYMENTS[staged["stage_id"]].expires_at = (
+        _staging._STAGED_PAYMENTS[staged["stage_id"]].expires_at = (
             time.time() - 10
         )
         res_exp = server.simulate_clearing(staged["stage_id"], "EPC-SEPA")
@@ -378,7 +379,7 @@ class TestCommitPaymentBatch:
 
         # Expired
         staged = server.stage_payment_batch(MT, [_sample_record()])
-        server._STAGED_PAYMENTS[staged["stage_id"]].expires_at = (
+        _staging._STAGED_PAYMENTS[staged["stage_id"]].expires_at = (
             time.time() - 5
         )
         res_exp = server.commit_payment_batch(
@@ -427,8 +428,8 @@ class TestStagedCleanup:
     def test_clean_expired_staged_orders(self):
         staged = server.stage_payment_batch(MT, [_sample_record()])
         sid = staged["stage_id"]
-        assert sid in server._STAGED_PAYMENTS
+        assert sid in _staging._STAGED_PAYMENTS
 
         # Advance simulated time past 24h cutoff
-        server._clean_expired_staged_orders(now=time.time() + 90000.0)
-        assert sid not in server._STAGED_PAYMENTS
+        _staging._clean_expired_staged_orders(now=time.time() + 90000.0)
+        assert sid not in _staging._STAGED_PAYMENTS

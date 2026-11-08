@@ -4,7 +4,7 @@ Every tool the server registers, with the description an agent sees and the
 arguments it accepts. Generated from the running server by
 `scripts/tool_catalogue.py`; CI fails if this file drifts from the code.
 
-28 tools. Every one returns JSON; a failure is an `{"error": ...}`
+29 tools. Every one returns JSON; a failure is an `{"error": ...}`
 payload, never an exception.
 
 ## `list_message_types`
@@ -29,7 +29,7 @@ Arguments: `message_type`
 
 Validate flat records against a message type's input JSON Schema.
 
-Arguments: `message_type`, `records`
+Arguments: `message_type`, `records`, `identifier_checks` (optional)
 
 ## `suggest_record_fix`
 
@@ -47,7 +47,7 @@ Arguments: `kind`, `value`
 
 Generate a validated ISO 20022 pain XML message from in-memory records.
 
-Arguments: `message_type`, `records`
+Arguments: `message_type`, `records`, `identifier_checks` (optional)
 
 ## `list_supported_formats`
 
@@ -59,7 +59,7 @@ Arguments: none
 
 Generate validated pain XML off the event loop, for large batches.
 
-Arguments: `message_type`, `records`
+Arguments: `message_type`, `records`, `identifier_checks` (optional)
 
 ## `generate_message_from_file`
 
@@ -90,6 +90,12 @@ Arguments: `message_type`
 Validate records against a payment-scheme rulebook (e.g. SEPA).
 
 Arguments: `records`, `profile` (optional)
+
+## `list_scheme_profiles`
+
+List every payment-scheme rulebook profile the core ships.
+
+Arguments: none
 
 ## `simulate_payment_batch`
 

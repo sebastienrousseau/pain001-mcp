@@ -12,7 +12,8 @@ prior context.
 MCP client (Claude Desktop, IDE, agent)
         |  stdio (JSON-RPC)
         v
-pain001_mcp/server.py        (FastMCP server: tools, resources, prompts)
+pain001_mcp/server.py        (FastMCP server: registers every tool,
+        |                     resource and prompt from the family modules)
         |  thin typed wrappers
         v
 pain001 public API           (pain001.generate_xml_string,
@@ -33,8 +34,16 @@ public API of that library, exposed in a way an MCP client can call.
 
 | Area | Module | Responsibility |
 | :--- | :--- | :--- |
-| **Server** | `pain001_mcp/server.py` | The FastMCP server, all tool / resource / prompt registrations |
-| **Faces** | `pain001_mcp/_faces.py` | `list_faces` and `project_face` over `pain001.faces` (pain001 >= 0.0.78), registered in `server.py` with the other tools |
+| **Server** | `pain001_mcp/server.py` | The FastMCP server, all tool / resource / prompt registrations, and a re-export of every tool |
+| **Shared** | `pain001_mcp/_common.py`, `pain001_mcp/_shapes.py` | Parameter types derived from the core (message types, scheme profiles), tool annotations, schema loading; the result TypedDicts every output schema comes from |
+| **Discovery** | `pain001_mcp/_catalogue.py` | `list_message_types`, `get_required_fields`, `get_input_schema`, `inspect_template`, `list_supported_formats`, the schema resource and the `build_payment_batch` prompt |
+| **Records** | `pain001_mcp/_records.py` | `validate_records`, `suggest_record_fix`, `validate_identifier`, `migrate_records`, `sanitize_to_iso20022_charset`, `convert_mt101` |
+| **Generation** | `pain001_mcp/_generate.py` | `generate_message`, `generate_message_async`, `generate_message_from_file`, `validate_xml_against_schema` |
+| **Bank replies** | `pain001_mcp/_replies.py` | `parse_camt053`, `parse_pain002` |
+| **Schemes** | `pain001_mcp/_schemes.py` | `validate_payment_scheme`, `list_scheme_profiles`, `simulate_payment_batch` |
+| **Corpus** | `pain001_mcp/_corpus.py` | The four example-corpus tools over `pain001.corpus` (pain001 >= 0.0.67) |
+| **Faces** | `pain001_mcp/_faces.py` | `list_faces` and `project_face` over `pain001.faces` (pain001 >= 0.0.78) |
+| **Staging** | `pain001_mcp/_staging.py`, `pain001_mcp/_clearing.py`, `pain001_mcp/_output.py` | `stage_payment_batch`, `commit_payment_batch` and the in-memory store; `simulate_clearing`, one table row per clearing system; the confined commit write |
 | **Entry point** | `pain001_mcp.server:main` (console script: `pain001-mcp`) | Launches the server over stdio, or over streamable HTTP / SSE with `--transport` (`_cli.py` + `_transports.py`, ADR 0004) |
 | **Version** | `pain001_mcp/__init__.py` | Single source of truth (`__version__`); the LSP reads it for the protocol handshake |
 | **Tests** | `tests/test_mcp_server.py`, `tests/test_stdio_e2e.py` | In-process + end-to-end-via-subprocess regressions |
@@ -47,16 +56,19 @@ public API of that library, exposed in a way an MCP client can call.
 The current MCP surface:
 
 - **Tools** - `list_message_types`, `get_required_fields`,
-  `get_input_schema`, `validate_records`, `validate_identifier`,
-  `generate_message`, `generate_message_async`,
+  `get_input_schema`, `validate_records`, `suggest_record_fix`,
+  `validate_identifier`, `generate_message`, `generate_message_async`,
   `generate_message_from_file`, `list_supported_formats`,
   `parse_camt053`, `parse_pain002`, `inspect_template`,
-  `validate_payment_scheme`, `migrate_records`,
+  `validate_payment_scheme`, `list_scheme_profiles`,
+  `simulate_payment_batch`, `migrate_records`,
   `validate_xml_against_schema`, `sanitize_to_iso20022_charset`,
   `convert_mt101`, and the example-corpus four `list_corpus_files`,
   `get_corpus_file`, `get_corpus_provenance`, `get_corpus_coverage`
   (pain001 >= 0.0.67, else a clear error payload), and the faces two
-  `list_faces`, `project_face` (pain001 >= 0.0.78, likewise).
+  `list_faces`, `project_face` (pain001 >= 0.0.78, likewise), and the
+  staging three `stage_payment_batch`, `simulate_clearing`,
+  `commit_payment_batch`.
 - **Resources** - `pain001://schema/{message_type}` (returns the bundled
   XSD text).
 - **Prompts** - `build_payment_batch(message_type=...)` (guided
@@ -83,8 +95,10 @@ The current MCP surface:
 
 ## Extension points
 
-- **Add a tool:** add a plain function in `pain001_mcp/server.py` and one
-  `server.tool(...)(name)` line in the registration block before `main()`
+- **Add a tool:** add a plain function to the module of its family (or a
+  new `pain001_mcp/_<family>.py`), import it in `pain001_mcp/server.py`,
+  and add one `server.tool(...)(name)` line in the registration block
+  before `main()`
   (decorators are not used: mutmut never mutates a decorated function, see
   ADR 0003); pair it with tests in `tests/test_mcp_server.py`, add it to
   `EXPECTED_TOOLS` there, and run `scripts/tool_catalogue.py`.
