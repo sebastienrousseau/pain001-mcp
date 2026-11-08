@@ -66,9 +66,9 @@
 python -m pip install pain001-mcp
 ```
 
-> **Latest release: v0.0.80**: a security release on the pain001 0.0.80
-> floor. `commit_payment_batch` writes only new `.xml` files inside its output
-> directory (GHSA-hqw7-q8v2-pq3m).
+> **Latest release: v0.0.81**: on the pain001 0.0.81 floor. Tools that
+> take inline rows check every IBAN and BIC and refuse mixed batches, as
+> the CLI does; `list_scheme_profiles` lists the scheme profiles.
 
 Published packages and development branches are distinct. Test unreleased
 changes on this companion's `feat/v<next-version>` branch against the matching core
