@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Requires pain001 and pain001-loader-mt101 0.0.81, in lockstep
   (`pyproject.toml` and `requirements/runtime.in`). `poetry.lock` and
   the hash-pinned requirements follow once both are on PyPI.
+- The scheme parameters (`validate_payment_scheme.profile`, and
+  `scheme` on `simulate_payment_batch` and `stage_payment_batch`) carry
+  the core's `PROFILES` as a JSON Schema `enum`, beside a `pattern` for a
+  comma-separated list of them, so a client sees the valid names without
+  reading the description. The schema accepts exactly the specs the
+  core's `validate_scheme` accepts; the core still checks the value.
 - `list_message_types` takes each name from the core's
   `TemplateMetadata.display_name` (for example "Customer Credit Transfer
   Initiation V09"); the name table restated in this server is gone.

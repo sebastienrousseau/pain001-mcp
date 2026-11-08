@@ -29,9 +29,10 @@ import json
 import re
 
 import pytest
+from jsonschema import Draft7Validator
 from pain001.constants import valid_xml_types
 from pain001.templates import DEFAULT_TEMPLATE_REGISTRY
-from pain001.validation.schemes import PROFILES
+from pain001.validation.schemes import PROFILES, validate_scheme
 
 from pain001_mcp import _catalogue, server
 
@@ -165,3 +166,77 @@ def test_list_message_types_never_falls_back_to_the_raw_type():
     rows = server.list_message_types()
     assert {row["message_type"] for row in rows} == set(valid_xml_types)
     assert all(row["name"] != row["message_type"] for row in rows)
+
+
+def _profile_schemas() -> list[tuple[str, str, dict]]:
+    """Return (tool, parameter, property schema) per profile parameter."""
+    return [
+        (tool, name, json.loads(text))
+        for tool, name, text in _profile_parameter_texts()
+    ]
+
+
+@pytest.mark.parametrize(
+    ("tool", "parameter", "schema"),
+    _profile_schemas(),
+    ids=[f"{tool}.{name}" for tool, name, _ in _profile_schemas()],
+)
+def test_a_profile_parameter_enumerates_the_core_profiles(
+    tool, parameter, schema
+):
+    """The schema carries the core's PROFILES as an enum, not prose only."""
+    enums = [
+        branch["enum"]
+        for branch in schema.get("anyOf", [])
+        if "enum" in branch
+    ]
+    assert enums == [sorted(PROFILES)], f"{tool}.{parameter}"
+
+
+@pytest.mark.parametrize(
+    ("tool", "parameter", "schema"),
+    _profile_schemas(),
+    ids=[f"{tool}.{name}" for tool, name, _ in _profile_schemas()],
+)
+def test_a_profile_parameter_admits_exactly_what_the_core_accepts(
+    tool, parameter, schema
+):
+    """The schema accepts a profile spec exactly when the core does."""
+    validator = Draft7Validator(schema)
+    candidates = [*sorted(PROFILES), *_SPEC_PROBES]
+    for value in candidates:
+        assert validator.is_valid(value) is _core_accepts(value), (
+            tool,
+            parameter,
+            value,
+        )
+    optional = parameter == "scheme"
+    assert validator.is_valid(None) is optional, (tool, parameter)
+
+
+# Specs around the edges of the core's parser: padding, empty items,
+# unknown names, case.
+_SPEC_PROBES = [
+    "sepa-sct,anti-duplicate",
+    " sepa-sct , anti-duplicate ",
+    "sepa-sct,,anti-duplicate",
+    "sepa-sct,",
+    ",sepa-sct",
+    "sepa-sct\t",
+    "",
+    ",",
+    " , ",
+    "bogus",
+    "sepa-sct,bogus",
+    "SEPA-SCT",
+    "sepa-sctx",
+]
+
+
+def _core_accepts(spec: str) -> bool:
+    """Whether ``pain001.validate_scheme`` takes ``spec`` as a profile."""
+    try:
+        validate_scheme([], spec)
+    except ValueError:
+        return False
+    return True

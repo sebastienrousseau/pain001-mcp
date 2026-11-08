@@ -23,7 +23,7 @@ no tool module restates them and none can drift from the core.
 import json
 from functools import lru_cache
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 from mcp.types import ToolAnnotations
 from pain001.constants import SCHEMAS_DIR, TEMPLATES_DIR, valid_xml_types
@@ -63,7 +63,37 @@ _MessageType = Annotated[
 ]
 
 # Every scheme profile pain001 ships, so no description names a fake one.
-_SCHEME_PROFILE_LIST = ", ".join(f"'{name}'" for name in sorted(PROFILES))
+_SCHEME_PROFILES: list[str] = sorted(PROFILES)
+_SCHEME_PROFILE_LIST = ", ".join(f"'{name}'" for name in _SCHEME_PROFILES)
+
+# A comma-separated list of profile names, as pain001.validate_scheme
+# parses it: items are stripped, empty items are ignored, and at least
+# one name must remain. Profile names are lower-case words joined by
+# hyphens, so they need no escaping in an ECMA-262 pattern.
+_ONE_PROFILE = "(?:" + "|".join(_SCHEME_PROFILES) + ")"
+_PROFILE_SPEC_PATTERN = (
+    rf"^(?:\s*,)*\s*{_ONE_PROFILE}\s*(?:,\s*(?:{_ONE_PROFILE}\s*)?)*$"
+)
+
+
+def _profile_schema(schema: dict[str, Any]) -> None:
+    """Offer the core's profiles as an enum, and a comma list of them.
+
+    Applied by pydantic to a profile parameter's JSON Schema. The string
+    branch becomes two: one profile name from ``PROFILES`` (an ``enum``
+    a client can show), or a comma-separated list of names (a
+    ``pattern``). A ``null`` branch, on an optional parameter, stays.
+    The core still validates the value; this is schema metadata.
+    """
+    schema.pop("type", None)
+    keep = [b for b in schema.pop("anyOf", []) if b.get("type") == "null"]
+    schema["anyOf"] = [
+        {"type": "string", "enum": _SCHEME_PROFILES},
+        {"type": "string", "pattern": _PROFILE_SPEC_PATTERN},
+        *keep,
+    ]
+
+
 _OptionalSchemeProfile = Annotated[
     str | None,
     Field(
@@ -71,7 +101,8 @@ _OptionalSchemeProfile = Annotated[
             "Optional payment-scheme rulebook profile to enforce, or several "
             f"joined by commas. One of {_SCHEME_PROFILE_LIST}. Omit to skip "
             "scheme-specific rulebook validation."
-        )
+        ),
+        json_schema_extra=_profile_schema,
     ),
 ]
 _SchemeProfile = Annotated[
@@ -81,7 +112,8 @@ _SchemeProfile = Annotated[
             "The payment-scheme rulebook profile to enforce, or several "
             "joined by commas (e.g. 'sepa-sct,anti-duplicate'). One of "
             f"{_SCHEME_PROFILE_LIST}. Defaults to 'sepa-sct'."
-        )
+        ),
+        json_schema_extra=_profile_schema,
     ),
 ]
 
