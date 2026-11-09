@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.83] - Unreleased
 
+### Fixed
+
+- The release's facts file is attached as
+  `pain001-mcp-<version>.facts.json`, as the 0.0.82 notes say and as
+  core names its own; 0.0.82 attached it as
+  `pain001-mcp-v0.0.82.facts.json`, after the tag. `scripts/facts.py
+  --asset` now writes and names the file, and a test holds the
+  workflow and the docs to that one name.
+
 ## [0.0.82] - 2026-11-09
 
 ### Added

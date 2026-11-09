@@ -15,9 +15,11 @@ can render from it:
 
 Usage::
 
-    python scripts/facts.py [-o FILE] [--check FILE]
+    python scripts/facts.py [-o FILE | --asset] [--check FILE]
 
 ``--check`` exits 1 when FILE is not what this tree would write.
+``--asset`` writes the file under its release name, in the current
+directory, and prints that name for the release workflow to upload.
 """
 
 from __future__ import annotations
@@ -34,6 +36,18 @@ ROOT = Path(__file__).resolve().parents[1]
 
 #: Bumped when a key changes meaning or disappears; new keys do not.
 FACTS_VERSION = 1
+
+
+def asset_name(version: str) -> str:
+    """The release asset's name, the only place it is spelled.
+
+    Args:
+        version: The package version, without a leading ``v``.
+
+    Returns:
+        ``pain001-mcp-<version>.facts.json``, as core names its own.
+    """
+    return f"pain001-mcp-{version}.facts.json"
 
 
 def _floor(spec: Any) -> str:
@@ -102,9 +116,16 @@ def main(argv: list[str] | None = None) -> int:
     """
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("-o", "--output", type=Path, default=None)
+    parser.add_argument("--asset", action="store_true")
     parser.add_argument("--check", type=Path, default=None)
     args = parser.parse_args(argv)
-    text = render(collect())
+    facts = collect()
+    text = render(facts)
+    if args.asset:
+        name = asset_name(facts["version"])
+        Path(name).write_text(text, encoding="utf-8")
+        print(name)
+        return 0
     if args.check is not None:
         if args.check.read_text(encoding="utf-8") != text:
             print(f"{args.check} is out of date", file=sys.stderr)

@@ -163,18 +163,25 @@ jobs:
 
       # The release's facts (tools, prompts, floors), generated from the
       # server itself; manifests and the site render from this file.
+      # The script names the file (scripts/facts.py asset_name), so the
+      # asset matches the documented name rather than the tag's spelling.
       - name: Generate facts.json
-        run: poetry run python scripts/facts.py -o "pain001-mcp-${RELEASE_TAG}.facts.json"
+        id: facts
+        run: |
+          file="$(poetry run python scripts/facts.py --asset)"
+          test -s "${file}"
+          echo "file=${file}" >> "$GITHUB_OUTPUT"
 
       - name: Upload SBOMs, license manifest and facts to release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FACTS_FILE: ${{ steps.facts.outputs.file }}
         run: |
           gh release upload "${RELEASE_TAG}" \
             "pain001-mcp-${RELEASE_TAG}.cdx.json" \
             "pain001-mcp-${RELEASE_TAG}.spdx.json" \
             "pain001-mcp-${RELEASE_TAG}.licenses.json" \
-            "pain001-mcp-${RELEASE_TAG}.facts.json" \
+            "${FACTS_FILE}" \
             --repo "${{ github.repository }}" --clobber
 
       - name: Upload SBOM artifact
