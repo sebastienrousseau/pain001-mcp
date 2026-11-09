@@ -23,7 +23,7 @@ packaging>=23
 # GHSA-9vhv-jxww-xfm5, GHSA-567q-5qvw-pf92 and GHSA-v4x8-3wr5-3wq8; the
 # floor keeps every affected release from resolving.
 pip-audit
-filelock>=4.2.1
+filelock>=4.2.9
 # Complexity gate: scripts/check_complexity.py and complexipy.
 radon>=6.0
 complexipy>=8.1
