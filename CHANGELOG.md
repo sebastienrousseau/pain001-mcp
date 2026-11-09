@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Requires `pain001 >= 0.0.82, < 1`, the release that ships
   `check_document`; `poetry.lock` and the hash-pinned ci, docs, fuzz and
   runtime sets move pain001 from 0.0.81 to 0.0.82.
+- Dependencies: anyio 4.16.0, dulwich 1.2.21, filelock 4.2.9, ruff
+  0.17.4 and virtualenv 21.15.5 (Dependabot #154 to #158), in
+  `poetry.lock` and every requirements lock that pins them.
 
 ## [0.0.81] - 2026-11-08
 
