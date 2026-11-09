@@ -87,6 +87,10 @@ CALLS = {
         "xml_content": get_file("de.sepa.sct-salary", MT),
         "face": "berlin_group",
     },
+    "check_payment_file": {
+        "xml_content": get_file("de.sepa.sct-salary", MT),
+        "scheme": "sepa-sct",
+    },
     "stage_payment_batch": {"message_type": MT, "records": [RECORD]},
     "simulate_clearing": {
         "stage_id": _staged_for_clearing["stage_id"],
@@ -136,6 +140,7 @@ def test_tool_result_validates_against_its_schema(name: str) -> None:
     [
         ("get_corpus_file", {"scenario_id": "zz.none", "version": MT}),
         ("project_face", {"xml_content": "<x/>", "face": "iso_2018"}),
+        ("check_payment_file", {"xml_content": "<x/>"}),
         ("validate_identifier", {"kind": "lei", "value": "x"}),
         ("inspect_template", {"message_type": "pain.999.001.01"}),
         (

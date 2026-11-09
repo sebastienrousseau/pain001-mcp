@@ -161,7 +161,12 @@ jobs:
             --with-urls --with-license-file --no-license-path \
             --output-file "pain001-mcp-${RELEASE_TAG}.licenses.json"
 
-      - name: Upload SBOMs + license manifest to release
+      # The release's facts (tools, prompts, floors), generated from the
+      # server itself; manifests and the site render from this file.
+      - name: Generate facts.json
+        run: poetry run python scripts/facts.py -o "pain001-mcp-${RELEASE_TAG}.facts.json"
+
+      - name: Upload SBOMs, license manifest and facts to release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -169,6 +174,7 @@ jobs:
             "pain001-mcp-${RELEASE_TAG}.cdx.json" \
             "pain001-mcp-${RELEASE_TAG}.spdx.json" \
             "pain001-mcp-${RELEASE_TAG}.licenses.json" \
+            "pain001-mcp-${RELEASE_TAG}.facts.json" \
             --repo "${{ github.repository }}" --clobber
 
       - name: Upload SBOM artifact

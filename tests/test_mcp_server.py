@@ -67,6 +67,8 @@ EXPECTED_TOOLS = {
     "commit_payment_batch",
     # New in v0.0.81:
     "list_scheme_profiles",
+    # New in v0.0.82:
+    "check_payment_file",
 }
 
 
