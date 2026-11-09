@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.0.83] - Unreleased
+## [0.0.83] - 2026-11-09
 
 ### Fixed
 
@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Requires `pain001 >= 0.0.83, < 1` and `pain001-loader-mt101 >=
+  0.0.83, < 1`, the suite's lockstep floors; `poetry.lock` and the
+  hash-pinned runtime, ci, docs and fuzz sets move both to 0.0.83. The
+  tools and their results are unchanged: the core's 0.0.83 work is XML
+  signing and signature verification, which no tool calls.
 - Workflow actions: github/codeql-action, docker/login-action and
   sigstore/cosign-installer 4.1.3 move to their latest pinned commits
   (Dependabot #160).
