@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   --asset` now writes and names the file, and a test holds the
   workflow and the docs to that one name.
 
+### Changed
+
+- Workflow actions: github/codeql-action, docker/login-action and
+  sigstore/cosign-installer 4.1.3 move to their latest pinned commits
+  (Dependabot #160).
+
 ## [0.0.82] - 2026-11-09
 
 ### Added
