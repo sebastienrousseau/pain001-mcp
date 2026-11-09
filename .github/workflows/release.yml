@@ -71,7 +71,7 @@ jobs:
       # identity, no secrets) for every distribution, attached to the GitHub
       # release as .sig + .pem so the release is verifiably signed.
       - name: Install cosign
-        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
         with:
           cosign-release: "v2.4.3"
 
@@ -163,18 +163,25 @@ jobs:
 
       # The release's facts (tools, prompts, floors), generated from the
       # server itself; manifests and the site render from this file.
+      # The script names the file (scripts/facts.py asset_name), so the
+      # asset matches the documented name rather than the tag's spelling.
       - name: Generate facts.json
-        run: poetry run python scripts/facts.py -o "pain001-mcp-${RELEASE_TAG}.facts.json"
+        id: facts
+        run: |
+          file="$(poetry run python scripts/facts.py --asset)"
+          test -s "${file}"
+          echo "file=${file}" >> "$GITHUB_OUTPUT"
 
       - name: Upload SBOMs, license manifest and facts to release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FACTS_FILE: ${{ steps.facts.outputs.file }}
         run: |
           gh release upload "${RELEASE_TAG}" \
             "pain001-mcp-${RELEASE_TAG}.cdx.json" \
             "pain001-mcp-${RELEASE_TAG}.spdx.json" \
             "pain001-mcp-${RELEASE_TAG}.licenses.json" \
-            "pain001-mcp-${RELEASE_TAG}.facts.json" \
+            "${FACTS_FILE}" \
             --repo "${{ github.repository }}" --clobber
 
       - name: Upload SBOM artifact

@@ -71,3 +71,34 @@ def test_write_check_and_stdout(
     capsys.readouterr()
     assert facts.main([]) == 0
     assert json.loads(capsys.readouterr().out)["package"] == "pain001-mcp"
+
+
+def test_the_release_uploads_the_documented_asset_name() -> None:
+    """0.0.82 shipped ``pain001-mcp-v0.0.82.facts.json``: the workflow
+    built the name from the tag while the docs promised the version.
+    The name now lives in ``asset_name`` alone; the workflow asks the
+    script for it, and the docs state the same pattern."""
+    facts = _facts()
+    assert facts.asset_name("0.0.83") == "pain001-mcp-0.0.83.facts.json"
+    documented = facts.asset_name("<version>")
+    for doc in ("scripts/facts.py", "CHANGELOG.md"):
+        text = (ROOT / doc).read_text(encoding="utf-8")
+        assert f"`{documented}`" in text, doc
+    workflow = (ROOT / ".github" / "workflows" / "release.yml").read_text(
+        encoding="utf-8"
+    )
+    assert "scripts/facts.py --asset" in workflow
+    assert re.findall(r"\S*\.facts\.json", workflow) == []
+
+
+def test_asset_writes_the_named_file_and_prints_its_name(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    facts = _facts()
+    monkeypatch.chdir(tmp_path)
+    assert facts.main(["--asset"]) == 0
+    name = facts.asset_name(pain001_mcp.__version__)
+    assert capsys.readouterr().out == f"{name}\n"
+    assert facts.main(["--check", name]) == 0

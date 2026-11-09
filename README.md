@@ -66,9 +66,9 @@
 python -m pip install pain001-mcp
 ```
 
-> **Latest release: v0.0.82**: on the pain001 0.0.82 floor.
-> `check_payment_file` checks a pain.001 or pain.008 file you already
-> have, with the core's `pain001 check`.
+> **Latest release: v0.0.83**: on the pain001 0.0.83 floor. Each
+> release attaches `pain001-mcp-<version>.facts.json`, now under that
+> documented name.
 
 Published packages and development branches are distinct. Test unreleased
 changes on this companion's `feat/v<next-version>` branch against the matching core
