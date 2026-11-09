@@ -1548,9 +1548,9 @@ pain001==0.0.82 \
     # via
     #   -r requirements/runtime.in
     #   pain001-loader-mt101
-pain001-loader-mt101==0.0.81 \
-    --hash=sha256:4553d7f7541339e05883f446ed6341fa4a5ff2ee6a69eac24e45e8c4738a8959 \
-    --hash=sha256:aa1f58cb431ee2521dc2791726ec3c064e404f34a157f4dd9c346af1c1082dd4
+pain001-loader-mt101==0.0.82 \
+    --hash=sha256:657a1acb8399eed70ec761873b6302ff1efd92a320c7da7fd2148c451c2fb2cd \
+    --hash=sha256:6b85a0e8db4a078e39e54c2f0eedc35e7cf97d3ce7bdbb689b5f00d3e1df141d
     # via -r requirements/runtime.in
 pathspec==1.1.1 \
     --hash=sha256:17db5ecd524104a120e173814c90367a96a98d07c45b2e10c2f3919fff91bf5a \
