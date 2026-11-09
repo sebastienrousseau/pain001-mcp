@@ -25,7 +25,8 @@ RUN apt-get update \
 # pyproject.toml carries ``readme = "README.md"``, so README.md must be
 # present at build-time to resolve the package metadata.
 COPY requirements/runtime.txt ./requirements/runtime.txt
-COPY pyproject.toml README.md ./
+COPY pyproject.toml README.md LICENSE ./
+COPY LICENSES ./LICENSES
 COPY pain001_mcp ./pain001_mcp
 
 # Every dependency comes hash-pinned from requirements/runtime.txt. The
@@ -47,7 +48,7 @@ FROM python:3.14-slim@sha256:a2b82f3c48559aa0a8446d9af49826b6e2b2016f4cd2afabfe6
 LABEL org.opencontainers.image.title="pain001-mcp" \
       org.opencontainers.image.description="Model Context Protocol server for the pain001 ISO 20022 library." \
       org.opencontainers.image.source="https://github.com/sebastienrousseau/pain001-mcp" \
-      org.opencontainers.image.licenses="Apache-2.0"
+      org.opencontainers.image.licenses="Apache-2.0 OR MIT"
 
 # Non-root user (MCP clients launch the container with stdio; no extra
 # privileges needed).

@@ -9,9 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.84] - 2026-11-09
+
 ### Added
 
 - Audit all nine suite repositories and their publication channels daily and after publishing workflows. The shared read-only checker retains JSON evidence of partial rollouts.
+
+### Changed
+
+- Require core pain001 and pain001-loader-mt101 0.0.84. Finalize locks from their published artifacts before this member releases.
+
+
+### Fixed
+
+- Include the declared licence files and README in the container build context before package installation.
+
+- Emit the existing Apache-2.0 OR MIT licence as a PEP 639 expression. Remove the erroneous proprietary classifier produced by legacy Poetry metadata.
 
 ## [0.0.83] - 2026-11-09
 
