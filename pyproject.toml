@@ -1,9 +1,19 @@
-[tool.poetry]
+# PEP 639 preserves the declared dual licence in distribution metadata.
+# The legacy Poetry field emitted an incorrect proprietary classifier.
+[project]
 name = "pain001-mcp"
-version = "0.0.83"
+license = "Apache-2.0 OR MIT"
+license-files = ["LICENSE", "LICENSES/Apache-2.0.txt", "LICENSES/MIT.txt"]
+dynamic = [
+    "version", "dependencies", "optional-dependencies", "requires-python",
+    "readme", "description", "authors", "keywords", "classifiers", "urls",
+    "scripts", "entry-points",
+]
+
+[tool.poetry]
+version = "0.0.84"
 description = "Model Context Protocol (MCP) server exposing the pain001 ISO 20022 Customer Credit Transfer Initiation library as agent tools."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
-license = "Apache-2.0 OR MIT"
 readme = "README.md"
 repository = "https://github.com/sebastienrousseau/pain001-mcp"
 homepage = "https://pain001.com"
@@ -20,8 +30,8 @@ pain001-mcp = "pain001_mcp.server:main"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<4.0"
-pain001 = {version = ">=0.0.83,<1", extras = ["fast"]}
-pain001-loader-mt101 = ">=0.0.83,<1"
+pain001 = {version = ">=0.0.84,<1", extras = ["fast"]}
+pain001-loader-mt101 = ">=0.0.84,<1"
 # mcp < 1.30.0 and 2.0.x/2.1.x are affected by GHSA-84m7-p3x7-pcfv
 # (streamable HTTP, which this server serves); < 1.28.1 also by
 # Dependabot alert #3.

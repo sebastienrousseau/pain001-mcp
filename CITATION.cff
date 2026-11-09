@@ -12,8 +12,8 @@ authors:
   - family-names: Rousseau
     given-names: Sebastien
     email: sebastian.rousseau@gmail.com
-version: "0.0.83"
-date-released: "2026-11-06"
+version: "0.0.84"
+date-released: "2026-11-09"
 license: "Apache-2.0 OR MIT"
 repository-code: "https://github.com/sebastienrousseau/pain001-mcp"
 url: "https://pain001.com"

@@ -66,13 +66,12 @@
 python -m pip install pain001-mcp
 ```
 
-> **Latest release: v0.0.83**: on the pain001 0.0.83 floor. Each
-> release attaches `pain001-mcp-<version>.facts.json`, now under that
-> documented name.
+> **Latest release: v0.0.84**: shared audits verify every required publication
+> across all nine suite repositories. Requires core pain001 and the MT101
+> loader at 0.0.84; MCP tools retain their existing behavior.
 
-Published packages and development branches are distinct. Test unreleased
-changes on this companion's `feat/v<next-version>` branch against the matching core
-branch.
+Test unreleased changes on this companion's `feat/v<next-version>` branch
+against the matching core branch.
 
 ---
 
@@ -211,7 +210,7 @@ Report vulnerabilities according to [`SECURITY.md`](SECURITY.md).
 ## Stability guarantees
 
 Versions advance in coordinated `0.0.1` steps with core. The maintainer opens
-releases; this branch does not bump versions. Contract and output changes need
+releases; this iteration ships 0.0.84 with the family. Contract and output changes need
 compatibility review. No stronger platform or stability guarantee is implied.
 
 ---
