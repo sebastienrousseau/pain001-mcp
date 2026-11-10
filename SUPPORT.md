@@ -12,9 +12,9 @@ Thanks for using pain001-mcp. Here's the fastest way to get help, by need.
   [`pain001`](https://github.com/sebastienrousseau/pain001) repo for
   message-type / scheme background.
 - **Still stuck?** Open a
-  [GitHub Discussion](https://github.com/sebastienrousseau/pain001/discussions)
-  on the parent repo (shared with pain001 and pain001-lsp) or a question
-  issue here. Include your Python version, `pain001-mcp` version
+  [GitHub issue](https://github.com/sebastienrousseau/pain001-mcp/issues/new) here
+  (the pain001 suite does not use GitHub Discussions). Include your
+  Python version, `pain001-mcp` version
   (`python -c "import pain001_mcp; print(pain001_mcp.__version__)"`), your
   MCP client (Claude Desktop / IDE / agent), and a minimal reproducer.
 
