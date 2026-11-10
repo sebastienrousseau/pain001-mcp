@@ -67,6 +67,6 @@ package in the dependency tree is transitive via `pain001`.
 
 - **Email**: security@pain001.com
 - **GitHub Advisories**: https://github.com/sebastienrousseau/pain001-mcp/security/advisories
-- **GitHub Discussions**: https://github.com/sebastienrousseau/pain001/discussions
+- **GitHub issues** (not for vulnerabilities): https://github.com/sebastienrousseau/pain001-mcp/issues
 
 [p001-sec]: https://github.com/sebastienrousseau/pain001/blob/main/SECURITY.md
