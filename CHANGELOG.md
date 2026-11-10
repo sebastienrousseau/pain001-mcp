@@ -34,6 +34,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GOVERNANCE.md` gains a continuity plan (each asset, who holds it,
   and what is not yet arranged) and states the solo-maintainer review
   setting on `main`.
+- `scripts/render_readme.py --check`, already a CI step, also fails
+  when the README's headings leave the portfolio template's order or a
+  `{{...}}` token is unresolved (`tests/test_render_readme.py`).
+
+### Changed
+
+- The README follows the portfolio template exactly: the extra
+  "MCP Registry" section is gone, and the `mcp-name:` marker the
+  registry reads moves into a hidden comment under License. The docs
+  badge, User manual and API reference link the published manual
+  instead of `docs/index.md`, and the demo's alt text says what it
+  shows.
 
 ### Fixed
 

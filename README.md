@@ -13,14 +13,14 @@
 <p align="center">
   <a href="https://github.com/sebastienrousseau/pain001-mcp/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001-mcp/ci.yml?style=for-the-badge&logo=github" alt="Build" height="28" /></a>
   <a href="https://pypi.org/project/pain001-mcp/"><img src="https://img.shields.io/pypi/v/pain001-mcp?style=for-the-badge&color=fc8d62&logo=python" alt="Registry" height="28" /></a>
-  <a href="docs/index.md"><img src="https://img.shields.io/badge/docs-source-blue?style=for-the-badge&labelColor=555555&logo=readthedocs" alt="Docs" height="28" /></a>
+  <a href="https://sebastienrousseau.com/pain001-mcp/api.html"><img src="https://img.shields.io/badge/docs-manual-blue?style=for-the-badge&labelColor=555555&logo=readthedocs" alt="Docs" height="28" /></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/pain001-mcp"><img src="https://img.shields.io/ossf-scorecard/github.com/sebastienrousseau/pain001-mcp?style=for-the-badge&label=OpenSSF%20Scorecard&logo=openssf" alt="OpenSSF Scorecard" height="28" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT-blue.svg?style=for-the-badge" alt="License: Apache-2.0 OR MIT" height="28" /></a>
   <a href="https://github.com/sebastienrousseau/pain001-mcp/blob/main/docs/POLICIES.md"><img src="https://img.shields.io/badge/Python-3.11%2B-93450a.svg?style=for-the-badge&logo=python" alt="Python 3.11 or newer" height="28" /></a>
 </p>
 
 <p align="center">
-  <img src=".github/demo.gif" alt="pain001-mcp Demo" width="100%" />
+  <img src=".github/demo.gif" alt="pain001-mcp --help, then examples/01_mcp_tools.py listing the registered tools, validating an IBAN and generating pain.001 XML" width="100%" />
 </p>
 
 ---
@@ -200,7 +200,7 @@ Report vulnerabilities according to [`SECURITY.md`](SECURITY.md).
 
 ## Documentation
 
-[What is pain.001?](https://pain001.com/pain-001/) · [User manual](docs/index.md) · [API reference](docs/index.md) ·
+[What is pain.001?](https://pain001.com/pain-001/) · [User manual](https://sebastienrousseau.com/pain001-mcp/) · [API reference](https://sebastienrousseau.com/pain001-mcp/api.html) ·
 [Developer guide](DEVELOPMENT.md) ·
 [Family map](https://github.com/sebastienrousseau/pain001#the-pain001-ecosystem)
 
@@ -214,13 +214,9 @@ compatibility review. No stronger platform or stability guarantee is implied.
 
 ---
 
-## MCP Registry
-
-`mcp-name: io.github.sebastienrousseau/pain001-mcp`
-
----
-
 ## License
 
 Dual-licensed under [Apache-2.0](LICENSES/Apache-2.0.txt) OR [MIT](LICENSES/MIT.txt), at your
 option. See [LICENSE](LICENSE). Dependencies retain their own licences.
+
+<!-- mcp-name: io.github.sebastienrousseau/pain001-mcp -->
