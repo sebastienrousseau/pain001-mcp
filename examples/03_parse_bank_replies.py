@@ -39,6 +39,16 @@ def main() -> None:
     print(f"pain.002 ({pain002_path}):")
     print(json.dumps(pain002, indent=2, default=str)[:400], "…")
 
+    # Self-check: both parsers return content, not an error payload.
+    checks = (
+        ("camt.053", camt053, "entries"),
+        ("pain.002", pain002, "payment_statuses"),
+    )
+    for name, parsed, key in checks:
+        if "error" in parsed or not parsed.get(key):
+            raise SystemExit(f"{name} did not parse: {parsed}")
+    print("Bank-reply parsing example completed.")
+
 
 if __name__ == "__main__":
     main()

@@ -40,6 +40,7 @@ def main() -> None:
     report = validate_records(MESSAGE_TYPE, [incomplete_record])
     print(f"schema errors: {len(report['errors'])} (valid={report['valid']})")
 
+    flagged = []
     for field, kind in [
         ("debtor_account_IBAN", "iban"),
         ("creditor_agent_BIC", "bic"),
@@ -47,6 +48,14 @@ def main() -> None:
         result = validate_identifier(kind, incomplete_record[field])
         marker = "OK" if result["valid"] else "ERR"
         print(f"  [{marker}] {field}={incomplete_record[field]!r}")
+        flagged.append(not result["valid"])
+
+    # Self-check: every defect planted in the record must be reported.
+    if not missing or report["valid"] or not report["errors"]:
+        raise SystemExit("validate_records missed the planted defects")
+    if not all(flagged):
+        raise SystemExit("validate_identifier accepted a bad identifier")
+    print("Validation pipeline example completed.")
 
 
 if __name__ == "__main__":

@@ -48,12 +48,11 @@ clean: ## Remove build artifacts and caches
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name '*.pyc' -delete 2>/dev/null || true
 
-examples: ## Verify example scripts run
-	$(POETRY) run python examples/01_mcp_tools.py
-	$(POETRY) run python examples/02_validate_pipeline.py
-	$(POETRY) run python examples/03_parse_bank_replies.py
-	$(POETRY) run python examples/04_corpus_tools.py
-	$(POETRY) run python examples/05_faces_tools.py
+examples: ## Verify every numbered example script runs
+	@set -e; for example in examples/[0-9]*.py; do \
+		echo "$(POETRY) run python $$example"; \
+		$(POETRY) run python "$$example"; \
+	done
 
 doc-coverage: ## Enforce the 100% docstring coverage gate
 	$(POETRY) run interrogate -c pyproject.toml -v pain001_mcp

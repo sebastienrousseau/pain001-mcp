@@ -16,6 +16,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   job (`docs-lint.yml`, configured in `.markdownlint-cli2.jsonc`); fix
   the Markdown it flagged, including a doubled blank line in the README
   template.
+- Run the README Quick Start commands as tests
+  (`tests/test_readme_snippets.py`), so a renamed flag or broken entry
+  point fails CI before a reader copies it.
+
+### Fixed
+
+- CI ran only the first three examples; `04_corpus_tools.py` and
+  `05_faces_tools.py` were never executed there. CI and `make examples`
+  now run every numbered example by glob, and examples 01 to 03 check
+  their own results and exit non-zero on a wrong one.
+- The in-process example test passed pytest's own arguments to
+  `03_parse_bank_replies.py`, which parsed `--cov=pain001_mcp` as a
+  file path and printed an error payload while the test passed. The
+  test now resets `sys.argv` and covers every numbered example.
+- The `01_mcp_tools.py` usage line named a file that does not exist.
 
 ## [0.0.85] - 2026-11-10
 
