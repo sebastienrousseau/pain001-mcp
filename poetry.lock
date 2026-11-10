@@ -1648,14 +1648,14 @@ files = [
 
 [[package]]
 name = "pain001"
-version = "0.0.84"
+version = "0.0.85"
 description = "Pain001 is a Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Data."
 optional = false
 python-versions = "<4.0,>=3.11"
 groups = ["main"]
 files = [
-    {file = "pain001-0.0.84-py3-none-any.whl", hash = "sha256:64c97af19317838b6995b886957a99a408b290831bd65dd4965296b1ef2ca999"},
-    {file = "pain001-0.0.84.tar.gz", hash = "sha256:14134e878cbae59e05fc4794ab61ea7eb4e7d0328aaac839828c8a38200a64e9"},
+    {file = "pain001-0.0.85-py3-none-any.whl", hash = "sha256:6b05d1270949dc864b4d97c01184ef1f01d2a05f4f0d8f7c82c8229bcc545c2d"},
+    {file = "pain001-0.0.85.tar.gz", hash = "sha256:97b36d450576644a1bd120624d50582bfc7c1cb5a565954bbae00843bfe3183e"},
 ]
 
 [package.dependencies]
@@ -1670,6 +1670,7 @@ xmlschema = ">=4.3.2,<5.0.0"
 
 [package.extras]
 api = ["fastapi (>=0.162.0)", "uvicorn[standard] (>=0.54.0)"]
+camt = ["camt053 (>=0.0.26,<1)"]
 fast = ["lxml (>=6.1.3,<7)"]
 gpg = ["python-gnupg (>=0.5.7,<1)"]
 lsp = ["pygls (>=2.1,<3)"]
@@ -2778,4 +2779,4 @@ docs = ["jinja2", "sphinx", "sphinx_rtd_theme"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "2f85261914bd076b4ba7313d8939fe241bd4b461c6bab27eea855c0707b96063"
+content-hash = "22ef77c44b6e1330e11e9f239f63c87d626e6d636026beae8f08dd0406212483"
