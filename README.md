@@ -25,7 +25,6 @@
 
 ---
 
-
 ## Contents
 
 **Getting started**
@@ -225,4 +224,3 @@ compatibility review. No stronger platform or stability guarantee is implied.
 
 Dual-licensed under [Apache-2.0](LICENSES/Apache-2.0.txt) OR [MIT](LICENSES/MIT.txt), at your
 option. See [LICENSE](LICENSE). Dependencies retain their own licences.
-

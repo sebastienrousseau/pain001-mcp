@@ -3,9 +3,10 @@
 ## Reporting Security Vulnerabilities
 
 If you discover a security vulnerability in pain001-mcp, please email
-**security@pain001.com** instead of using the issue tracker.
+**<security@pain001.com>** instead of using the issue tracker.
 
 Please include:
+
 1. Description of the vulnerability
 2. Steps to reproduce
 3. Potential impact
@@ -65,8 +66,8 @@ package in the dependency tree is transitive via `pain001`.
 
 ## Contact
 
-- **Email**: security@pain001.com
-- **GitHub Advisories**: https://github.com/sebastienrousseau/pain001-mcp/security/advisories
-- **GitHub issues** (not for vulnerabilities): https://github.com/sebastienrousseau/pain001-mcp/issues
+- **Email**: <security@pain001.com>
+- **GitHub Advisories**: <https://github.com/sebastienrousseau/pain001-mcp/security/advisories>
+- **GitHub issues** (not for vulnerabilities): <https://github.com/sebastienrousseau/pain001-mcp/issues>
 
 [p001-sec]: https://github.com/sebastienrousseau/pain001/blob/main/SECURITY.md

@@ -57,24 +57,32 @@ pip install poetry
 
 1. **Fork** the repository
 2. **Create a branch** from `main`:
+
    ```bash
    git checkout -b feat/my-feature
    ```
+
 3. **Make changes** - follow the coding standards below
 4. **Run tests**:
+
    ```bash
    poetry run pytest tests/ -v
    ```
+
 5. **Run linters**:
+
    ```bash
    poetry run ruff check pain001_mcp/
    poetry run mypy pain001_mcp/
    poetry run black --check pain001_mcp/ tests/
    ```
+
 6. **Sign and commit**:
+
    ```bash
    git commit -S -m "feat: add my feature"
    ```
+
 7. **Push** and open a pull request
 
 ## Commit Signing (Required)

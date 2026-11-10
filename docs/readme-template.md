@@ -25,7 +25,6 @@
 
 ---
 
-
 ## Contents
 
 **Getting started**
@@ -191,4 +190,3 @@ Report vulnerabilities according to [`SECURITY.md`](SECURITY.md).
 ## License
 
 {{LICENSE_CONTENT}}
-
