@@ -37,6 +37,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `scripts/render_readme.py --check`, already a CI step, also fails
   when the README's headings leave the portfolio template's order or a
   `{{...}}` token is unresolved (`tests/test_render_readme.py`).
+- The manual is built with warnings as errors and link-checked on every
+  pull request and release-branch push (`docs.yml`), not only when
+  `main` deploys it; deployment now runs `actions/configure-pages`. The
+  API reference adds the `check_payment_file` tool and the transport and
+  command-line modules, and every page's footer links the author.
+- `examples/README.md` indexes all five examples in its table, and a
+  test fails when a numbered example is missing from it.
 
 ### Changed
 
@@ -73,6 +80,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   other. Markdown files that declared `Apache-2.0` alone, or no SPDX
   identifier, now declare `Apache-2.0 OR MIT`, the package licence;
   `scripts/tool_catalogue.py` writes it into `docs/tools.md`.
+- The manual's changelog turned file names such as `ROADMAP.md` into
+  links to `http://ROADMAP.md` (MyST fuzzy linkify, now off), and the
+  roadmap's link to the tool catalogue did not resolve.
 
 ## [0.0.85] - 2026-11-10
 

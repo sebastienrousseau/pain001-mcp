@@ -54,6 +54,16 @@ server, registers every tool and re-exports them.
    :show-inheritance:
 ```
 
+### Payment file check tool
+
+```{eval-rst}
+.. automodule:: pain001_mcp._check
+   :members:
+   :exclude-members: Field
+   :undoc-members:
+   :show-inheritance:
+```
+
 ### Bank-reply tools
 
 ```{eval-rst}
@@ -122,4 +132,17 @@ server, registers every tool and re-exports them.
    :exclude-members: Field
    :undoc-members:
    :show-inheritance:
+```
+
+### Transports and command line
+
+The transport dispatch and its flags, shared verbatim by every server in
+the suite.
+
+```{eval-rst}
+.. automodule:: pain001_mcp._transports
+   :members:
+
+.. automodule:: pain001_mcp._cli
+   :members:
 ```

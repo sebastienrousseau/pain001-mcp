@@ -27,6 +27,9 @@ extensions = [
 # MyST options: enable Markdown directives without breaking standard
 # CommonMark renders.
 myst_enable_extensions = ["colon_fence", "deflist", "linkify"]
+# Link only real URLs: fuzzy matching turned file names such as
+# "ROADMAP.md" in the changelog into links to http://ROADMAP.md.
+myst_linkify_fuzzy_links = False
 
 # Allow myst_parser to ingest the top-level README.md.
 source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
@@ -37,6 +40,11 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "readme-template.md"]
 # Furo theme: lightweight, modern, mobile-friendly.
 html_theme = "furo"
 html_title = f"pain001-mcp {release}"
+# The footer's copyright line, with the author link, comes from
+# _templates/page.html (as in pain001-lsp); Furo's own line escapes
+# HTML and would repeat it unlinked.
+html_show_copyright = False
+html_context = {"author_year": "2026"}
 
 # Cross-link to pain001's docs and the Python stdlib.
 intersphinx_mapping = {
@@ -53,3 +61,9 @@ autodoc_default_options = {
 autodoc_typehints = "description"
 napoleon_google_docstring = True
 napoleon_numpy_docstring = False
+
+# Link check (make docs-linkcheck, docs.yml). GitHub renders README
+# anchors with JavaScript, so their fragments cannot be checked.
+linkcheck_anchors_ignore_for_url = [r"https://github\.com/.*"]
+linkcheck_retries = 3
+linkcheck_timeout = 30

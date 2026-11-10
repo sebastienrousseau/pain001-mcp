@@ -535,6 +535,13 @@ _EXAMPLES = sorted(
 )
 
 
+def test_every_example_is_indexed():
+    """examples/README.md lists every numbered example, with a link."""
+    index = (_EXAMPLES[0].parent / "README.md").read_text(encoding="utf-8")
+    missing = [p.name for p in _EXAMPLES if f"]({p.name})" not in index]
+    assert _EXAMPLES and not missing, missing
+
+
 @pytest.mark.parametrize("path", _EXAMPLES, ids=lambda path: path.name)
 def test_example_scripts_run_without_error(path, capsys, monkeypatch):
     """Each example script imports and runs end-to-end.
