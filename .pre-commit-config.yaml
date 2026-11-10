@@ -29,6 +29,12 @@ repos:
         args: ['--fix=lf']
       - id: detect-private-key
 
+  # Same version and [tool.codespell] config as the docs-lint job.
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+
   - repo: local
     hooks:
       - id: ruff

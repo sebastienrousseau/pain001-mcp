@@ -110,6 +110,15 @@ fail_under = 100
 show_missing = true
 skip_covered = false
 
+[tool.codespell]
+# Spelling gate for the docs-lint job and the pre-commit hook. Skip
+# caches, lockfiles, generated output and byte-exact parser fixtures.
+skip = "./.git,./.venv,./.mypy_cache,./.ruff_cache,./.pytest_cache,./.complexipy_cache,./.benchmarks,./mutants,./htmlcov,./docs/_build,./tests/fixtures,./requirements,./poetry.lock,./.coverage,./coverage.xml,*.gif,*.xml,*.xsd"
+# "froms" names the Dockerfile FROM lines in a test; "unparseable" is
+# the spelling the core library's error messages use.
+ignore-words-list = "froms,unparseable"
+quiet-level = 3
+
 [tool.interrogate]
 fail-under = 100
 ignore-init-method = true

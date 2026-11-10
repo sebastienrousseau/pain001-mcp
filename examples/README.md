@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
+
 # pain001-mcp examples
 
 Runnable, self-contained examples for the pain001 MCP server. Run any of

@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
 
 # pain001-mcp Governance
 
@@ -73,9 +73,34 @@ library used in payments. The mitigations in place:
 - **Quality is enforced by CI,** not by one person's memory.
 - **The goal is >= 2 maintainers** with independent release authority.
 
+### Continuity plan
+
+What happens to each piece of the project if the lead maintainer becomes
+unavailable. Items marked **Not yet arranged** have no continuity
+arrangement today; the plan is incomplete until they do.
+
+| Asset | Today | Continuity |
+| :--- | :--- | :--- |
+| Signing keys | SSH keys listed in [`KEYS.asc`](KEYS.asc); commits and tags are signed with them | A new maintainer signs with their own key, added to `KEYS.asc` in a reviewed change; old releases stay verifiable because the file's history is kept. **Not yet arranged:** a documented key backup. |
+| PyPI project `pain001-mcp` | Published by trusted publishing from `release.yml`; owned by the lead maintainer | Add a second PyPI owner. **Not yet arranged:** there is no second owner. |
+| MCP Registry entry `io.github.sebastienrousseau/pain001-mcp` | Published by `publish-mcp.yml` with GitHub OIDC; the namespace is the lead maintainer's GitHub account | **Not yet arranged:** the namespace moves only with the repository's owner. |
+| Container image `ghcr.io/sebastienrousseau/pain001-mcp` | Published by `docker.yml` under the lead maintainer's account | **Not yet arranged:** no second account can publish it. |
+| GitHub repository | Owned by the lead maintainer's account | Transfer to an organisation or foundation with at least two owners, keeping redirects. **Not yet arranged:** no target account has been chosen. |
+| Domain `pain001.com` (the security contact address) | Registered by the lead maintainer, served through Cloudflare | **Not yet arranged:** no one else is named to renew or transfer it. |
+| Releases and CI | Documented in `RELEASING.md` and run by GitHub Actions | Anyone with release rights can cut a release from the documented process. |
+| The code | Apache-2.0 OR MIT, public history | Anyone can fork and continue it, with or without the project. |
+
+### Review policy
+
+`main` requires a pull request and the required status checks, with
+administrator enforcement on and zero required approving reviews: a
+solo-maintainer setting, so a merge has no independent reviewer. Agents
+need explicit authorization naming a particular pull request before
+merging; green checks alone do not authorize a merge.
+
 ## Code of conduct & security
 
 Participation is governed by
-[`CODE-OF-CONDUCT.md`](CODE-OF-CONDUCT.md). Security issues follow the
+[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md). Security issues follow the
 private disclosure process in [`SECURITY.md`](SECURITY.md) - please do
 not open public issues for vulnerabilities.

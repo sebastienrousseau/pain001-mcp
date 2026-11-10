@@ -20,6 +20,8 @@ def render() -> str:
     """Return the catalogue markdown for the registered tools."""
     tools = asyncio.run(srv.server.list_tools())
     lines = [
+        "<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->",
+        "",
         "# Tool catalogue",
         "",
         "Every tool the server registers, with the description an agent sees and the",

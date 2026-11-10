@@ -19,6 +19,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Run the README Quick Start commands as tests
   (`tests/test_readme_snippets.py`), so a renamed flag or broken entry
   point fails CI before a reader copies it.
+- Spelling gate: a `codespell` job in `docs-lint.yml` (hash-pinned in
+  `requirements/docs-lint.txt`, configured in `[tool.codespell]`) and
+  the matching pre-commit hook.
+- A dev container (`.devcontainer/devcontainer.json`) that installs the
+  Poetry environment and finishes with `make check`.
+- `KEYS.asc`: the maintainer's SSH signing keys in allowed-signers
+  form, the same keys as the core library's; commits and the `v0.0.85`
+  tag verify against it.
+- `DEVELOPMENT.md` now lists every CI workflow with the local command
+  that reproduces it, the test layout and the release model; `make docs`
+  and `make docs-linkcheck` build and link-check the manual.
+- The manual includes `ARCHITECTURE.md`.
+- `GOVERNANCE.md` gains a continuity plan (each asset, who holds it,
+  and what is not yet arranged) and states the solo-maintainer review
+  setting on `main`.
 
 ### Fixed
 
@@ -31,6 +46,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   file path and printed an error payload while the test passed. The
   test now resets `sys.argv` and covers every numbered example.
 - The `01_mcp_tools.py` usage line named a file that does not exist.
+- `SECURITY.md` said the server only speaks stdio and opens no socket;
+  `--transport streamable-http` and `sse` open a loopback HTTP listener
+  without authentication, which it now states. It also gains the
+  supported-versions policy `SUPPORT.md` pointed to, GitHub private
+  vulnerability reporting as the first channel, and the suite's
+  response goals (5 working days to acknowledge, in place of a 48-hour
+  promise), and names this repository's own Dependabot configuration.
+- `CONTRIBUTING.md` stated an Apache-2.0-only licence and showed a
+  commit without `-s`, which `dco.yml` rejects; it now states the dual
+  licence and signs off.
+- Two codes of conduct (`CODE-OF-CONDUCT.md` and `CODE_OF_CONDUCT.md`)
+  disagreed; the older one is removed and `GOVERNANCE.md` links the
+  other. Markdown files that declared `Apache-2.0` alone, or no SPDX
+  identifier, now declare `Apache-2.0 OR MIT`, the package licence;
+  `scripts/tool_catalogue.py` writes it into `docs/tools.md`.
 
 ## [0.0.85] - 2026-11-10
 

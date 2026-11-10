@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
+
 # Python API reference
 
 The standalone server's importable Python surface (used by the runnable

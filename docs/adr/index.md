@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
+
 # Architecture decision records
 
 One file per decision that shaped this server, in the core's ADR format:

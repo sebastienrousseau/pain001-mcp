@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
+
 # pain001-mcp
 
 Model Context Protocol server exposing the
@@ -12,6 +14,7 @@ explains its structure, versions and a complete, schema-valid example.
 :caption: Contents
 
 readme
+architecture
 POLICIES
 COMPARISON
 BENCHMARKS
