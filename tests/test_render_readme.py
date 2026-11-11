@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 import sys
 from pathlib import Path
 
@@ -25,6 +26,20 @@ def test_the_committed_readme_has_the_canonical_shape():
     text = (ROOT / "README.md").read_text()
     assert text == render_readme.render()
     assert render_readme.structure_problems(text, NAME) == []
+
+
+def test_every_readme_image_is_an_absolute_url():
+    """PyPI does not resolve relative paths, so every image is absolute."""
+    text = (ROOT / "README.md").read_text()
+    sources = re.findall(r'(?:src|srcset)="([^"]+)"', text)
+    assert sources
+    assert all(source.startswith("https://") for source in sources), sources
+    prefix = (
+        f"https://raw.githubusercontent.com/sebastienrousseau/{NAME}/main/"
+    )
+    tree = [s.removeprefix(prefix) for s in sources if s.startswith(prefix)]
+    assert ".github/demo.gif" in tree
+    assert all((ROOT / path).is_file() for path in tree), tree
 
 
 def test_the_registry_marker_is_kept():

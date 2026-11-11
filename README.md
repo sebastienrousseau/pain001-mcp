@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <img src=".github/demo.gif" alt="pain001-mcp --help, then examples/01_mcp_tools.py listing the registered tools, validating an IBAN and generating pain.001 XML" width="100%" />
+  <img src="https://raw.githubusercontent.com/sebastienrousseau/pain001-mcp/main/.github/demo.gif" alt="pain001-mcp --help, then examples/01_mcp_tools.py listing the registered tools, validating an IBAN and generating pain.001 XML" width="100%" />
 </p>
 
 ---
