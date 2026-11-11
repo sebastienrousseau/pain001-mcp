@@ -37,6 +37,7 @@ public API of that library, exposed in a way an MCP client can call.
 | **Server** | `pain001_mcp/server.py` | The FastMCP server, all tool / resource / prompt registrations, and a re-export of every tool |
 | **Shared** | `pain001_mcp/_common.py`, `pain001_mcp/_shapes.py` | Parameter types derived from the core (message types, scheme profiles), tool annotations, schema loading; the result TypedDicts every output schema comes from |
 | **Discovery** | `pain001_mcp/_catalogue.py` | `list_message_types`, `get_required_fields`, `get_input_schema`, `inspect_template`, `list_supported_formats`, the schema resource and the `build_payment_batch` prompt |
+| **Validation ladder** | `pain001_mcp/_ladder.py` | Runs the core's validation ladder (`pain001.validate`) for every tool that validates or generates, and turns its issues into row errors and `issues` payloads |
 | **Records** | `pain001_mcp/_records.py` | `validate_records`, `suggest_record_fix`, `validate_identifier`, `migrate_records`, `sanitize_to_iso20022_charset`, `convert_mt101` |
 | **Generation** | `pain001_mcp/_generate.py` | `generate_message`, `generate_message_async`, `generate_message_from_file`, `validate_xml_against_schema` |
 | **Bank replies** | `pain001_mcp/_replies.py` | `parse_camt053`, `parse_pain002` |
@@ -79,6 +80,13 @@ The current MCP surface:
 - **Delegation, not duplication.** Every tool is a thin wrapper over the
   `pain001` public API. If you want a new tool, port the matching helper
   from `pain001` rather than re-implementing it here.
+- **One verdict per payload.** `validate_records`, the three
+  `generate_message` tools, `simulate_payment_batch` and
+  `stage_payment_batch` run the core's validation ladder (pain001
+  >= 0.0.87), the one its CLI and REST API run, so a payload gets the
+  same verdict and the same `P001-E...` issue codes on every surface.
+  `tests/test_verdict_parity.py` drives the CLI, the REST API and these
+  tools with the same fixtures and checks they agree.
 - **Errors as data.** Tools never raise. A `ValueError` (or a
   `pain001.exceptions` subclass thereof) is turned into an
   `{"error": ...}` payload so the agent can reason about failure

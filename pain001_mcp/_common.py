@@ -15,13 +15,7 @@ from typing import Annotated, Any
 
 from mcp.types import ToolAnnotations
 from pain001.constants import SCHEMAS_DIR, TEMPLATES_DIR, valid_xml_types
-
-# The checks the core's loaders run on every load (pain001 >= 0.0.81),
-# through their public names.
-from pain001.validation import check_identifiers as _check_identifiers
-from pain001.validation import identifier_errors as _identifier_errors
 from pain001.validation.schemes import PROFILES
-from pain001.xml.batch_consistency import require_one_batch as _one_batch
 from pydantic import Field
 
 # What the tool modules import from here. The names keep their leading
@@ -39,10 +33,7 @@ __all__ = [
     "_RECORDS_FIELD_GUIDE",
     "_SchemeProfile",
     "_check_message_type",
-    "_identifier_findings",
     "_load_schema",
-    "_refuse_bad_identifiers",
-    "_refuse_mixed_batch",
     "_template_bundle",
     "_template_dir",
 ]
@@ -145,31 +136,6 @@ _IdentifierChecks = Annotated[
         )
     ),
 ]
-
-
-def _identifier_findings(records: list[dict]) -> list[tuple[int, str, str]]:
-    """Return ``(row, column, reason)`` per invalid IBAN or BIC.
-
-    The core's own check (what its loaders run): the reason never repeats
-    the identifier, which is personal data.
-    """
-    findings: list[tuple[int, str, str]] = _identifier_errors(records)
-    return findings
-
-
-def _refuse_bad_identifiers(records: list[dict]) -> None:
-    """Raise the core's ``PaymentValidationError`` for a bad IBAN or BIC."""
-    _check_identifiers(records)
-
-
-def _refuse_mixed_batch(records: list[dict], message_type: str) -> None:
-    """Raise the core's ``PaymentValidationError`` for a mixed batch.
-
-    Rows that would not share one PmtInf are refused as the CLI and the
-    generator refuse them. An empty batch is left to the other checks.
-    """
-    if records:
-        _one_batch(records, message_type)
 
 
 # What generate_message accepts per record, surfaced in the tool schema so an

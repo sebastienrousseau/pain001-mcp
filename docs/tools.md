@@ -29,7 +29,7 @@ Arguments: `message_type`
 
 ## `validate_records`
 
-Validate flat records against a message type's input JSON Schema.
+Validate flat records the way the pain001 CLI and REST API do.
 
 Arguments: `message_type`, `records`, `identifier_checks` (optional)
 
@@ -65,7 +65,7 @@ Arguments: `message_type`, `records`, `identifier_checks` (optional)
 
 ## `generate_message_from_file`
 
-Generate validated pain XML from a CSV file on the local disk.
+Generate validated pain XML from a payment data file on the local disk.
 
 Arguments: `message_type`, `data_file_path`
 

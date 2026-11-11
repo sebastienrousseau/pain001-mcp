@@ -38,10 +38,16 @@ class SchemaResult(TypedDict, total=False):
 
 
 class RecordError(TypedDict):
-    """One schema violation: the record's row, the field path, the message."""
+    """One finding: the record's row and line, the field, the code, why.
+
+    ``row`` counts records from 0 and ``line`` from 1, as the core's
+    issues do; ``code`` is the core's stable ``P001-E...`` issue code.
+    """
 
     row: int
+    line: int
     path: str
+    code: str
     message: str
 
 

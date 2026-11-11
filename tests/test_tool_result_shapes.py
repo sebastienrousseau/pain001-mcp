@@ -64,12 +64,14 @@ class TestValidateRecords:
         out = server.validate_records(MT, [_valid_record(), bad])
         assert out["valid"] is False
         assert out["total"] == 2
-        assert out["valid_count"] == 1
+        # The row contract refuses the batch as a whole: none counted.
+        assert out["valid_count"] == 0
         assert out["errors"], "the broken row must produce errors"
         for entry in out["errors"]:
-            assert set(entry) == {"row", "path", "message"}
-            assert entry["row"] == 1
+            assert set(entry) == {"row", "line", "path", "code", "message"}
+            assert (entry["row"], entry["line"]) == (1, 2)
             assert isinstance(entry["path"], str)
+            assert entry["code"].startswith("P001-E")
             assert entry["message"]
         assert any(e["path"] == "payment_amount" for e in out["errors"])
 

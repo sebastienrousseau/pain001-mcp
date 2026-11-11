@@ -122,14 +122,18 @@ def test_missing_currency_is_reported_by_name():
     record = natural_record()
     del record["currency"]
     payload = json.loads(server.generate_message("pain.001.001.09", [record]))
-    assert "currency (or payment_currency)" in payload["error"]
+    assert "column currency: missing value" in payload["error"]
+    assert [(i["column"], i["code"]) for i in payload["issues"]] == [
+        ("currency", "P001-E010")
+    ]
 
 
-def test_xsd_failure_reports_element_paths():
-    """An XSD-invalid value reports the offending element, not an opaque path."""
+def test_a_value_outside_the_schema_is_named_by_column():
+    """A value the JSON Schema refuses never reaches the XSD (P001-E030)."""
     record = natural_record(charge_bearer="INVALID")
     payload = json.loads(server.generate_message("pain.001.001.09", [record]))
-    assert "ChrgBr" in payload["error"]
+    assert "column charge_bearer" in payload["error"]
+    assert payload["issues"][0]["code"] == "P001-E030"
 
 
 def test_async_variant_returns_structured_error():
@@ -141,7 +145,8 @@ def test_async_variant_returns_structured_error():
             )
         )
     )
-    assert "Missing required fields" in payload["error"]
+    assert "missing value" in payload["error"]
+    assert {i["code"] for i in payload["issues"]} == {"P001-E010"}
 
 
 # ---------------------------------------------------------------------------

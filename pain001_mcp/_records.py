@@ -10,9 +10,7 @@ writes a file.
 import unicodedata
 from typing import Annotated, Any, Literal
 
-from jsonschema import Draft7Validator
-from pain001 import canonicalize_payment_record, sanitize_to_charset
-from pain001.exceptions import PaymentValidationError
+from pain001 import sanitize_to_charset
 from pain001.migration import VersionMapper
 from pain001.validation import validate_bic, validate_iban
 from pain001.validation.charset import ISO20022_ALLOWED_CHARACTERS
@@ -21,15 +19,12 @@ from pydantic import Field
 
 from pain001_mcp._common import (
     _check_message_type,
-    _identifier_findings,
     _IdentifierChecks,
-    _load_schema,
     _MessageType,
-    _refuse_mixed_batch,
 )
+from pain001_mcp._ladder import verdict
 from pain001_mcp._shapes import (
     MigrateResult,
-    RecordError,
     SanitiseResult,
     ValidateIdentifierResult,
     ValidateRecordsResult,
@@ -90,46 +85,34 @@ _RecordsToValidate = Annotated[
 ]
 
 
-def _record_errors(
-    validator: Draft7Validator, row: int, record: dict
-) -> list[RecordError]:
-    """Return one entry per schema violation in ``record``, by path."""
-    return [
-        {
-            "row": row,
-            "path": ".".join(str(p) for p in err.path),
-            "message": err.message,
-        }
-        for err in sorted(
-            validator.iter_errors(record), key=lambda e: list(e.path)
-        )
-    ]
-
-
-def _identifier_record_errors(records: list[dict]) -> list[RecordError]:
-    """Return one row error per invalid IBAN or BIC column."""
-    return [
-        {"row": row, "path": column, "message": reason}
-        for row, column, reason in _identifier_findings(records)
-    ]
-
-
 def validate_records(
     message_type: _MessageType,
     records: _RecordsToValidate,
     identifier_checks: _IdentifierChecks = True,
 ) -> ValidateRecordsResult:
-    """Validate flat records against a message type's input JSON Schema.
+    """Validate flat records the way the pain001 CLI and REST API do.
 
-    Use this before ``generate_message`` to catch structural/type errors
-    per record and get a row-by-row error report. Like the pain001 CLI,
-    it also checks every IBAN and BIC (unless ``identifier_checks`` is
-    false) and refuses rows that would not share one payment information
-    block. For payment-scheme rulebook checks (SEPA field lengths,
-    charset, etc.) also run ``validate_payment_scheme``.
+    Use this before ``generate_message``: it runs the core's validation
+    ladder (pain001.validate), so a batch it accepts is one the CLI,
+    the REST API and ``generate_message`` accept, and a batch it
+    refuses is refused there too. The ladder checks the row contract
+    (required fields, amounts, booleans, dates), every IBAN and BIC
+    (unless ``identifier_checks`` is false), that the rows form one
+    payment information block, then the message type's JSON Schema
+    (for example an ISO 4217 currency). For payment-scheme rulebook
+    checks (SEPA field lengths, charset, etc.) also run
+    ``validate_payment_scheme``.
+
+    The row contract and identifier checks refuse the batch as a whole
+    (``valid_count`` 0) and name the first problems; the schema check
+    then reports every row. Each error carries ``row`` (from 0),
+    ``line`` (from 1), ``path`` (the field), ``code`` (the core's
+    stable ``P001-E...`` issue code) and ``message``, which never
+    repeats the value.
 
     Returns a report ``{"valid": bool, "total": int, "valid_count": int,
-    "errors": [...]}``, or ``{"error": ...}`` for a mixed batch.
+    "errors": [...]}``, or ``{"error": ...}`` for rows that do not form
+    one batch, an empty list or an unknown message type.
 
     Args:
         message_type: A supported ISO 20022 pain message type.
@@ -137,33 +120,10 @@ def validate_records(
         identifier_checks: If false, skip the IBAN and BIC checks.
     """
     try:
-        schema = _load_schema(message_type)
-        _refuse_mixed_batch(records, _check_message_type(message_type))
-    except (ValueError, PaymentValidationError) as exc:
+        message_type = _check_message_type(message_type)
+    except ValueError as exc:
         return {"error": str(exc)}
-
-    # Map alias keys ('amount', 'currency', lower-case IBAN/BIC spellings)
-    # to their canonical names, exactly as generate_message will, so a
-    # record that generates cleanly also validates cleanly. Values keep
-    # their JSON types; only key names are rewritten.
-    records = [canonicalize_payment_record(record) for record in records]
-
-    validator = Draft7Validator(schema)
-    errors = [
-        error
-        for row, record in enumerate(records)
-        for error in _record_errors(validator, row, record)
-    ]
-    if identifier_checks:
-        errors += _identifier_record_errors(records)
-        errors.sort(key=lambda error: error["row"])
-    invalid_rows = {error["row"] for error in errors}
-    return {
-        "valid": not errors,
-        "total": len(records),
-        "valid_count": len(records) - len(invalid_rows),
-        "errors": errors,
-    }
+    return verdict(message_type, records, identifier_checks)
 
 
 def suggest_record_fix(
