@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.86] - 2026-11-11
+
 ### Added
 
 - Add a code of conduct (adapted from Contributor Covenant 2.1, the
@@ -47,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Release 0.0.86 in lockstep with the pain001 suite.
 - The README follows the portfolio template exactly: the extra
   "MCP Registry" section is gone, and the `mcp-name:` marker the
   registry reads moves into a hidden comment under License. The docs

@@ -11,7 +11,7 @@ dynamic = [
 ]
 
 [tool.poetry]
-version = "0.0.85"
+version = "0.0.86"
 description = "Model Context Protocol (MCP) server exposing the pain001 ISO 20022 Customer Credit Transfer Initiation library as agent tools."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
 readme = "README.md"
