@@ -1,4 +1,4 @@
-.PHONY: help install dev test lint format type-check complexity security clean examples doc-coverage check demo
+.PHONY: help install dev test lint format type-check complexity security clean examples doc-coverage docs docs-linkcheck check demo
 
 # Mutation score floor for the tool handlers: 75.8% (1200 of 1584) on
 # 2026-09-28 with dual-control simulation tools.
@@ -48,15 +48,25 @@ clean: ## Remove build artifacts and caches
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name '*.pyc' -delete 2>/dev/null || true
 
-examples: ## Verify example scripts run
-	$(POETRY) run python examples/01_mcp_tools.py
-	$(POETRY) run python examples/02_validate_pipeline.py
-	$(POETRY) run python examples/03_parse_bank_replies.py
-	$(POETRY) run python examples/04_corpus_tools.py
-	$(POETRY) run python examples/05_faces_tools.py
+examples: ## Verify every numbered example script runs
+	@set -e; for example in examples/[0-9]*.py; do \
+		echo "$(POETRY) run python $$example"; \
+		$(POETRY) run python "$$example"; \
+	done
 
 doc-coverage: ## Enforce the 100% docstring coverage gate
 	$(POETRY) run interrogate -c pyproject.toml -v pain001_mcp
+
+# The Sphinx toolchain lives outside the Poetry environment (hash-pinned
+# in requirements/docs.txt); point SPHINXBUILD at it, as DEVELOPMENT.md
+# shows. Warnings are errors, as in docs.yml.
+SPHINXBUILD ?= sphinx-build
+
+docs: ## Build the manual with warnings as errors
+	$(SPHINXBUILD) -W --keep-going -b html docs docs/_build/html
+
+docs-linkcheck: ## Check every link in the manual
+	$(SPHINXBUILD) -W --keep-going -b linkcheck docs docs/_build/linkcheck
 
 # urllib's macOS proxy lookup (_scproxy) can crash inside mutmut's forked
 # workers and silently drop those mutants from the score; a loopback proxy

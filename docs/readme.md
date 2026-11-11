@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
+
 # Companion overview
 
 The [repository README](https://github.com/sebastienrousseau/pain001-mcp)

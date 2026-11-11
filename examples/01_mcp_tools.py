@@ -3,7 +3,7 @@
 
 Usage:
     pip install pain001-mcp     # requires Python 3.11+
-    python examples/mcp_tools.py
+    python examples/01_mcp_tools.py
 
 The pain001 MCP server (launched as ``pain001-mcp`` over stdio) exposes the
 pain001 library to AI agents. This example invokes the same tools directly
@@ -12,6 +12,7 @@ would receive.
 """
 
 import asyncio
+import json
 
 from pain001_mcp.server import server
 
@@ -85,18 +86,23 @@ async def main() -> None:
         (await call("list_message_types", {}))[:60],
         "…",
     )
-    print(
-        "validate_identifier ->",
-        await call(
-            "validate_identifier",
-            {"kind": "iban", "value": "DE89370400440532013000"},
-        ),
+    iban = await call(
+        "validate_identifier",
+        {"kind": "iban", "value": "DE89370400440532013000"},
     )
+    print("validate_identifier ->", iban)
     xml = await call(
         "generate_message",
         {"message_type": "pain.001.001.09", "records": record},
     )
     print("generate_message    ->", xml[:46], "…")
+
+    # Self-check, so CI fails if a tool stops behaving as shown above.
+    if not json.loads(iban).get("valid"):
+        raise SystemExit("validate_identifier rejected a valid IBAN")
+    if "CstmrCdtTrfInitn" not in xml:
+        raise SystemExit("generate_message did not return pain.001 XML")
+    print("MCP tools example completed.")
 
 
 if __name__ == "__main__":

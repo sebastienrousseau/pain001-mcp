@@ -183,8 +183,13 @@ jobs:
           REF: ${{ github.head_ref || github.ref_name }}
         run: scripts/ci-install.sh requirements/ci.txt
 
+      # Every numbered example, by glob, so a new one cannot be left out
+      # (04 and 05 were, until 0.0.86). Each is self-checking and exits
+      # non-zero on a wrong result.
       - name: Run examples
         run: |
-          python examples/01_mcp_tools.py
-          python examples/02_validate_pipeline.py
-          python examples/03_parse_bank_replies.py
+          for example in examples/[0-9]*.py; do
+            echo "::group::$example"
+            python "$example"
+            echo "::endgroup::"
+          done

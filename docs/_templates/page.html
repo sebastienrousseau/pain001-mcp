@@ -1,0 +1,16 @@
+{#- SPDX-License-Identifier: Apache-2.0 OR MIT -#}
+{#- Furo's footer escapes ``copyright``, so the author link the family
+    standard requires on every page (AGENTS.md section 7.1.2) is added
+    here, once, instead of through conf.py. Furo's own copyright line is
+    switched off with ``html_show_copyright = False``. -#}
+{% extends "!page.html" %}
+{% block footer %}
+{{ super() }}
+<div class="bottom-of-page">
+  <div class="left-details">
+    <div class="copyright">
+      © {{ author_year }} <a href="https://sebastienrousseau.com/" rel="author">Sebastien Rousseau</a>
+    </div>
+  </div>
+</div>
+{% endblock footer %}

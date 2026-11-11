@@ -530,24 +530,32 @@ def test_build_payment_batch_prompt_default_type():
     assert "pain.001.001.09" in prompt
 
 
-@pytest.mark.parametrize(
-    "module_path",
-    [
-        "examples/01_mcp_tools.py",
-        "examples/02_validate_pipeline.py",
-        "examples/03_parse_bank_replies.py",
-    ],
+_EXAMPLES = sorted(
+    (Path(__file__).resolve().parents[1] / "examples").glob("[0-9]*.py")
 )
-def test_example_scripts_run_without_error(module_path, capsys):
+
+
+def test_every_example_is_indexed():
+    """examples/README.md lists every numbered example, with a link."""
+    index = (_EXAMPLES[0].parent / "README.md").read_text(encoding="utf-8")
+    missing = [p.name for p in _EXAMPLES if f"]({p.name})" not in index]
+    assert _EXAMPLES and not missing, missing
+
+
+@pytest.mark.parametrize("path", _EXAMPLES, ids=lambda path: path.name)
+def test_example_scripts_run_without_error(path, capsys, monkeypatch):
     """Each example script imports and runs end-to-end.
 
     Catches breakage at the test-suite level instead of only when a
-    human runs ``make examples``.
+    human runs ``make examples``. ``sys.argv`` is reset to the script
+    alone: under pytest it holds pytest's own arguments, which
+    ``03_parse_bank_replies.py`` read as file paths (until 0.0.86 it
+    parsed ``--cov=pain001_mcp`` and printed the error payload).
     """
     import importlib.util
     import sys
 
-    path = Path(__file__).resolve().parents[1] / module_path
+    monkeypatch.setattr(sys, "argv", [str(path)])
     spec = importlib.util.spec_from_file_location(
         f"_example_{path.stem}", path
     )

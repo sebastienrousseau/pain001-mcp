@@ -1,4 +1,4 @@
-<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
 
 # pain001-mcp Architecture
 
@@ -109,7 +109,7 @@ The current MCP surface:
 
 ## Where to look first
 
-- Runnable examples: [`examples/`](examples/)
-- Roadmap: [`ROADMAP.md`](ROADMAP.md)
-- Release process: [`RELEASING.md`](RELEASING.md)
+- Runnable examples: [`examples/`](https://github.com/sebastienrousseau/pain001-mcp/tree/main/examples)
+- Roadmap: [`ROADMAP.md`](https://github.com/sebastienrousseau/pain001-mcp/blob/main/ROADMAP.md)
+- Release process: [`RELEASING.md`](https://github.com/sebastienrousseau/pain001-mcp/blob/main/RELEASING.md)
 - Parent library: [`pain001`](https://github.com/sebastienrousseau/pain001)

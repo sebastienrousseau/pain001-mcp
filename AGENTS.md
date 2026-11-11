@@ -38,6 +38,7 @@ All unit tests and conformance tests must pass with 0 failures, 0 warnings, and 
 ## 3. Hygiene First
 
 Before any feature, fix, or release work, check repository health:
+
 1. Verify CI is green on `main`.
 2. Ensure linter and formatter pass without warnings or new suppressions.
 3. Every function must remain within the complexity ceilings (Cyclomatic ≤ 10, Cognitive ≤ 15, Halstead ≤ 30, Lines of code ≤ 60 per function, ≤ 500 per file).

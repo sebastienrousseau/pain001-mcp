@@ -13,47 +13,46 @@
 <p align="center">
   <a href="https://github.com/sebastienrousseau/pain001-mcp/actions"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/pain001-mcp/ci.yml?style=for-the-badge&logo=github" alt="Build" height="28" /></a>
   <a href="https://pypi.org/project/pain001-mcp/"><img src="https://img.shields.io/pypi/v/pain001-mcp?style=for-the-badge&color=fc8d62&logo=python" alt="Registry" height="28" /></a>
-  <a href="docs/index.md"><img src="https://img.shields.io/badge/docs-source-blue?style=for-the-badge&labelColor=555555&logo=readthedocs" alt="Docs" height="28" /></a>
+  <a href="https://sebastienrousseau.com/pain001-mcp/api.html"><img src="https://img.shields.io/badge/docs-manual-blue?style=for-the-badge&labelColor=555555&logo=readthedocs" alt="Docs" height="28" /></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/pain001-mcp"><img src="https://img.shields.io/ossf-scorecard/github.com/sebastienrousseau/pain001-mcp?style=for-the-badge&label=OpenSSF%20Scorecard&logo=openssf" alt="OpenSSF Scorecard" height="28" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT-blue.svg?style=for-the-badge" alt="License: Apache-2.0 OR MIT" height="28" /></a>
   <a href="https://github.com/sebastienrousseau/pain001-mcp/blob/main/docs/POLICIES.md"><img src="https://img.shields.io/badge/Python-3.11%2B-93450a.svg?style=for-the-badge&logo=python" alt="Python 3.11 or newer" height="28" /></a>
 </p>
 
 <p align="center">
-  <img src=".github/demo.gif" alt="pain001-mcp Demo" width="100%" />
+  <img src="https://raw.githubusercontent.com/sebastienrousseau/pain001-mcp/main/.github/demo.gif" alt="pain001-mcp --help, then examples/01_mcp_tools.py listing the registered tools, validating an IBAN and generating pain.001 XML" width="100%" />
 </p>
 
 ---
-
 
 ## Contents
 
 **Getting started**
 
-- [Install](#install) — PyPI and source
-- [Requirements](#requirements) — toolchain floor, platforms
-- [Quick Start](#quick-start) — use the installed companion
+- [Install](#install): PyPI and source
+- [Requirements](#requirements): toolchain floor, platforms
+- [Quick Start](#quick-start): use the installed companion
 
 **The pain001-mcp ecosystem**
 
-- [The pain001-mcp ecosystem](#the-pain001-mcp-ecosystem) — core and this companion
+- [The pain001-mcp ecosystem](#the-pain001-mcp-ecosystem): core and this companion
 
 **Library reference**
 
-- [Capabilities at a glance](#capabilities-at-a-glance) — the current surface by theme
-- [Ecosystem comparison](#ecosystem-comparison) — short matrix; full table at [`docs/COMPARISON.md`](docs/COMPARISON.md)
-- [Benchmarks](#benchmarks) — headline numbers; full table at [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md)
-- [Features](#features) — module-level capability list
-- [Configuration](#configuration) — core options
-- [Examples](#examples) — runnable example index
+- [Capabilities at a glance](#capabilities-at-a-glance): the current surface by theme
+- [Ecosystem comparison](#ecosystem-comparison): short matrix; full table at [`docs/COMPARISON.md`](docs/COMPARISON.md)
+- [Benchmarks](#benchmarks): headline numbers; full table at [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md)
+- [Features](#features): module-level capability list
+- [Configuration](#configuration): core options
+- [Examples](#examples): runnable example index
 
 **Operational**
 
-- [When not to use pain001-mcp](#when-not-to-use-pain001-mcp) — limitations
-- [Development](#development) — make targets, fuzzing, CI
-- [Security](#security) — guarantees and compliance
-- [Documentation](#documentation) — all reference docs
-- [Stability guarantees](#stability-guarantees) — SemVer axis, output stability, minimum toolchain discipline
+- [When not to use pain001-mcp](#when-not-to-use-pain001-mcp): limitations
+- [Development](#development): make targets, fuzzing, CI
+- [Security](#security): guarantees and compliance
+- [Documentation](#documentation): all reference docs
+- [Stability guarantees](#stability-guarantees): SemVer axis, output stability, minimum toolchain discipline
 - [License](#license)
 
 ---
@@ -66,9 +65,9 @@
 python -m pip install pain001-mcp
 ```
 
-> **Latest release: v0.0.85**: released with pain001 0.0.85. The 30 MCP
-> tools are unchanged; support questions now go to this repository's
-> GitHub issues.
+> **Latest release: v0.0.86**: released with pain001 0.0.86. The 30 MCP
+> tools are unchanged; CI now runs every example and the README Quick
+> Start, and the manual is built and link-checked on every pull request.
 
 Test unreleased changes on this companion's `feat/v<next-version>` branch
 against the matching core branch.
@@ -201,7 +200,7 @@ Report vulnerabilities according to [`SECURITY.md`](SECURITY.md).
 
 ## Documentation
 
-[What is pain.001?](https://pain001.com/pain-001/) · [User manual](docs/index.md) · [API reference](docs/index.md) ·
+[What is pain.001?](https://pain001.com/pain-001/) · [User manual](https://sebastienrousseau.com/pain001-mcp/) · [API reference](https://sebastienrousseau.com/pain001-mcp/api.html) ·
 [Developer guide](DEVELOPMENT.md) ·
 [Family map](https://github.com/sebastienrousseau/pain001#the-pain001-ecosystem)
 
@@ -210,14 +209,8 @@ Report vulnerabilities according to [`SECURITY.md`](SECURITY.md).
 ## Stability guarantees
 
 Versions advance in coordinated `0.0.1` steps with core. The maintainer opens
-releases; this iteration ships 0.0.85 with the family. Contract and output changes need
+releases; this iteration ships 0.0.86 with the family. Contract and output changes need
 compatibility review. No stronger platform or stability guarantee is implied.
-
----
-
-## MCP Registry
-
-`mcp-name: io.github.sebastienrousseau/pain001-mcp`
 
 ---
 
@@ -226,3 +219,4 @@ compatibility review. No stronger platform or stability guarantee is implied.
 Dual-licensed under [Apache-2.0](LICENSES/Apache-2.0.txt) OR [MIT](LICENSES/MIT.txt), at your
 option. See [LICENSE](LICENSE). Dependencies retain their own licences.
 
+<!-- mcp-name: io.github.sebastienrousseau/pain001-mcp -->

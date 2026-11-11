@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
+
 # Tool catalogue
 
 Every tool the server registers, with the description an agent sees and the

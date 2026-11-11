@@ -11,7 +11,7 @@ dynamic = [
 ]
 
 [tool.poetry]
-version = "0.0.85"
+version = "0.0.86"
 description = "Model Context Protocol (MCP) server exposing the pain001 ISO 20022 Customer Credit Transfer Initiation library as agent tools."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
 readme = "README.md"
@@ -30,8 +30,8 @@ pain001-mcp = "pain001_mcp.server:main"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<4.0"
-pain001 = {version = ">=0.0.85,<1", extras = ["fast"]}
-pain001-loader-mt101 = ">=0.0.85,<1"
+pain001 = {version = ">=0.0.86,<1", extras = ["fast"]}
+pain001-loader-mt101 = ">=0.0.86,<1"
 # mcp < 1.30.0 and 2.0.x/2.1.x are affected by GHSA-84m7-p3x7-pcfv
 # (streamable HTTP, which this server serves); < 1.28.1 also by
 # Dependabot alert #3.
@@ -109,6 +109,15 @@ exclude_also = [
 fail_under = 100
 show_missing = true
 skip_covered = false
+
+[tool.codespell]
+# Spelling gate for the docs-lint job and the pre-commit hook. Skip
+# caches, lockfiles, generated output and byte-exact parser fixtures.
+skip = "./.git,./.venv,./.mypy_cache,./.ruff_cache,./.pytest_cache,./.complexipy_cache,./.benchmarks,./mutants,./htmlcov,./docs/_build,./tests/fixtures,./requirements,./poetry.lock,./.coverage,./coverage.xml,*.gif,*.xml,*.xsd"
+# "froms" names the Dockerfile FROM lines in a test; "unparseable" is
+# the spelling the core library's error messages use.
+ignore-words-list = "froms,unparseable"
+quiet-level = 3
 
 [tool.interrogate]
 fail-under = 100

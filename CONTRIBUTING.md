@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
+
 # Contributing to pain001-mcp
 
 Thank you for your interest in contributing to pain001-mcp. This guide covers
@@ -10,6 +12,9 @@ Language Server. It depends on `pain001` and exposes its public API as agent
 tools, so most behaviour lives in the core library.
 
 ## Development Setup
+
+[DEVELOPMENT.md](DEVELOPMENT.md) lists every CI gate and how to run it
+locally; the steps below are the short version.
 
 ### Prerequisites
 
@@ -57,24 +62,32 @@ pip install poetry
 
 1. **Fork** the repository
 2. **Create a branch** from `main`:
+
    ```bash
    git checkout -b feat/my-feature
    ```
+
 3. **Make changes** - follow the coding standards below
 4. **Run tests**:
+
    ```bash
    poetry run pytest tests/ -v
    ```
+
 5. **Run linters**:
+
    ```bash
    poetry run ruff check pain001_mcp/
    poetry run mypy pain001_mcp/
    poetry run black --check pain001_mcp/ tests/
    ```
+
 6. **Sign and commit**:
+
    ```bash
-   git commit -S -m "feat: add my feature"
+   git commit -s -S -m "feat: add my feature"
    ```
+
 7. **Push** and open a pull request
 
 ## Commit Signing (Required)
@@ -128,5 +141,8 @@ poetry run pytest tests/test_mcp_server.py -v
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under
-the [Apache License 2.0](LICENSE).
+By contributing, you agree that your contributions will be licensed
+under the project's dual licence, [Apache-2.0](LICENSES/Apache-2.0.txt)
+OR [MIT](LICENSES/MIT.txt), at the user's option. Every commit carries a
+`Signed-off-by:` line ([Developer Certificate of Origin](DCO.txt),
+checked by `dco.yml`).

@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: Apache-2.0 OR MIT -->
+
 # Python API reference
 
 The standalone server's importable Python surface (used by the runnable
@@ -46,6 +48,16 @@ server, registers every tool and re-exports them.
 
 ```{eval-rst}
 .. automodule:: pain001_mcp._generate
+   :members:
+   :exclude-members: Field
+   :undoc-members:
+   :show-inheritance:
+```
+
+### Payment file check tool
+
+```{eval-rst}
+.. automodule:: pain001_mcp._check
    :members:
    :exclude-members: Field
    :undoc-members:
@@ -120,4 +132,17 @@ server, registers every tool and re-exports them.
    :exclude-members: Field
    :undoc-members:
    :show-inheritance:
+```
+
+### Transports and command line
+
+The transport dispatch and its flags, shared verbatim by every server in
+the suite.
+
+```{eval-rst}
+.. automodule:: pain001_mcp._transports
+   :members:
+
+.. automodule:: pain001_mcp._cli
+   :members:
 ```

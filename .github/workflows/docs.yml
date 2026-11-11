@@ -1,25 +1,28 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+#
+# The manual: built with warnings as errors and link-checked on every
+# pull request and release-branch push, deployed to GitHub Pages from
+# main. Reproduce locally with `make docs` and `make docs-linkcheck`
+# (DEVELOPMENT.md).
 name: Deploy Documentation
 
 on:
   push:
+    branches: [main, "feat/**"]
+  pull_request:
     branches: [main]
-    paths:
-      - "docs/**"
-      - ".github/workflows/docs.yml"
-      - "pain001_mcp/__init__.py"
-      - "pyproject.toml"
-      - "README.md"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: docs-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
+    name: Build (warnings are errors)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -39,17 +42,43 @@ jobs:
           REF: ${{ github.head_ref || github.ref_name }}
         run: scripts/ci-install.sh requirements/docs.txt
 
+      # -W turns every warning into a failure: an autodoc import error,
+      # an undocumented reference or a broken intra-manual link.
       - name: Build Sphinx documentation
-        run: |
-          cd docs
-          make html
+        run: make docs
 
       - name: Upload artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           path: "docs/_build/html"
 
+  linkcheck:
+    name: Link check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        env:
+          REF: ${{ github.head_ref || github.ref_name }}
+        run: scripts/ci-install.sh requirements/docs.txt
+
+      - name: Check every link in the manual
+        run: make docs-linkcheck
+
   deploy:
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -60,6 +89,9 @@ jobs:
       id-token: write
     needs: build
     steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5

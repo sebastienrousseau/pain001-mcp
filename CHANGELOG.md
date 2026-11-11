@@ -9,6 +9,86 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.86] - 2026-11-11
+
+### Added
+
+- Add a code of conduct (adapted from Contributor Covenant 2.1, the
+  suite's shared text), a pull request template and a markdownlint CI
+  job (`docs-lint.yml`, configured in `.markdownlint-cli2.jsonc`); fix
+  the Markdown it flagged, including a doubled blank line in the README
+  template.
+- Run the README Quick Start commands as tests
+  (`tests/test_readme_snippets.py`), so a renamed flag or broken entry
+  point fails CI before a reader copies it.
+- Spelling gate: a `codespell` job in `docs-lint.yml` (hash-pinned in
+  `requirements/docs-lint.txt`, configured in `[tool.codespell]`) and
+  the matching pre-commit hook.
+- A dev container (`.devcontainer/devcontainer.json`) that installs the
+  Poetry environment and finishes with `make check`.
+- `KEYS.asc`: the maintainer's SSH signing keys in allowed-signers
+  form, the same keys as the core library's; commits and the `v0.0.85`
+  tag verify against it.
+- `DEVELOPMENT.md` now lists every CI workflow with the local command
+  that reproduces it, the test layout and the release model; `make docs`
+  and `make docs-linkcheck` build and link-check the manual.
+- The manual includes `ARCHITECTURE.md`.
+- `GOVERNANCE.md` gains a continuity plan (each asset, who holds it,
+  and what is not yet arranged) and states the solo-maintainer review
+  setting on `main`.
+- `scripts/render_readme.py --check`, already a CI step, also fails
+  when the README's headings leave the portfolio template's order or a
+  `{{...}}` token is unresolved (`tests/test_render_readme.py`).
+- The manual is built with warnings as errors and link-checked on every
+  pull request and release-branch push (`docs.yml`), not only when
+  `main` deploys it; deployment now runs `actions/configure-pages`. The
+  API reference adds the `check_payment_file` tool and the transport and
+  command-line modules, and every page's footer links the author.
+- `examples/README.md` indexes all five examples in its table, and a
+  test fails when a numbered example is missing from it.
+
+### Changed
+
+- Release 0.0.86 in lockstep with the pain001 suite and require core
+  pain001 0.0.86 and pain001-loader-mt101 0.0.86; the locks resolve
+  their published artifacts.
+- The README follows the portfolio template exactly: the extra
+  "MCP Registry" section is gone, and the `mcp-name:` marker the
+  registry reads moves into a hidden comment under License. The docs
+  badge, User manual and API reference link the published manual
+  instead of `docs/index.md`, and the demo's alt text says what it
+  shows.
+
+### Fixed
+
+- CI ran only the first three examples; `04_corpus_tools.py` and
+  `05_faces_tools.py` were never executed there. CI and `make examples`
+  now run every numbered example by glob, and examples 01 to 03 check
+  their own results and exit non-zero on a wrong one.
+- The in-process example test passed pytest's own arguments to
+  `03_parse_bank_replies.py`, which parsed `--cov=pain001_mcp` as a
+  file path and printed an error payload while the test passed. The
+  test now resets `sys.argv` and covers every numbered example.
+- The `01_mcp_tools.py` usage line named a file that does not exist.
+- `SECURITY.md` said the server only speaks stdio and opens no socket;
+  `--transport streamable-http` and `sse` open a loopback HTTP listener
+  without authentication, which it now states. It also gains the
+  supported-versions policy `SUPPORT.md` pointed to, GitHub private
+  vulnerability reporting as the first channel, and the suite's
+  response goals (5 working days to acknowledge, in place of a 48-hour
+  promise), and names this repository's own Dependabot configuration.
+- `CONTRIBUTING.md` stated an Apache-2.0-only licence and showed a
+  commit without `-s`, which `dco.yml` rejects; it now states the dual
+  licence and signs off.
+- Two codes of conduct (`CODE-OF-CONDUCT.md` and `CODE_OF_CONDUCT.md`)
+  disagreed; the older one is removed and `GOVERNANCE.md` links the
+  other. Markdown files that declared `Apache-2.0` alone, or no SPDX
+  identifier, now declare `Apache-2.0 OR MIT`, the package licence;
+  `scripts/tool_catalogue.py` writes it into `docs/tools.md`.
+- The manual's changelog turned file names such as `ROADMAP.md` into
+  links to `http://ROADMAP.md` (MyST fuzzy linkify, now off), and the
+  roadmap's link to the tool catalogue did not resolve.
+
 ## [0.0.85] - 2026-11-10
 
 ### Changed
