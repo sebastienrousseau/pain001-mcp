@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Sebastien Rousseau <sebastian.rousseau@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 """Shared fixtures for the pain001-mcp test suite."""
 
 import pytest

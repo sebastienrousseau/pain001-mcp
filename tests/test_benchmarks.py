@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Sebastien Rousseau <sebastian.rousseau@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 """Performance benchmarks for the MCP tools.
 
 An MCP server answers repeated tool calls from a model, so per-call cost

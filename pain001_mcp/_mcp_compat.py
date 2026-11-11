@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Sebastien Rousseau <sebastian.rousseau@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 """Compatibility layer over the ``mcp`` SDK's two supported majors.
 
 ``mcp`` 2.0 removed the ``mcp.server.fastmcp`` module. ``FastMCP`` became

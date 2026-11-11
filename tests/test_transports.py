@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Sebastien Rousseau <sebastian.rousseau@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 """The one command line every server in the suite shares.
 
 ``_transports`` and ``_cli`` are copied verbatim into each server, so these

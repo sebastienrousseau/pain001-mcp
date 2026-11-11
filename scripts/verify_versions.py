@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 Sebastien Rousseau <sebastian.rousseau@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 """Verify that the pain001-mcp package version is in lockstep everywhere.
 
 Single source of truth: ``pain001_mcp.__version__``. This script reads

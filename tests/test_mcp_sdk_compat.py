@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2026 Sebastien Rousseau <sebastian.rousseau@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 """Regression tests for the ``mcp`` SDK compatibility layer.
 
 ``mcp`` 2.0 removed ``mcp.server.fastmcp`` and renamed ``FastMCP`` to

@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Every Python file states the project's licence, `Apache-2.0 OR MIT`, as
+  SPDX headers. The package modules and several tests carried an
+  Apache-2.0-only notice, and the examples, scripts, Sphinx config and
+  a few tests had none.
 - Suite Consistency pins the core's ecosystem check at `febcd0a`, which
   accepts the five pain001 SDK repositories as known members not yet
   released. From the 0.0.86 release until this change every scheduled
