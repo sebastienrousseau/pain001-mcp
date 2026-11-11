@@ -10,7 +10,7 @@ prior context.
 
 ```
 MCP client (Claude Desktop, IDE, agent)
-        |  stdio (JSON-RPC)
+        |  stdio, or streamable HTTP / SSE (JSON-RPC)
         v
 pain001_mcp/server.py        (FastMCP server: registers every tool,
         |                     resource and prompt from the family modules)
@@ -83,8 +83,14 @@ The current MCP surface:
   `pain001.exceptions` subclass thereof) is turned into an
   `{"error": ...}` payload so the agent can reason about failure
   without parsing tracebacks.
-- **No network sockets.** The server only speaks stdio. No HTTP listener
-  to harden, no TLS to manage.
+- **stdio by default, HTTP on request.** With no flags the server
+  speaks stdio and opens no socket. `--transport streamable-http`
+  serves MCP at `/mcp`, and `--transport sse` serves the older HTTP+SSE
+  transport at `/sse` and `/messages/` (ADR 0004). Both bind
+  `--host`/`--port`, which default to `127.0.0.1:8000`. They add no
+  authentication or TLS of their own: as [`SECURITY.md`](https://github.com/sebastienrousseau/pain001-mcp/blob/main/SECURITY.md)
+  says, put the server behind a gateway you trust before binding a
+  routable address with `--host`.
 - **Path safety reused.** File-path tools (`parse_camt053`,
   `parse_pain002`, `generate_message_from_file`) delegate to
   `pain001.security.validate_path()`, the same guard the CLI and REST

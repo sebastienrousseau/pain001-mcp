@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   accepts the five pain001 SDK repositories as known members not yet
   released. From the 0.0.86 release until this change every scheduled
   run failed on them as undeclared repositories.
+- `ARCHITECTURE.md` no longer says the server only speaks stdio. It
+  now describes the optional streamable-HTTP and SSE transports from
+  ADR 0004: their paths, the `127.0.0.1:8000` default, and that they
+  carry no authentication or TLS of their own.
 
 ## [0.0.86] - 2026-11-11
 
