@@ -49,7 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Release 0.0.86 in lockstep with the pain001 suite.
+- Release 0.0.86 in lockstep with the pain001 suite and require core
+  pain001 0.0.86; the locks resolve its published artifacts.
 - The README follows the portfolio template exactly: the extra
   "MCP Registry" section is gone, and the `mcp-name:` marker the
   registry reads moves into a hidden comment under License. The docs
