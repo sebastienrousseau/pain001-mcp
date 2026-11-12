@@ -9,8 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.87] - 2026-11-12
+
 ### Changed
 
+- Release 0.0.87 in lockstep with the pain001 suite.
 - **Verdicts change.** `validate_records`, `generate_message`,
   `generate_message_async`, `generate_message_from_file`,
   `simulate_payment_batch` and `stage_payment_batch` now run the core's

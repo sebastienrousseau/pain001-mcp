@@ -7,14 +7,14 @@ body:
     id: version
     attributes:
       label: pain001-mcp Version
-      placeholder: "0.0.86"
+      placeholder: "0.0.87"
     validations:
       required: true
   - type: input
     id: pain001_version
     attributes:
       label: pain001 Version
-      placeholder: "0.0.86"
+      placeholder: "0.0.87"
     validations:
       required: true
   - type: dropdown

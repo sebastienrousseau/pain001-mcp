@@ -65,9 +65,9 @@
 python -m pip install pain001-mcp
 ```
 
-> **Latest release: v0.0.86**: released with pain001 0.0.86. The 30 MCP
-> tools are unchanged; CI now runs every example and the README Quick
-> Start, and the manual is built and link-checked on every pull request.
+> **Latest release: v0.0.87**: released with pain001 0.0.87. The 30 MCP
+> tools now give the same verdict and issue codes as the pain001 CLI
+> and REST API for the same payload.
 
 Test unreleased changes on this companion's `feat/v<next-version>` branch
 against the matching core branch.
@@ -209,7 +209,7 @@ Report vulnerabilities according to [`SECURITY.md`](SECURITY.md).
 ## Stability guarantees
 
 Versions advance in coordinated `0.0.1` steps with core. The maintainer opens
-releases; this iteration ships 0.0.86 with the family. Contract and output changes need
+releases; this iteration ships 0.0.87 with the family. Contract and output changes need
 compatibility review. No stronger platform or stability guarantee is implied.
 
 ---
