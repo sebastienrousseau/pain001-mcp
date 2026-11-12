@@ -36,6 +36,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   already said, through the CLI's own loader; a CSV row with more
   values than columns is refused with `P001-E002` instead of failing.
 - Requires pain001 0.0.87.
+- Suite Consistency no longer runs on another workflow's completion
+  (`workflow_run`). It audits the family daily and on dispatch, as the
+  core's does, since that trigger runs with the default branch's trust
+  whatever started it. Regenerated from pain001's
+  `scripts/render_ecosystem_workflows.py`.
 
 ### Fixed
 
