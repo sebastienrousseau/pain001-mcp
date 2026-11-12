@@ -104,7 +104,9 @@ def _cli_generate(path: Path) -> Verdict:
 
 
 def _rest(route: str, path: Path) -> Verdict:
-    response = TestClient(app).post(
+    # Without PAIN001_API_KEY the core API answers only loopback hosts
+    # (pain001 0.0.87), and TestClient's default host is "testserver".
+    response = TestClient(app, base_url="http://localhost").post(
         route,
         json={
             "file_path": str(path),
