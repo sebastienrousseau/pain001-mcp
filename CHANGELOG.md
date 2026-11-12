@@ -38,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   reads (CSV, SQLite, JSON, JSONL, Parquet), as `list_supported_formats`
   already said, through the CLI's own loader; a CSV row with more
   values than columns is refused with `P001-E002` instead of failing.
-- Requires pain001 0.0.87.
+- Requires pain001 0.0.87 and pain001-loader-mt101 0.0.87.
 - Suite Consistency no longer runs on another workflow's completion
   (`workflow_run`). It audits the family daily and on dispatch, as the
   core's does, since that trigger runs with the default branch's trust
