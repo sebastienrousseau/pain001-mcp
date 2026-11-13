@@ -254,11 +254,13 @@ def test_tool_descriptions_govern_only_their_own_tool():
         desc = tool.description or ""
         lower = desc.lower()
         for cue in _SHADOW_CUES:
-            start = lower.find(cue)
-            if start < 0:
-                continue
-            window = desc[start : start + 120]
-            for other in sorted(names - {tool.name}):
-                if re.search(rf"\b{re.escape(other)}\b", window):
-                    offenders.append((tool.name, other, cue))
+            # Every occurrence, not only the first: a later cue can name a
+            # different tool.
+            for match in re.finditer(re.escape(cue), lower):
+                window = desc[match.start() : match.start() + 120]
+                offenders.extend(
+                    (tool.name, other, cue)
+                    for other in sorted(names - {tool.name})
+                    if re.search(rf"\b{re.escape(other)}\b", window)
+                )
     assert offenders == []
