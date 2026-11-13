@@ -228,3 +228,39 @@ def _core_accepts(spec: str) -> bool:
     except ValueError:
         return False
     return True
+
+
+_SHADOW_CUES = (
+    "before calling",
+    "after calling",
+    "instead of calling",
+    "whenever calling",
+    "when calling",
+    "prior to calling",
+    "do not call",
+    "never call",
+    "always call",
+    "use this instead of",
+    "do not use",
+)
+
+
+def test_tool_descriptions_govern_only_their_own_tool():
+    """No tool description attaches an imperative rule to another tool."""
+    tools = _tools()
+    names = {tool.name for tool in tools}
+    offenders: list[tuple[str, str, str]] = []
+    for tool in tools:
+        desc = tool.description or ""
+        lower = desc.lower()
+        for cue in _SHADOW_CUES:
+            # Every occurrence, not only the first: a later cue can name a
+            # different tool.
+            for match in re.finditer(re.escape(cue), lower):
+                window = desc[match.start() : match.start() + 120]
+                offenders.extend(
+                    (tool.name, other, cue)
+                    for other in sorted(names - {tool.name})
+                    if re.search(rf"\b{re.escape(other)}\b", window)
+                )
+    assert offenders == []

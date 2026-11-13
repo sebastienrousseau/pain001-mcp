@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- Raise the `opentelemetry-api` floor from `>=1.45.1` to `>=1.45.2`
+  across `pyproject.toml`, `requirements/runtime.in`, and the
+  hash-pinned `requirements/{runtime,ci,docs,fuzz}.txt` lockfiles,
+  clearing `CVE-2026-126360`.
+
+### Fixed
+
+- Remove cross-tool imperative directives (`Do not use`, `call X`)
+  from the `list_corpus_files` and `list_message_types` tool docstrings
+  so each description governs only its own tool (`passmcp`
+  `catalog.text.shadowing`, enforced by
+  `tests/test_tool_vocabulary.py`). `passmcp check --stdio` scores the
+  server 98.125 / 100 with this change, up from 90.625 on 0.0.87.
+
 ## [0.0.87] - 2026-11-12
 
 ### Changed

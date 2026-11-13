@@ -89,12 +89,14 @@ def list_corpus_files(
 ) -> CorpusListResult:
     """List the example files pain001 ships: market scenarios and coverage sets.
 
-    Use this to discover what ready-made, validated ISO 20022 files exist
-    before calling ``get_corpus_file`` or ``get_corpus_provenance``. Market
-    files are realistic payments per country and rail (``scenario_id``
-    like ``gb.chaps.property-purchase``); a ``variant`` names the bank
-    overlay a file was built with. Coverage files exercise every element
-    and choice branch of one message type and carry no scenario.
+    Use this to discover the ``scenario_id``, ``version``, and ``variant``
+    identifiers of the ready-made, validated ISO 20022 files ``pain001``
+    ships; ``get_corpus_file`` and ``get_corpus_provenance`` accept those
+    identifiers. Market files are realistic payments per country and rail
+    (``scenario_id`` like ``gb.chaps.property-purchase``); a ``variant``
+    names the bank overlay a file was built with. Coverage files exercise
+    every element and choice branch of one message type and carry no
+    scenario.
 
     Delegates to :func:`pain001.corpus.list_files`.
 
