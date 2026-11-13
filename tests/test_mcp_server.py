@@ -1,17 +1,5 @@
-# Copyright (C) 2023-2026 Sebastien Rousseau.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-# implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-FileCopyrightText: 2023-2026 Sebastien Rousseau <sebastian.rousseau@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 
 """Tests for the pain001 MCP server."""
 
@@ -165,7 +153,8 @@ def test_validate_records_reports_missing_required_fields():
     report = server.validate_records("pain.001.001.09", [{}])
     assert report["valid"] is False
     assert report["valid_count"] == 0
-    assert any("required" in err["message"] for err in report["errors"])
+    assert {err["code"] for err in report["errors"]} == {"P001-E010"}
+    assert "creditor_name" in {err["path"] for err in report["errors"]}
 
 
 def test_validate_records_accepts_valid_record(sample_record):
@@ -427,6 +416,22 @@ def test_generate_message_from_file_missing_path_returns_error(tmp_path):
         "pain.001.001.09", str(tmp_path / "nope.csv")
     )
     assert "error" in json.loads(out)
+
+
+@pytest.mark.parametrize("path", ["/etc/hosts.csv", "../outside.csv"])
+def test_generate_message_from_file_refuses_paths_outside_the_cwd(
+    path, tmp_path, monkeypatch
+):
+    """The core loader's path guard applies: nothing outside the cwd."""
+    work = tmp_path / "work"
+    work.mkdir()
+    (tmp_path / "outside.csv").write_text("id\n1\n", encoding="utf-8")
+    monkeypatch.chdir(work)
+    out = json.loads(
+        server.generate_message_from_file("pain.001.001.09", path)
+    )
+    assert out["error"].startswith("Data file validation failed")
+    assert "Path " in out["error"]
 
 
 # ---------------------------------------------------------------------------
@@ -929,15 +934,9 @@ def test_simulate_payment_batch_invalid_message_type(sample_record):
 
 
 def test_simulate_payment_batch_empty_records():
-    """An empty batch returns zero totals and empty duplicate list."""
+    """An empty batch is refused, as the CLI refuses a file with no rows."""
     res = server.simulate_payment_batch("pain.001.001.09", [])
-    assert res["valid"] is True
-    assert res["total"] == 0
-    assert res["valid_count"] == 0
-    assert res["control_sum_by_currency"] == {}
-    assert res["unique_debtors"] == 0
-    assert res["unique_creditors"] == 0
-    assert res["duplicates"] == []
+    assert res == {"error": "Empty data list provided."}
 
 
 def test_simulate_payment_batch_non_numeric_amount():

@@ -9,6 +9,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.87] - 2026-11-12
+
+### Changed
+
+- Release 0.0.87 in lockstep with the pain001 suite.
+- **Verdicts change.** `validate_records`, `generate_message`,
+  `generate_message_async`, `generate_message_from_file`,
+  `simulate_payment_batch` and `stage_payment_batch` now run the core's
+  validation ladder (`pain001.validate`, pain001 0.0.87), the one the
+  pain001 CLI and REST API run, so every surface gives one verdict for
+  one payload. What an MCP client sees:
+  - the generators refuse what the CLI refuses, for example
+    `currency=EURO` or `eur` (`P001-E030`), where they returned XML;
+  - `validate_records` accepts rows whose values are text, as a CSV
+    gives them (the core's own sample), where it refused them;
+  - each `validate_records` error carries `line` (from 1) and `code`
+    (the core's stable `P001-E...` issue code) beside `row`, `path` and
+    `message`; a generator's error payload carries an `issues` list of
+    `{line, column, code, message}`;
+  - the checks run in the CLI's order: a row-contract or identifier
+    problem refuses the batch as a whole (`valid_count` 0) and the JSON
+    Schema is not reached, so fewer problems may be listed at once;
+  - an empty `records` list is an `{"error": ...}`, not a valid batch;
+  - records with no `nb_of_txs` or `ctrl_sum` still validate and
+    generate: the values the generator computes are filled in first.
+- `generate_message_from_file` reads every format the core's loader
+  reads (CSV, SQLite, JSON, JSONL, Parquet), as `list_supported_formats`
+  already said, through the CLI's own loader; a CSV row with more
+  values than columns is refused with `P001-E002` instead of failing.
+- Requires pain001 0.0.87 and pain001-loader-mt101 0.0.87.
+- Suite Consistency no longer runs on another workflow's completion
+  (`workflow_run`). It audits the family daily and on dispatch, as the
+  core's does, since that trigger runs with the default branch's trust
+  whatever started it. Regenerated from pain001's
+  `scripts/render_ecosystem_workflows.py`.
+
+### Fixed
+
+- `generate_message` and its async and file variants generated XML
+  for rows the pain001 CLI and REST API refuse (`currency=EURO`), and
+  `validate_records` refused the core's own sample CSV rows, because
+  the tools ran their own checks: a JSON Schema pass on raw values in
+  `validate_records`, none in the generators.
+  `tests/test_verdict_parity.py` runs the same fixtures through the
+  CLI, the REST API and the MCP tools and checks the verdicts and issue
+  codes agree.
+- Every Python file states the project's licence, `Apache-2.0 OR MIT`, as
+  SPDX headers. The package modules and several tests carried an
+  Apache-2.0-only notice, and the examples, scripts, Sphinx config and
+  a few tests had none.
+- Suite Consistency pins the core's ecosystem check at `febcd0a`, which
+  accepts the five pain001 SDK repositories as known members not yet
+  released. From the 0.0.86 release until this change every scheduled
+  run failed on them as undeclared repositories.
+- `ARCHITECTURE.md` no longer says the server only speaks stdio. It
+  now describes the optional streamable-HTTP and SSE transports from
+  ADR 0004: their paths, the `127.0.0.1:8000` default, and that they
+  carry no authentication or TLS of their own.
+
 ## [0.0.86] - 2026-11-11
 
 ### Added

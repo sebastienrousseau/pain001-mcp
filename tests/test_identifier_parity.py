@@ -3,11 +3,10 @@
 """The MCP refuses what the CLI refuses (pain001 >= 0.0.81).
 
 From 0.0.81 the core checks every IBAN and BIC column on load (mod-97,
-ISO 9362) and refuses rows that would not share one PmtInf. The CLI
-and the file loaders run those checks; the MCP tools take inline rows
-and never touch a loader, so they run the same checks themselves, with
-the same ``identifier_checks`` opt-out. A row that the CLI refuses must
-not validate here, nor generate.
+ISO 9362) and refuses rows that would not share one PmtInf. From 0.0.87
+the MCP tools run the core's own validation ladder on inline rows, so
+those checks, and the ``identifier_checks`` opt-out, are the CLI's. A
+row that the CLI refuses must not validate here, nor generate.
 """
 
 from __future__ import annotations
@@ -88,10 +87,13 @@ class TestValidateRecords:
             MT, [_record(), _record(creditor_account_IBAN=BAD_IBAN)]
         )
         assert out["valid"] is False
-        assert out["valid_count"] == 1
+        # The identifier rung refuses the batch as a whole, as the CLI
+        # does, so no row is counted valid.
+        assert out["valid_count"] == 0
         (error,) = out["errors"]
-        assert error["row"] == 1
+        assert (error["row"], error["line"]) == (1, 2)
         assert error["path"] == "creditor_account_IBAN"
+        assert error["code"] == "P001-E020"
         assert error["message"].startswith("not a valid IBAN")
         assert BAD_IBAN not in json.dumps(out), "an IBAN is personal data"
 
@@ -100,6 +102,7 @@ class TestValidateRecords:
         assert out["valid"] is False
         (error,) = out["errors"]
         assert (error["row"], error["path"]) == (0, "debtor_agent_BIC")
+        assert error["code"] == "P001-E021"
         assert error["message"].startswith("not a valid BIC")
 
     def test_a_lower_case_column_is_checked_too(self):
@@ -120,13 +123,15 @@ class TestValidateRecords:
         assert out["valid"] is True
         assert out["errors"] == []
 
-    def test_schema_and_identifier_errors_are_both_reported(self):
+    def test_the_row_contract_is_checked_before_the_identifiers(self):
+        """The CLI's order: a bad amount is named before a bad IBAN."""
         out = server.validate_records(
             MT,
             [_record(creditor_account_IBAN=BAD_IBAN, payment_amount="abc")],
         )
-        paths = {e["path"] for e in out["errors"]}
-        assert {"payment_amount", "creditor_account_IBAN"} <= paths
+        assert [(e["path"], e["code"]) for e in out["errors"]] == [
+            ("payment_amount", "P001-E012")
+        ]
 
     def test_a_mixed_batch_is_refused_as_generation_refuses_it(self):
         rows = [_record(), _record(payment_id="E2E-2", debtor_name="Other")]
@@ -151,7 +156,15 @@ class TestGenerateMessage:
         rows = [_record(creditor_account_IBAN=BAD_IBAN)]
         out = json.loads(server.generate_message(MT, rows))
         assert out["error"] == _loader_refusal(tmp_path, monkeypatch, rows)
-        assert BAD_IBAN not in out["error"]
+        assert BAD_IBAN not in json.dumps(out)
+        assert out["issues"] == [
+            {
+                "line": 1,
+                "column": "creditor_account_IBAN",
+                "code": "P001-E020",
+                "message": out["issues"][0]["message"],
+            }
+        ]
 
     def test_the_opt_out_generates_the_file(self):
         rows = [_record(creditor_account_IBAN=BAD_IBAN)]

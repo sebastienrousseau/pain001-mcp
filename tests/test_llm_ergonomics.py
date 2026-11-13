@@ -1,17 +1,5 @@
-# Copyright (C) 2023-2026 Sebastien Rousseau.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-# implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-FileCopyrightText: 2023-2026 Sebastien Rousseau <sebastian.rousseau@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 
 """LLM-ergonomic generate-path regression tests (v0.0.56).
 
@@ -134,14 +122,18 @@ def test_missing_currency_is_reported_by_name():
     record = natural_record()
     del record["currency"]
     payload = json.loads(server.generate_message("pain.001.001.09", [record]))
-    assert "currency (or payment_currency)" in payload["error"]
+    assert "column currency: missing value" in payload["error"]
+    assert [(i["column"], i["code"]) for i in payload["issues"]] == [
+        ("currency", "P001-E010")
+    ]
 
 
-def test_xsd_failure_reports_element_paths():
-    """An XSD-invalid value reports the offending element, not an opaque path."""
+def test_a_value_outside_the_schema_is_named_by_column():
+    """A value the JSON Schema refuses never reaches the XSD (P001-E030)."""
     record = natural_record(charge_bearer="INVALID")
     payload = json.loads(server.generate_message("pain.001.001.09", [record]))
-    assert "ChrgBr" in payload["error"]
+    assert "column charge_bearer" in payload["error"]
+    assert payload["issues"][0]["code"] == "P001-E030"
 
 
 def test_async_variant_returns_structured_error():
@@ -153,7 +145,8 @@ def test_async_variant_returns_structured_error():
             )
         )
     )
-    assert "Missing required fields" in payload["error"]
+    assert "missing value" in payload["error"]
+    assert {i["code"] for i in payload["issues"]} == {"P001-E010"}
 
 
 # ---------------------------------------------------------------------------

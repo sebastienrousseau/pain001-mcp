@@ -1,17 +1,5 @@
-# Copyright (C) 2023-2026 Sebastien Rousseau.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-# implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-FileCopyrightText: 2023-2026 Sebastien Rousseau <sebastian.rousseau@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 
 """Result shapes: the TypedDicts every tool's output schema comes from.
 
@@ -50,10 +38,16 @@ class SchemaResult(TypedDict, total=False):
 
 
 class RecordError(TypedDict):
-    """One schema violation: the record's row, the field path, the message."""
+    """One finding: the record's row and line, the field, the code, why.
+
+    ``row`` counts records from 0 and ``line`` from 1, as the core's
+    issues do; ``code`` is the core's stable ``P001-E...`` issue code.
+    """
 
     row: int
+    line: int
     path: str
+    code: str
     message: str
 
 

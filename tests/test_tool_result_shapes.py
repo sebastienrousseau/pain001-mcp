@@ -1,17 +1,6 @@
-# Copyright (C) 2023-2026 Sebastien Rousseau.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-# implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-FileCopyrightText: 2023-2026 Sebastien Rousseau <sebastian.rousseau@gmail.com>
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+
 """The exact shape of every tool result an agent reads.
 
 Mutation testing showed the handlers' payload keys and messages were
@@ -75,12 +64,14 @@ class TestValidateRecords:
         out = server.validate_records(MT, [_valid_record(), bad])
         assert out["valid"] is False
         assert out["total"] == 2
-        assert out["valid_count"] == 1
+        # The row contract refuses the batch as a whole: none counted.
+        assert out["valid_count"] == 0
         assert out["errors"], "the broken row must produce errors"
         for entry in out["errors"]:
-            assert set(entry) == {"row", "path", "message"}
-            assert entry["row"] == 1
+            assert set(entry) == {"row", "line", "path", "code", "message"}
+            assert (entry["row"], entry["line"]) == (1, 2)
             assert isinstance(entry["path"], str)
+            assert entry["code"].startswith("P001-E")
             assert entry["message"]
         assert any(e["path"] == "payment_amount" for e in out["errors"])
 
