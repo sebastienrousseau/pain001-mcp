@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Remove cross-tool imperative directives (`Do not use`, `call X`)
+  from the `list_corpus_files` and `list_message_types` tool docstrings
+  so each description governs only its own tool (`passmcp`
+  `catalog.text.shadowing`, enforced by
+  `tests/test_tool_vocabulary.py`, lifting live stdio evaluation from
+  `90.625` to `99.0625 / 100`, Grade `A`).
+
+### Fixed
+
+- Remove cross-tool imperative directives (`Do not use`, `call X`)
+  from the `list_corpus_files` and `list_message_types` tool docstrings
+  so each description governs only its own tool (`passmcp`
+  `catalog.text.shadowing`, enforced by
+  `tests/test_tool_vocabulary.py`, lifting live stdio evaluation from
+  `90.625` to `99.0625 / 100`, Grade `A`).
+
 ## [0.0.87] - 2026-11-12
 
 ### Changed
