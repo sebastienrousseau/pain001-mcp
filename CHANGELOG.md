@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.88] - 2026-11-15
+
+### Changed
+
+- Release 0.0.88 in lockstep with the pain001 suite. Requires pain001
+  0.0.88 and pain001-loader-mt101 0.0.88; `poetry.lock` and the
+  hash-pinned requirement sets move only those two packages.
+- Suite Consistency pins the core's ecosystem check at `404ebb9`
+  (pain001 v0.0.88), which checks the five SDKs as family members, and
+  its job is named "Every family publication agrees" rather than
+  counting nine publications.
+
 ### Security
 
 - Raise the `opentelemetry-api` floor from `>=1.45.1` to `>=1.45.2`
