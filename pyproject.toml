@@ -64,7 +64,7 @@ mutmut = "^3.7.0"
 packaging = ">=23"
 # Complexity gate (scripts/check_complexity.py, complexipy).
 radon = ">=6.0"
-complexipy = { version = ">=8.1", python = "<3.16" }
+complexipy = { version = ">=9.0.0", python = "<3.16" }
 # tests/test_verdict_parity.py drives the core's REST API in-process
 # (FastAPI's TestClient, which needs httpx) to check that it and the MCP
 # tools give one verdict per payload.
