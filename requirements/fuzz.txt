@@ -414,9 +414,9 @@ charset-normalizer==3.5.2 \
     --hash=sha256:fd1fbe0f116b6e55da77aca2c6ddcddcfac2186cbf78bdebf40fc156efca389d \
     --hash=sha256:fe9753dfee015c570d73df76f899f18444d41388bffcde097deba51c4fadbb9f
     # via requests
-click==8.5.0 \
-    --hash=sha256:255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360 \
-    --hash=sha256:ba0d2089de75ea0310e2dde03160e6ca10009947fb95a182f9b54021bb272e34
+click==8.5.1 \
+    --hash=sha256:8bb5376d2006950386f8c6427613334a2acadc5f559cb80e638d00b4df957e37 \
+    --hash=sha256:9bbfada76703fd1d784b83eea012e3e8c6a001a876543ef104fa56aaaeb072b4
     # via
     #   black
     #   interrogate
@@ -1564,15 +1564,15 @@ packaging==26.3 \
     #   pip-audit
     #   pip-requirements-parser
     #   pytest
-pain001==0.0.88 \
-    --hash=sha256:72f8007ca74c4047053d70d81f2e41176f774aa8463ccfcc2cbd182944bfb0ff \
-    --hash=sha256:d9bf3088539365a71941a66ff78627fc47f1f0090199f9cda8346e8949574b5f
+pain001==0.0.89 \
+    --hash=sha256:1e1912b9df1aa3ec1729daf19e8b683786c5dfd587b62dabc7d2036e5ac93479 \
+    --hash=sha256:eab5b53466e8637bf4684ea1ee3e9f7f26c5755a3b34578a808fcc0b555604df
     # via
     #   -r requirements/runtime.in
     #   pain001-loader-mt101
-pain001-loader-mt101==0.0.88 \
-    --hash=sha256:d25dcd21498b63edfabeb4f2c25b7a3bdf2248bb29670b16ad0dadacc1399b51 \
-    --hash=sha256:f64bf15023a1869ebdcd5104d61e9a5788cf1844cb009af0844d64c3ccc1ebfc
+pain001-loader-mt101==0.0.89 \
+    --hash=sha256:969f4250794c116535c4cb26c2d885114f7119fcc28c7a1417344b4fff1dc02f \
+    --hash=sha256:9dfe6d2a0b8c91ab1788cc265572405b0c9a77165811d64ed26c7fdfe90aae53
     # via -r requirements/runtime.in
 pathspec==1.1.1 \
     --hash=sha256:17db5ecd524104a120e173814c90367a96a98d07c45b2e10c2f3919fff91bf5a \
