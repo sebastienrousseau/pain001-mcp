@@ -5,7 +5,7 @@ type: software
 title: "pain001-mcp: Model Context Protocol server for ISO 20022 payment files"
 abstract: >-
   A Model Context Protocol server exposing the pain001 library to AI agents:
-  twenty-one tools for generating and validating ISO 20022 pain.001 and
+  thirty tools for generating and validating ISO 20022 pain.001 and
   pain.008 files, checking identifiers, parsing bank replies, converting MT101
   and reading the validated example corpus with its provenance.
 authors:
