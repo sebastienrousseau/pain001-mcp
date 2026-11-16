@@ -9,13 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.89] - 2026-11-16
+
 ### Changed
 
-- Development and CI tooling moves forward: ruff 0.17.5 and complexipy
-  9.0.0 (floors raised in `pyproject.toml` and `requirements/ci.in`),
-  codespell 2.4.3, myst-parser 5.2.0 (with mdit-py-plugins 0.7.0),
-  filelock 4.2.10 and virtualenv 21.15.6 in the hash-pinned
-  `requirements/` sets. No runtime dependency changes.
+- Release 0.0.89 in lockstep with the pain001 suite. Requires pain001
+  0.0.89 and pain001-loader-mt101 0.0.89; `poetry.lock` and the
+  hash-pinned runtime, ci, docs and fuzz sets move those two packages
+  and click 8.5.0 to 8.5.1, the floor core 0.0.89 requires. Nothing in
+  this server used the core CLI flags 0.0.89 removed.
+- Development and CI tooling moves forward, folded from Dependabot
+  #170 to #175: ruff 0.17.5 and complexipy 9.0.0 (floors raised in
+  `pyproject.toml` and `requirements/ci.in`), codespell 2.4.3,
+  myst-parser 5.2.0 (with mdit-py-plugins 0.7.0), filelock 4.2.10 and
+  virtualenv 21.15.6 in the hash-pinned `requirements/` sets. No
+  runtime dependency changes.
 
 ## [0.0.88] - 2026-11-14
 
