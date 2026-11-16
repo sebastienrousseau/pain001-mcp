@@ -3,4 +3,4 @@
 # in pyproject.toml). Hash-pinned in docs-lint.txt. Regenerate:
 #   uv pip compile --generate-hashes --universal --python-version 3.12 \
 #     requirements/docs-lint.in -o requirements/docs-lint.txt
-codespell==2.4.1
+codespell==2.4.3

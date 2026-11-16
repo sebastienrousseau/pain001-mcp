@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Development and CI tooling moves forward: ruff 0.17.5 and complexipy
+  9.0.0 (floors raised in `pyproject.toml` and `requirements/ci.in`),
+  codespell 2.4.3, myst-parser 5.2.0 (with mdit-py-plugins 0.7.0),
+  filelock 4.2.10 and virtualenv 21.15.6 in the hash-pinned
+  `requirements/` sets. No runtime dependency changes.
+
 ## [0.0.88] - 2026-11-14
 
 ### Changed
