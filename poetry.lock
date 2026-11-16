@@ -1782,18 +1782,18 @@ upload = ["paramiko (>=5.1.0,<6)"]
 
 [[package]]
 name = "pain001-loader-mt101"
-version = "0.0.89"
+version = "0.0.90"
 description = "Convert legacy SWIFT MT101 requests for transfer to ISO 20022 pain.001 flat records."
 optional = false
 python-versions = ">=3.11"
 groups = ["main"]
 files = [
-    {file = "pain001_loader_mt101-0.0.89-py3-none-any.whl", hash = "sha256:969f4250794c116535c4cb26c2d885114f7119fcc28c7a1417344b4fff1dc02f"},
-    {file = "pain001_loader_mt101-0.0.89.tar.gz", hash = "sha256:9dfe6d2a0b8c91ab1788cc265572405b0c9a77165811d64ed26c7fdfe90aae53"},
+    {file = "pain001_loader_mt101-0.0.90-py3-none-any.whl", hash = "sha256:11cfbbcffa824f438b5bfa6d651ad7f0dc1ab2c12b364a6d9af990bb3317d5e9"},
+    {file = "pain001_loader_mt101-0.0.90.tar.gz", hash = "sha256:45baed97aa8cc68f446e487bf64e073d7718cf1a0c401f68023d9539e028e214"},
 ]
 
 [package.dependencies]
-pain001 = ">=0.0.89,<1"
+pain001 = ">=0.0.90,<1"
 
 [package.extras]
 dev = ["complexipy (>=8.1.0)", "interrogate (>=1.7)", "mypy (>=1.11)", "pytest (>=8)", "pytest-benchmark (>=5)", "pytest-cov (>=5)", "radon (>=6.0.1)", "ruff (>=0.6)"]
@@ -2877,4 +2877,4 @@ docs = ["jinja2", "sphinx", "sphinx_rtd_theme"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "4c83024b716b3c16e43f36a051f6307ce8db0759e7fc80ab445d9371ee2ca9c2"
+content-hash = "947e462c0e144687d3e21a690ba722a8e43f6e325222c5a577005063c0e007c7"
