@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Requires pain001 0.0.90; `poetry.lock` and the hash-pinned runtime,
+  ci, docs and fuzz sets move only pain001. The pain001-loader-mt101
+  floor stays at 0.0.89 until loader-mt101 0.0.90 is on PyPI.
 - The container image runs on `python:3.15-slim` (digest-pinned),
   folded from Dependabot #176. The Python package's supported and
   tested versions are unchanged.

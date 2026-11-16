@@ -1746,14 +1746,14 @@ files = [
 
 [[package]]
 name = "pain001"
-version = "0.0.89"
+version = "0.0.90"
 description = "Pain001 is a Python Library for Automating ISO 20022-Compliant Payment Files Using CSV Data."
 optional = false
 python-versions = "<4.0,>=3.11"
 groups = ["main"]
 files = [
-    {file = "pain001-0.0.89-py3-none-any.whl", hash = "sha256:eab5b53466e8637bf4684ea1ee3e9f7f26c5755a3b34578a808fcc0b555604df"},
-    {file = "pain001-0.0.89.tar.gz", hash = "sha256:1e1912b9df1aa3ec1729daf19e8b683786c5dfd587b62dabc7d2036e5ac93479"},
+    {file = "pain001-0.0.90-py3-none-any.whl", hash = "sha256:b69a310eff4198bee51e61f37487ec4c24d23d6a5219f57b512215925fdbbd38"},
+    {file = "pain001-0.0.90.tar.gz", hash = "sha256:460def405e6ad28973e3b00da366774f5da82f619e834c9b4d48e54d9967c885"},
 ]
 
 [package.dependencies]
@@ -2877,4 +2877,4 @@ docs = ["jinja2", "sphinx", "sphinx_rtd_theme"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "410bde4304540c82aa11ec0625700a4520e9025fe7eb7651d3e12b0f82b4aa2c"
+content-hash = "4c83024b716b3c16e43f36a051f6307ce8db0759e7fc80ab445d9371ee2ca9c2"

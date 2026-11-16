@@ -1565,9 +1565,9 @@ packaging==26.3 \
     #   pip-audit
     #   pip-requirements-parser
     #   pytest
-pain001==0.0.89 \
-    --hash=sha256:1e1912b9df1aa3ec1729daf19e8b683786c5dfd587b62dabc7d2036e5ac93479 \
-    --hash=sha256:eab5b53466e8637bf4684ea1ee3e9f7f26c5755a3b34578a808fcc0b555604df
+pain001==0.0.90 \
+    --hash=sha256:460def405e6ad28973e3b00da366774f5da82f619e834c9b4d48e54d9967c885 \
+    --hash=sha256:b69a310eff4198bee51e61f37487ec4c24d23d6a5219f57b512215925fdbbd38
     # via
     #   -r requirements/runtime.in
     #   pain001-loader-mt101
