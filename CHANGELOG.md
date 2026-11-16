@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The container image runs on `python:3.15-slim` (digest-pinned),
+  folded from Dependabot #176. The Python package's supported and
+  tested versions are unchanged.
+
 ## [0.0.89] - 2026-11-16
 
 ### Changed

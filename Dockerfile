@@ -4,7 +4,7 @@
 # The container runs the FastMCP server over stdio so an MCP client can
 # launch it directly with ``docker run -i --rm pain001-mcp``.
 
-FROM python:3.14-slim@sha256:a2b82f3c48559aa0a8446d9af49826b6e2b2016f4cd2afabfe6013ec53729170 AS builder
+FROM python:3.15-slim@sha256:65a65fc7b30b06cb6df4930fd4650697cb23f4c2698ab81fc87e4b031bc36928 AS builder
 
 WORKDIR /build
 
@@ -43,7 +43,7 @@ RUN python -m venv /opt/venv \
     && /opt/venv/bin/pip install --no-deps --force-reinstall /build/wheels/*.whl \
     && /opt/venv/bin/pip check
 
-FROM python:3.14-slim@sha256:a2b82f3c48559aa0a8446d9af49826b6e2b2016f4cd2afabfe6013ec53729170
+FROM python:3.15-slim@sha256:65a65fc7b30b06cb6df4930fd4650697cb23f4c2698ab81fc87e4b031bc36928
 
 LABEL org.opencontainers.image.title="pain001-mcp" \
       org.opencontainers.image.description="Model Context Protocol server for the pain001 ISO 20022 library." \
