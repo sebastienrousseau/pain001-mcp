@@ -11,7 +11,7 @@ dynamic = [
 ]
 
 [tool.poetry]
-version = "0.0.88"
+version = "0.0.89"
 description = "Model Context Protocol (MCP) server exposing the pain001 ISO 20022 Customer Credit Transfer Initiation library as agent tools."
 authors = ["Sebastien Rousseau <sebastian.rousseau@gmail.com>"]
 readme = "README.md"
@@ -30,8 +30,8 @@ pain001-mcp = "pain001_mcp.server:main"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<4.0"
-pain001 = {version = ">=0.0.88,<1", extras = ["fast"]}
-pain001-loader-mt101 = ">=0.0.88,<1"
+pain001 = {version = ">=0.0.89,<1", extras = ["fast"]}
+pain001-loader-mt101 = ">=0.0.89,<1"
 # mcp < 1.30.0 and 2.0.x/2.1.x are affected by GHSA-84m7-p3x7-pcfv
 # (streamable HTTP, which this server serves); < 1.28.1 also by
 # Dependabot alert #3.
@@ -55,7 +55,7 @@ pytest = ">=9.0.3,<10.0.0"
 pytest-cov = ">=6.0.0,<8.0.0"
 pytest-benchmark = ">=5.3.1,<6.0.0"
 black = "^26.3.1"
-ruff = ">=0.1,<0.18"
+ruff = ">=0.17.5,<0.18"
 mypy = ">=1.11,<3.0"
 types-jsonschema = ">=4,<5"
 bandit = "^1.7.0"
@@ -64,7 +64,7 @@ mutmut = "^3.7.0"
 packaging = ">=23"
 # Complexity gate (scripts/check_complexity.py, complexipy).
 radon = ">=6.0"
-complexipy = { version = ">=8.1", python = "<3.16" }
+complexipy = { version = ">=9.0.0", python = "<3.16" }
 # tests/test_verdict_parity.py drives the core's REST API in-process
 # (FastAPI's TestClient, which needs httpx) to check that it and the MCP
 # tools give one verdict per payload.

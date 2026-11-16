@@ -12,7 +12,7 @@ pytest>=9.0.3,<10.0.0
 pytest-cov>=6.0.0,<8.0.0
 pytest-benchmark>=5.3.1,<6.0.0
 black>=26.3.1,<27
-ruff>=0.1,<0.18
+ruff>=0.17.5,<0.18
 mypy>=1.11,<3.0
 types-jsonschema>=4,<5
 bandit>=1.7.0,<2
@@ -23,10 +23,10 @@ packaging>=23
 # GHSA-9vhv-jxww-xfm5, GHSA-567q-5qvw-pf92 and GHSA-v4x8-3wr5-3wq8; the
 # floor keeps every affected release from resolving.
 pip-audit
-filelock>=4.2.1
+filelock>=4.2.10
 # Complexity gate: scripts/check_complexity.py and complexipy.
 radon>=6.0
-complexipy>=8.1
+complexipy>=9.0.0
 # The verdict parity test drives the core's REST API in-process
 # (FastAPI's TestClient needs httpx).
 fastapi>=0.162.0
