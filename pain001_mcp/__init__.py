@@ -3,4 +3,4 @@
 
 """pain001-mcp: a Model Context Protocol server for the pain001 library."""
 
-__version__ = "0.0.90"
+__version__ = "0.0.91"
