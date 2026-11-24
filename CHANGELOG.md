@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.91] - Unreleased
 
+### Changed
+
+- Release 0.0.91 in lockstep with the pain001 suite.
+- Development and CI tooling moves forward, folded from Dependabot
+  #178 to #183: ruff 0.17.6 and fastapi 0.165.0 (floors raised in
+  `pyproject.toml`), filelock 4.3.1, virtualenv 21.15.13 and soupsieve
+  4.1.3 in the hash-pinned `requirements/` sets (floors raised in the
+  `.in` files), and the CodeQL, Scorecard (2.6.0) and check-ecosystem
+  (pain001 0.0.90) action pins. No runtime dependency changes.
+
 ### Security
 
 - `commit_payment_batch` hardening, reported privately by Serhii Shunko

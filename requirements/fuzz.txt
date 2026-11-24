@@ -753,9 +753,9 @@ fastapi==0.162.5 \
     --hash=sha256:1ca37f64f61c99cebd38636e67525fb721c5e8c1169f07f2a35d73b0a63265d4 \
     --hash=sha256:5303c67415fde762889ca337db79d27b755b8bd09cef314fa7a4340bb30bfd2b
     # via -r requirements/ci.in
-filelock==4.2.10 \
-    --hash=sha256:9479aaeb4db20b5a53e3da28493edd24720b66b8a0b84030aa56ccdf243d6857 \
-    --hash=sha256:fcc3c0cb8bfe7f4b3bb0e231c04b15dbad068cb3c2515f343d8fde4dce93bd5d
+filelock==4.3.1 \
+    --hash=sha256:4c5ee627c401f1863ac6a0de9a14a28d3bb5f8c730b45e2fd6e5dbc79cf34b9e \
+    --hash=sha256:79e43df8e9fe509cd83a3899a7c186c8077cbbe4d200a1ed3705c2f3bb6bc487
     # via
     #   -r requirements/ci.in
     #   cachecontrol
