@@ -11,6 +11,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.91] - Unreleased
 
+### Security
+
+- `commit_payment_batch` hardening, reported privately by Serhii Shunko
+  (confinement itself held on 0.0.90; none of these escapes the output
+  directory):
+  - an `output_file_path` with a NUL byte raised `ValueError` out of the
+    tool instead of returning `{"error": ...}`, after creating its
+    parent directories; it is now refused before anything is created;
+  - a trailing `/` or `\` (`"dir.xml/"`) wrote a regular file, and
+    `"."` wrote a file at the output root itself when the root did not
+    exist yet and ended in `.xml`; both are refused;
+  - committed files are created owner-only (`0o600` before the umask)
+    rather than with the default mode, and a write that fails part way
+    removes the partial file;
+  - refusal and write-failure messages name the caller's path and the
+    reason, no longer the server's resolved output directory.
+
 ## [0.0.90] - 2026-11-16
 
 ### Changed
