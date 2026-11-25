@@ -154,3 +154,77 @@ def test_a_file_appearing_after_the_check_is_not_replaced(root):
     with pytest.raises(OutputPathError, match="already exists"):
         write_new(target, "<Document/>")
     assert target.read_text(encoding="utf-8") == "someone else's"
+
+
+# Hardening reported privately by Serhii Shunko against 0.0.90: none of
+# these escapes the root, but each broke the error contract or left residue.
+
+
+@pytest.mark.parametrize(
+    "path", ["sub/a\x00.xml", "a\x00.xml"], ids=["nested", "flat"]
+)
+def test_a_nul_byte_is_refused_without_side_effects(root, path):
+    res = _commit(path)
+    assert "NUL" in str(res.get("error")), res
+    assert list(root.iterdir()) == []
+
+
+@pytest.mark.parametrize("path", ["dir.xml/", "dir.xml\\", "batches/dir.xml/"])
+def test_a_trailing_separator_is_refused(root, path):
+    res = _commit(path)
+    assert "names a directory" in str(res.get("error")), res
+    assert list(root.iterdir()) == []
+
+
+@pytest.mark.parametrize("path", [".", "", "batches/.."])
+def test_the_root_itself_is_refused(tmp_path, monkeypatch, path):
+    """A root that does not exist yet and ends in .xml is not a file name."""
+    out = tmp_path / "out.xml"
+    monkeypatch.setenv("PAIN001_MCP_OUTPUT_DIR", str(out))
+    res = _commit(path)
+    assert "is the output directory" in str(res.get("error")), res
+    assert not out.exists()
+
+
+@pytest.mark.skipif(__import__("os").name != "posix", reason="POSIX modes")
+def test_written_files_are_owner_only(root):
+    old = __import__("os").umask(0o022)
+    try:
+        res = _commit("private.xml")
+    finally:
+        __import__("os").umask(old)
+    assert "error" not in res, res
+    assert (root / "private.xml").stat().st_mode & 0o777 == 0o600
+
+
+def test_a_failed_write_leaves_no_partial_file(root, monkeypatch):
+    from pain001_mcp import _output
+
+    def fail(fd, data):
+        raise OSError(28, "No space left on device")
+
+    monkeypatch.setattr(_output.os, "write", fail)
+    res = _commit("partial.xml")
+    assert "Failed to write output XML file" in str(res.get("error")), res
+    assert not (root / "partial.xml").exists()
+
+
+@pytest.mark.parametrize(
+    "path", ["../escape.xml", "notes.txt", "keep.xml", "a\x00.xml"]
+)
+def test_refusals_do_not_name_the_host_directory(root, path):
+    (root / "keep.xml").write_text("original", encoding="utf-8")
+    res = _commit(path)
+    assert "error" in res, res
+    assert str(root) not in str(res["error"]), res
+    assert str(root.parent) not in str(res["error"]), res
+
+
+def test_the_race_guard_does_not_name_the_host_directory(root):
+    from pain001_mcp._output import OutputPathError, write_new
+
+    target = root / "race.xml"
+    target.write_text("someone else's", encoding="utf-8")
+    with pytest.raises(OutputPathError) as excinfo:
+        write_new(target, "<Document/>")
+    assert str(root) not in str(excinfo.value)

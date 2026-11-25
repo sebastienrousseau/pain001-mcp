@@ -67,6 +67,13 @@ own. The security surface is:
   traversals. `pain001-mcp` adds an explicit regression test that
   parser tools return `{"error": ...}` for traversal attempts rather than
   reading arbitrary files.
+- **Committed files** - `commit_payment_batch` writes only new `.xml`
+  files inside `PAIN001_MCP_OUTPUT_DIR` (else the working directory),
+  resolved with symlinks before the check. NUL bytes, trailing
+  separators and the directory itself are refused before anything is
+  created; files are created exclusively and owner-only (`0o600` before
+  the umask) and removed if the write fails; refusals name the caller's
+  path, not the host directory.
 - **XXE Prevention** - XML parsing goes through `pain001`, which uses
   `defusedxml`.
 - **Error containment** - every tool returns `{"error": …}` rather than
