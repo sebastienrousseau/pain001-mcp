@@ -9,11 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.0.91] - Unreleased
+## [0.0.91] - 2026-11-24
 
 ### Changed
 
 - Release 0.0.91 in lockstep with the pain001 suite.
+- Requires pain001 0.0.91 and pain001-loader-mt101 0.0.91;
+  `poetry.lock` and the hash-pinned runtime, ci, docs and fuzz sets
+  move only those two packages.
 - Development and CI tooling moves forward, folded from Dependabot
   #178 to #183: ruff 0.17.6 and fastapi 0.165.0 (floors raised in
   `pyproject.toml`), filelock 4.3.1, virtualenv 21.15.13 and soupsieve
