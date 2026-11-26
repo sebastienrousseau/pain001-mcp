@@ -66,7 +66,7 @@ python -m pip install pain001-mcp
 ```
 
 > **Latest release: v0.0.91**: released with pain001 0.0.91. Requires
-> pain001 0.0.90 and pain001-loader-mt101 0.0.90; the 30 MCP tools
+> pain001 0.0.91 and pain001-loader-mt101 0.0.91; the 30 MCP tools
 > behave as they did in 0.0.90.
 
 Test unreleased changes on this companion's `feat/v<next-version>` branch

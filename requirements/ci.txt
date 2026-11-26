@@ -1565,15 +1565,15 @@ packaging==26.3 \
     #   pip-audit
     #   pip-requirements-parser
     #   pytest
-pain001==0.0.90 \
-    --hash=sha256:460def405e6ad28973e3b00da366774f5da82f619e834c9b4d48e54d9967c885 \
-    --hash=sha256:b69a310eff4198bee51e61f37487ec4c24d23d6a5219f57b512215925fdbbd38
+pain001==0.0.91 \
+    --hash=sha256:6bec12a3284c4d5eb9e5ecb2e7db94df6127ba0337d9451fde8c0c6c2d549f06 \
+    --hash=sha256:bb9deec8887a4abd395d3fb450605c03f2c5282cade88edc553cc882bfb6f36b
     # via
     #   -r requirements/runtime.in
     #   pain001-loader-mt101
-pain001-loader-mt101==0.0.90 \
-    --hash=sha256:11cfbbcffa824f438b5bfa6d651ad7f0dc1ab2c12b364a6d9af990bb3317d5e9 \
-    --hash=sha256:45baed97aa8cc68f446e487bf64e073d7718cf1a0c401f68023d9539e028e214
+pain001-loader-mt101==0.0.91 \
+    --hash=sha256:51f065103f7c78a039878a5bae179329ede4a39210da588ddcdbda2842287308 \
+    --hash=sha256:f4b548bfd1c481dc155564068fd4846184d7e3d0bd0c89584e174cc13bc52860
     # via -r requirements/runtime.in
 pathspec==1.1.1 \
     --hash=sha256:17db5ecd524104a120e173814c90367a96a98d07c45b2e10c2f3919fff91bf5a \
